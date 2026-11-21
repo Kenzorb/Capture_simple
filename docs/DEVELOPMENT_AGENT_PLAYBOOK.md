@@ -1564,16 +1564,16 @@ _None at document creation._
 
 | Field | Current value |
 |---|---|
-| Overall status | `IN_PROGRESS` |
+| Overall status | `BLOCKED` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-016 — Initialize Supabase and migrations` |
 | Last verified completed task | `CAP-015` |
-| Last verification executed | `Followed documented startup in a fresh clone with an offline cached frozen install. The copied apps/web/.env.local was ignored, the template was trackable, pnpm dev served localhost:3000, the extension built to the documented folder, four Vitest tests and one Chromium test passed, and Prettier passed. P1 prerequisite check and env placeholder check passed after correcting the scalar PowerShell probe.` |
-| Last successful Git commit | `f1fdfd9` |
-| Active blockers | `Hosted GitHub and provider access remain unconfirmed. The CI workflow passed locally via act.` |
+| Last verification executed | `Supabase 3.2.0 init and migration creation passed. Local start exited 1 because Docker and Podman are unavailable. TOML and layout checks passed. Database reset could not run.` |
+| Last successful Git commit | `a4e3c2c` |
+| Active blockers | `CAP-016 requires a running Docker-compatible engine on Windows. Hosted GitHub and provider access remain unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Initialize Supabase and migrations.` |
+| Next action | `Run the pinned Supabase startup and local database reset with Docker or Podman available, then verify the baseline migration before CAP-017.` |
 
 ### 11.1 Phase progress overview
 
@@ -1920,3 +1920,29 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** P1 gate passed using the verified CI workflow and scaffold. Runtime checks for Supabase and Inngest belong to CAP-016 and CAP-049.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-016 — Initialize Supabase and migrations.
+
+### [2026-11-21T23:59:03+08:00] CAP-015 — Document local developer startup — COMMIT
+- **Git commit:** a4e3c2c
+
+### [2026-11-21T23:59:16+08:00] CAP-016 — Initialize Supabase and migrations — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** P1 gate passed with clean install, both builds, tests, local CI, and startup instructions.
+- **Next action:** Initialize versioned local Supabase configuration and verify a disposable database reset.
+
+### [2026-11-22T00:02:18+08:00] CAP-016 — Initialize Supabase and migrations — BLOCKED
+- **Agent/session:** Codex
+- **Context/dependencies:** P0 and P1 are complete. The local database starts the P2 dependency chain.
+- **Changes:** Generated supabase/config.toml and supabase/.gitignore with Supabase CLI 3.2.0. Added a versioned public-schema permission migration and a local seed file, and aligned the local Auth origin with the README.
+- **Verification:** `npx --offline --yes supabase@3.2.0 init --agent no` and `migration new capture_schema_boundary --agent no` passed. `npx --offline --yes supabase@3.2.0 start --agent no` exited 1 with `docker: command not found (podman also not found)`. `db reset --local` could not run. Python tomllib, migration naming/layout, and Git ignore checks passed.
+- **Evidence:** supabase/migrations/20261121160117_capture_schema_boundary.sql and the local config. No Docker CLI, standard Docker executable, service, or configured endpoint was found. Official native artifacts exclude Windows x64.
+- **Blockers/risks:** Provide a running local Docker or Podman engine. CAP-016 has no database runtime verification.
+- **Git commit:** Task code remains in the working tree pending runtime verification. Last verified task commit: a4e3c2c.
+- **Next action:** With the engine running, repeat `npx --yes supabase@3.2.0 start --agent no`, then `npx --yes supabase@3.2.0 db reset --local --agent no` against the disposable local project and inspect migration history and schema privileges.
+
+### [2026-11-22T00:02:20+08:00] CAP-016 — Initialize Supabase and migrations — HANDOFF
+- **Agent/session:** Codex
+- **Context/dependencies:** 15 of 112 tasks verified. CAP-001 through CAP-015 each have a task commit. P2 begins at CAP-016.
+- **Changes:** Four untracked Supabase task files remain as prepared local work. This handoff persists the verified CAP-015 commit addendum and the CAP-016 blocker.
+- **Verification:** CAP-016 stopped at the local container-runtime dependency. The last completed CI workflow passed through both builds and the smoke test in act, and failed on the intentional test assertion in a separate run. Native cache upload warned about missing gzip.
+- **Git commit:** a4e3c2c (CAP-015); handoff recorded in a separate docs commit.
+- **Next action:** Resume CAP-016 once the engine is available. Leave its checkbox unchecked until clean replay passes.

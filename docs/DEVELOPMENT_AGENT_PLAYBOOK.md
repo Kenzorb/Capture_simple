@@ -5,7 +5,7 @@
 > **Project:** Capture — AI-powered article capture, structured notes, and personal knowledge tree (Chrome extension + web application).
 >
 > **Created:** 21 November 2026  
-> **Status:** `NOT STARTED` — no development tasks are marked complete in this document.  
+> **Status:** See [§11 Live progress state](#11-live-progress-state) for the current task and verification evidence.
 > **Canonical product reference:** `docs/PRODUCT_SPEC.md` (copy from `Capture_Product_and_Technical_Specification.md`).  
 > **Canonical execution file:** `docs/DEVELOPMENT_AGENT_PLAYBOOK.md` (this document).
 
@@ -397,7 +397,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-015 — Document local developer startup
 
-- [ ] **CAP-015 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-015 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create README/SETUP instructions: env template, Supabase local commands, web server, extension load, job dev mode, test run.
 
@@ -1565,15 +1565,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN_PROGRESS` |
-| Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-015 — Document local developer startup` |
-| Last verified completed task | `CAP-014` |
-| Last verification executed | `act 0.2.92 workflow_dispatch -P windows-2025=-self-hosted passed the actual workflow in a clean local Windows checkout, including frozen install, format, lint, types, four Vitest tests, browser installation, one Chromium test, and both builds. A separate fixture workflow failed at pnpm test with exit 1 on the named intentional assertion as expected. Workflow formatting passed.` |
-| Last successful Git commit | `84f456d` |
+| Current phase | `P2 — Build database, RLS, and sign-in` |
+| Current task | `CAP-016 — Initialize Supabase and migrations` |
+| Last verified completed task | `CAP-015` |
+| Last verification executed | `Followed documented startup in a fresh clone with an offline cached frozen install. The copied apps/web/.env.local was ignored, the template was trackable, pnpm dev served localhost:3000, the extension built to the documented folder, four Vitest tests and one Chromium test passed, and Prettier passed. P1 prerequisite check and env placeholder check passed after correcting the scalar PowerShell probe.` |
+| Last successful Git commit | `f1fdfd9` |
 | Active blockers | `Hosted GitHub and provider access remain unconfirmed. The CI workflow passed locally via act.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Document local developer startup.` |
+| Next action | `Initialize Supabase and migrations.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,8 +1582,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 7/8 | In progress |
-| P2 | CAP-016–025 | 0/10 | Not started |
+| P1 | CAP-008–015 | 8/8 | Complete |
+| P2 | CAP-016–025 | 0/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **14/112** | **In progress** |
+| **Total** | **CAP-001–112** | **15/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1903,3 +1903,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Used windows-2025 and cmd, with the locally executed workflow as acceptance evidence. Hosted execution is pending repository access. Native runner cache uploads warned because gzip was missing from its PATH. The main workflow steps passed.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-015 — Document local developer startup.
+
+### [2026-11-21T23:54:41+08:00] CAP-014 — Set up CI workflow — COMMIT
+- **Git commit:** f1fdfd9
+
+### [2026-11-21T23:54:54+08:00] CAP-015 — Document local developer startup — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-014 verified the GitHub Actions workflow in a local runner.
+- **Next action:** Document the current scaffold and phase-gated local services; verify the startup path.
+
+### [2026-11-21T23:58:57+08:00] CAP-015 — Document local developer startup — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added .env.example and step-by-step README/SETUP startup and test guidance. Documented the Supabase and Inngest commands with their implementation phases.
+- **Verification:** Followed documented startup in a fresh clone with an offline cached frozen install. The copied apps/web/.env.local was ignored, the template was trackable, pnpm dev served localhost:3000, the extension built to the documented folder, four Vitest tests and one Chromium test passed, and Prettier passed. P1 prerequisite check and env placeholder check passed after correcting the scalar PowerShell probe.
+- **Evidence:** Disposable startup checkout and Playwright Chromium 156. Prior CAP-010 verified unpacked extension loading. Verified proposed Supabase and Inngest command syntax against their official documentation.
+- **Decisions:** P1 gate passed using the verified CI workflow and scaffold. Runtime checks for Supabase and Inngest belong to CAP-016 and CAP-049.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-016 — Initialize Supabase and migrations.

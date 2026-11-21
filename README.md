@@ -2,9 +2,18 @@
 
 Capture is a Chrome extension and web application for saving articles and building a personal knowledge library.
 
-## Development commands
+## Run locally
 
-Use the Node.js version in `.nvmrc` and the pnpm version in `package.json`. Install dependencies with `pnpm install --frozen-lockfile`.
+Install the Node.js version in `.nvmrc` and use pnpm `10.19.0`, as pinned in `package.json`. Corepack users can run `corepack enable pnpm` to enable the pnpm command. If the shim is unavailable, replace `pnpm` in the commands below with `npx --yes pnpm@10.19.0`. Use `pnpm.cmd` or `npx.cmd` in PowerShell when script execution policy blocks the corresponding PowerShell shim.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev --hostname 127.0.0.1
+```
+
+Open `http://localhost:3000`. The current web and extension scaffolds start without provider credentials. For environment setup, local services, and Chrome installation, see [Setup](docs/SETUP.md#local-startup).
+
+## Development commands
 
 | Command                       | Purpose                                                           |
 | ----------------------------- | ----------------------------------------------------------------- |

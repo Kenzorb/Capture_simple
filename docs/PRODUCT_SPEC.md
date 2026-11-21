@@ -923,7 +923,7 @@ capture/
 │   ├── migrations/
 │   └── seed.sql
 ├── docs/
-│   ├── PRODUCT.md
+│   ├── PRODUCT_SPEC.md
 │   ├── ARCHITECTURE.md
 │   └── API.md
 ├── .env.example

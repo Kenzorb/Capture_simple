@@ -261,7 +261,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-002 — Import and cross-check source documents
 
-- [ ] **CAP-002 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-002 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Place product spec at `docs/PRODUCT_SPEC.md` and this playbook at its canonical path. Compare feature IDs F01–F23 with the phase tasks and flag any contradictions.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P0 — Discover, align, and secure prerequisites` |
-| Current task | `CAP-002 — Import and cross-check source documents` |
-| Last verified completed task | `CAP-001` |
-| Last verification executed | `Inventory and explicit Git status passed; no previous commits or application files` |
-| Last successful Git commit | `Not recorded` |
+| Current task | `CAP-003 — Lock MVP and paid-release scope` |
+| Last verified completed task | `CAP-002` |
+| Last verification executed | `Both canonical documents read as UTF-8; F01–F23 and post-MVP backlog cross-checked` |
+| Last successful Git commit | `9cc723b` |
 | Active blockers | `None recorded yet; required accounts/access not yet assessed` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Cross-check F01–F23 against the numbered tasks and backlog.` |
+| Next action | `Record launch scope and initial audience in docs/ARCHITECTURE.md.` |
 
 ### 11.1 Phase progress overview
 
@@ -1581,7 +1581,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
-| P0 | CAP-001–007 | 1/7 | In progress |
+| P0 | CAP-001–007 | 2/7 | In progress |
 | P1 | CAP-008–015 | 0/8 | Not started |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **1/112** | **In progress** |
+| **Total** | **CAP-001–112** | **2/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1654,3 +1654,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Evidence:** CAP-001 STARTED entry and baseline files.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-002 — Import and cross-check source documents.
+
+### [2026-11-21T22:56:10+08:00] CAP-001 — Inventory the repository — COMMIT
+- **Git commit:** 9cc723b
+
+### [2026-11-21T22:56:18+08:00] CAP-002 — Import and cross-check source documents — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-001 verified and committed. Both source documents already occupy the canonical paths.
+- **Next action:** Cross-check all feature IDs and document scope discrepancies.
+
+### [2026-11-21T22:57:00+08:00] CAP-002 — Import and cross-check source documents — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Corrected the illustrative `PRODUCT.md` name to `PRODUCT_SPEC.md` in spec §17. Both actual files were already at their canonical paths.
+- **Verification:** `Get-Content -Encoding UTF8 -Raw` read both documents. A PowerShell regex check passed for all 23 feature rows, all seven post-MVP backlog entries, and removal of the stale name. Manually checked MVP coverage against §6.
+- **Evidence:** F01 → 017/023/024/080; F02 → 040–048; F03 → 032/037; F04 → 043/052–053; F05 → 027–029; F06 → 030/036; F07 → 054–057; F08 → 063–065; F09 → 066–068; F10 → 069–070; F11 → 073–074; F12 → 051/060/079/082; F13 → 076; F14 → 084–092; F15 → 077–080; F16 → 071; F17–F23 → §10.2.
+- **Decisions:** The phase labels in spec §18 describe roadmap milestones. Use playbook P0–P11 for execution order. Treat profile editing as part of CAP-080 and manual text fallback as a CAP-082 recovery path under spec §6.4. Billing lifecycle is a paid launch gate, and topic merging may follow if CAP-070 verifies an alternative.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-003 — Lock MVP and paid-release scope.

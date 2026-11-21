@@ -1,0 +1,16 @@
+{
+  "name": "extension",
+  "version": "0.1.0",
+  "description": "Save articles to your Capture library.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt --browser chrome --mv3",
+    "build": "wxt build --browser chrome --mv3",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "wxt": "0.21.5"
+  }
+}

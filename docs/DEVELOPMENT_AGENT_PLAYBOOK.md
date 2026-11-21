@@ -347,7 +347,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-010 — Scaffold MV3 Chrome extension
 
-- [ ] **CAP-010 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-010 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create WXT/TypeScript extension workspace with popup, background entrypoint, manifest, extension icon placeholders and minimal permissions.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-010 — Scaffold MV3 Chrome extension` |
-| Last verified completed task | `CAP-009` |
-| Last verification executed | `Pinned pnpm install passed. pnpm --filter web dev served HTTP 200 for / and /sign-in and HTTP 307 to /sign-in for /dashboard. pnpm --filter web build compiled and type-checked successfully. Verified the build ID and clean generated-file boundary.` |
-| Last successful Git commit | `8a5ee2f` |
+| Current task | `CAP-011 — Create shared schemas/types package` |
+| Last verified completed task | `CAP-010` |
+| Last verification executed | `pnpm --filter extension build passed. Node assertions checked manifest version 3, no requested permissions or content scripts, popup and worker assets, and four correct PNG sizes. A CDP smoke test loaded the unpacked build into Chrome/153.0.8010.12 (Playwright Chromium), identified the Capture worker via chrome.runtime.getManifest(), opened popup.html from the worker, and verified rendered text.` |
+| Last successful Git commit | `a4078b5` |
 | Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Scaffold MV3 Chrome extension.` |
+| Next action | `Create shared schemas/types package.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 2/8 | In progress |
+| P1 | CAP-008–015 | 3/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **9/112** | **In progress** |
+| **Total** | **CAP-001–112** | **10/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1799,3 +1799,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Used Next.js 16.4.6 and Tailwind CSS 4.3.5. Disabled framework-generated agent rules to keep the project playbook authoritative. Supabase sign-in remains assigned to CAP-023.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-010 — Scaffold MV3 Chrome extension.
+
+### [2026-11-21T23:08:48+08:00] CAP-009 — Scaffold Next.js web app — COMMIT
+- **Git commit:** a4078b5
+
+### [2026-11-21T23:08:59+08:00] CAP-010 — Scaffold MV3 Chrome extension — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-009 web scaffold passed route and build checks.
+- **Next action:** Create and load a minimal WXT extension.
+
+### [2026-11-21T23:12:44+08:00] CAP-010 — Scaffold MV3 Chrome extension — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added the WXT TypeScript extension workspace, Chrome MV3 manifest configuration, popup, background entrypoint and four placeholder icons.
+- **Verification:** pnpm --filter extension build passed. Node assertions checked manifest version 3, no requested permissions or content scripts, popup and worker assets, and four correct PNG sizes. A CDP smoke test loaded the unpacked build into Chrome/153.0.8010.12 (Playwright Chromium), identified the Capture worker via chrome.runtime.getManifest(), opened popup.html from the worker, and verified rendered text.
+- **Evidence:** apps/extension/.output/chrome-mv3/manifest.json and Chrome runtime verification. Initial dependency install hit Windows EBUSY and passed on retry. Initial popup probe could select the wrong worker; the passing probe verified Capture's manifest identity before opening it.
+- **Decisions:** The scaffold requests zero browser and host permissions. P5 introduces each permission with the feature that requires it.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-011 — Create shared schemas/types package.

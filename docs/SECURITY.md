@@ -1,0 +1,15 @@
+# Capture security checklist
+
+Use synthetic fixtures and two disposable accounts for security checks. Record commands, environment, and actual outcomes in the playbook.
+
+| Risk | Required controls and verification | Owner |
+|---|---|---|
+| Cross-account data access | Enable RLS on user data, scope joins by owner, and authorize API operations with server-derived identity. Two-account tests must deny foreign reads, writes, deletes, and exports. CAP-021, CAP-093. | Database and API maintainer |
+| Extension session misuse | Require explicit connection, an allowlisted redirect, short-lived single-use handoffs, and token revocation. Verify expiry, replay rejection, disconnect, and absence of server secrets in the bundle. CAP-040, CAP-047–048. | Extension maintainer |
+| Unsafe page content | Process only on explicit capture. Extract and render bounded text, and discard active markup. Test that synthetic scripts and event handlers remain inert and large captures are bounded. CAP-043, CAP-052, CAP-094. | Extraction and web maintainer |
+| SSRF in manual capture | Restrict outbound fetches to public HTTP(S) destinations, validate each redirect and connected address, and bound response size and time. A controlled integration suite must verify that restricted addresses receive zero requests. CAP-032, CAP-052, CAP-094. | API and extraction maintainer |
+| Unsupported AI claims and untrusted instructions | Treat extracted text as data, validate generated notes and evidence references, and preserve saved links on terminal failure. Test invalid references and untrusted content with synthetic fixtures. CAP-054–057, CAP-094. | AI maintainer |
+| Concurrent quotas and job retries | Reserve allowance atomically and finalize each reservation once. At one unit remaining, concurrent jobs must reserve exactly one unit. A retry must reuse the reservation and a terminal failure must release it. CAP-058–059, CAP-078, CAP-095. | Database and worker maintainer |
+| Billing webhook replay | Verify raw-body signatures, deduplicate known event IDs, and reconcile current subscription state. A test-mode lifecycle must show replay and out-of-order events produce no duplicate or stale entitlements. CAP-087, CAP-091, CAP-095. | Billing maintainer |
+| Unexpected spend | Enforce per-request size and token limits, bounded retries, account and job budgets, and alert thresholds. Measure observed cost per processed article and verify an alert in staging before launch. CAP-056, CAP-097, CAP-099. | Release operator and project owner |
+| Copyright and retention | Preserve source attribution, limit stored source text to product needs, and use approved public content or synthetic fixtures in tests. Verify that export and account deletion honor user ownership and the documented backup retention policy. Keep captured text and URLs out of analytics. CAP-076, CAP-098, CAP-100. | Privacy and release owner |

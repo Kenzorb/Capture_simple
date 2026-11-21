@@ -387,7 +387,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-014 — Set up CI workflow
 
-- [ ] **CAP-014 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-014 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add GitHub Actions (or selected CI) for install, format/lint, typecheck, tests and builds; cache dependencies safely.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-014 — Set up CI workflow` |
-| Last verified completed task | `CAP-013` |
-| Last verification executed | `CI=true pnpm test passed four tests across two files (three schema unit cases, one jsdom React Testing Library case). CI=true pnpm test:browser passed one Chromium smoke test using installed Chromium 153. pnpm typecheck passed, and ESLint/Prettier passed against the final file scope.` |
-| Last successful Git commit | `967b03b` |
-| Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
+| Current task | `CAP-015 — Document local developer startup` |
+| Last verified completed task | `CAP-014` |
+| Last verification executed | `act 0.2.92 workflow_dispatch -P windows-2025=-self-hosted passed the actual workflow in a clean local Windows checkout, including frozen install, format, lint, types, four Vitest tests, browser installation, one Chromium test, and both builds. A separate fixture workflow failed at pnpm test with exit 1 on the named intentional assertion as expected. Workflow formatting passed.` |
+| Last successful Git commit | `84f456d` |
+| Active blockers | `Hosted GitHub and provider access remain unconfirmed. The CI workflow passed locally via act.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Set up CI workflow.` |
+| Next action | `Document local developer startup.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 6/8 | In progress |
+| P1 | CAP-008–015 | 7/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **13/112** | **In progress** |
+| **Total** | **CAP-001–112** | **14/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1876,3 +1876,30 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Use synthetic fixtures and isolate the browser server. The documented database strategy is implemented with the database phase; this harness uses no hosted credentials.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-014 — Set up CI workflow.
+
+### [2026-11-21T23:28:04+08:00] CAP-013 — Set up testing harness — COMMIT
+- **Git commit:** 84f456d
+
+### [2026-11-21T23:28:24+08:00] CAP-014 — Set up CI workflow — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-013 verified Vitest and Playwright suites.
+- **Next action:** Add a GitHub Actions workflow and verify the check sequence in a clean checkout.
+
+### [2026-11-21T23:36:48+08:00] CAP-014 — Set up CI workflow — FAILED
+- **Agent/session:** Codex
+- **Verification:** Clean Windows clone passed frozen install, format, lint, types, Vitest, Chromium and both builds. Injected Vitest failure exited 1 in disposable clone. Native act workflow reached pnpm/action-setup and exited 1: No pnpm version is specified despite a pinned root packageManager.
+- **Next action:** Diagnose act's native workspace environment, then rerun the workflow.
+
+### [2026-11-21T23:38:39+08:00] CAP-014 — Set up CI workflow — RESUMED
+- **Agent/session:** Codex
+- **Verification:** Native act workspace probe identified that --bind left the host executor empty. Removing --bind populated the manifest. The next attempt found the pin and then failed because the action invoked Node from a path containing spaces.
+- **Next action:** Run setup-node first, use the runner temp directory for pnpm and cache its store, then retry the exact workflow.
+
+### [2026-11-21T23:54:33+08:00] CAP-014 — Set up CI workflow — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added GitHub Actions CI for pull requests, main and CI verification branches, and manual dispatch. It reads runtime pins, uses read-only permissions, and configures the pnpm store cache.
+- **Verification:** act 0.2.92 workflow_dispatch -P windows-2025=-self-hosted passed the actual workflow in a clean local Windows checkout, including frozen install, format, lint, types, four Vitest tests, browser installation, one Chromium test, and both builds. A separate fixture workflow failed at pnpm test with exit 1 on the named intentional assertion as expected. Workflow formatting passed.
+- **Evidence:** Two native act runs using disposable checkouts and temporary caches. The negative log is capture-cap014-act-0.2.92/negative-act.log under the temporary directory. The normal job exited 0.
+- **Decisions:** Used windows-2025 and cmd, with the locally executed workflow as acceptance evidence. Hosted execution is pending repository access. Native runner cache uploads warned because gzip was missing from its PATH. The main workflow steps passed.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-015 — Document local developer startup.

@@ -337,7 +337,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-009 — Scaffold Next.js web app
 
-- [ ] **CAP-009 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-009 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create App Router, TypeScript and Tailwind setup; add home, sign-in placeholder and protected dashboard route structure.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-009 — Scaffold Next.js web app` |
-| Last verified completed task | `CAP-008` |
-| Last verification executed | `A disposable Git clone of the candidate passed npx --yes pnpm@10.19.0 install --frozen-lockfile, git check-ignore for five synthetic local/secret fixtures, and clean git status --porcelain. Node v22.15.0 and working diff check passed.` |
-| Last successful Git commit | `3e0aa54` |
+| Current task | `CAP-010 — Scaffold MV3 Chrome extension` |
+| Last verified completed task | `CAP-009` |
+| Last verification executed | `Pinned pnpm install passed. pnpm --filter web dev served HTTP 200 for / and /sign-in and HTTP 307 to /sign-in for /dashboard. pnpm --filter web build compiled and type-checked successfully. Verified the build ID and clean generated-file boundary.` |
+| Last successful Git commit | `8a5ee2f` |
 | Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Scaffold Next.js web app.` |
+| Next action | `Scaffold MV3 Chrome extension.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 1/8 | In progress |
+| P1 | CAP-008–015 | 2/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **8/112** | **In progress** |
+| **Total** | **CAP-001–112** | **9/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1782,3 +1782,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Pin pnpm 10.19.0 and the available Node 22.15.0 runtime. Public registry access worked with approved sandbox escalation.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-009 — Scaffold Next.js web app.
+
+### [2026-11-21T23:03:18+08:00] CAP-008 — Initialize Git and workspace — COMMIT
+- **Git commit:** 8a5ee2f
+
+### [2026-11-21T23:03:33+08:00] CAP-009 — Scaffold Next.js web app — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-008 passed the frozen workspace install.
+- **Next action:** Set up the web workspace and exercise each initial route.
+
+### [2026-11-21T23:08:43+08:00] CAP-009 — Scaffold Next.js web app — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added the Next.js App Router workspace with TypeScript, Tailwind/PostCSS, landing page, sign-in placeholder, and dashboard route group that always requires sign-in until auth is implemented.
+- **Verification:** Pinned pnpm install passed. pnpm --filter web dev served HTTP 200 for / and /sign-in and HTTP 307 to /sign-in for /dashboard. pnpm --filter web build compiled and type-checked successfully. Verified the build ID and clean generated-file boundary.
+- **Evidence:** capture-web-dev.log (local ignored) and apps/web/.next/BUILD_ID. Final smoke test and production build passed with the committed config.
+- **Decisions:** Used Next.js 16.4.6 and Tailwind CSS 4.3.5. Disabled framework-generated agent rules to keep the project playbook authoritative. Supabase sign-in remains assigned to CAP-023.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-010 — Scaffold MV3 Chrome extension.

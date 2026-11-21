@@ -327,7 +327,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-008 — Initialize Git and workspace
 
-- [ ] **CAP-008 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-008 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Preserve existing repository if present. Add `pnpm-workspace.yaml`, root package scripts, runtime pinning, `.editorconfig` and safe `.gitignore`.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-008 — Initialize Git and workspace` |
-| Last verified completed task | `CAP-007` |
-| Last verification executed | `Read the environment matrix and checked dev/staging/prod boundaries, target verification, secret isolation, approval policy, billing-off design, and six previous P0 checkboxes. All checks passed. No production resources or credentials are configured.` |
-| Last successful Git commit | `9a05292` |
-| Active blockers | `No blocker for P0 planning. GitHub remote/runners and hosted provider access are unconfirmed.` |
+| Current task | `CAP-009 — Scaffold Next.js web app` |
+| Last verified completed task | `CAP-008` |
+| Last verification executed | `A disposable Git clone of the candidate passed npx --yes pnpm@10.19.0 install --frozen-lockfile, git check-ignore for five synthetic local/secret fixtures, and clean git status --porcelain. Node v22.15.0 and working diff check passed.` |
+| Last successful Git commit | `3e0aa54` |
+| Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Initialize Git and workspace.` |
+| Next action | `Scaffold Next.js web app.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 0/8 | In progress |
+| P1 | CAP-008–015 | 1/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **7/112** | **In progress** |
+| **Total** | **CAP-001–112** | **8/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1756,3 +1756,29 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** P0 gate passed for local work. Hosted verification and runtime enforcement remain scheduled in their numbered tasks.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-008 — Initialize Git and workspace.
+
+### [2026-11-21T23:00:11+08:00] CAP-007 — Define environments and release policy — COMMIT
+- **Git commit:** 3e0aa54
+
+### [2026-11-21T23:01:09+08:00] CAP-008 — Initialize Git and workspace — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** P0 gate passed. Git is already initialized and has the verified P0 commits.
+- **Next action:** Add the pinned pnpm workspace and verify a clean install.
+
+### [2026-11-21T23:02:46+08:00] CAP-008 — Initialize Git and workspace — FAILED
+- **Agent/session:** Codex
+- **Verification:** Frozen pnpm 10.19.0 install and all five git check-ignore fixtures passed. Clean status assertion failed with `M pnpm-lock.yaml`; Git showed no content diff.
+- **Next action:** Set LF explicitly for the lockfile and repeat the fresh-clone test.
+
+### [2026-11-21T23:02:47+08:00] CAP-008 — Initialize Git and workspace — RESUMED
+- **Agent/session:** Codex
+- **Next action:** Make Git checkouts preserve the lockfile's LF line endings.
+
+### [2026-11-21T23:03:13+08:00] CAP-008 — Initialize Git and workspace — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added pnpm-workspace.yaml, package.json, pnpm-lock.yaml, .nvmrc, .editorconfig, and a lockfile LF rule in .gitattributes. Kept the existing local history and ignore rules.
+- **Verification:** A disposable Git clone of the candidate passed npx --yes pnpm@10.19.0 install --frozen-lockfile, git check-ignore for five synthetic local/secret fixtures, and clean git status --porcelain. Node v22.15.0 and working diff check passed.
+- **Evidence:** CAP-008 FAILED and RESUMED events record the Windows checkout fix. Fresh-clone install and clean status both passed after the fix.
+- **Decisions:** Pin pnpm 10.19.0 and the available Node 22.15.0 runtime. Public registry access worked with approved sandbox escalation.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-009 — Scaffold Next.js web app.

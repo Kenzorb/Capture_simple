@@ -357,7 +357,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-011 — Create shared schemas/types package
 
-- [ ] **CAP-011 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-011 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Define shared API request/response contracts, error structure, processing statuses, plan enums, article/topic types and Zod schemas.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-011 — Create shared schemas/types package` |
-| Last verified completed task | `CAP-010` |
-| Last verification executed | `pnpm --filter extension build passed. Node assertions checked manifest version 3, no requested permissions or content scripts, popup and worker assets, and four correct PNG sizes. A CDP smoke test loaded the unpacked build into Chrome/153.0.8010.12 (Playwright Chromium), identified the Capture worker via chrome.runtime.getManifest(), opened popup.html from the worker, and verified rendered text.` |
-| Last successful Git commit | `a4078b5` |
+| Current task | `CAP-012 — Configure formatting and quality scripts` |
+| Last verified completed task | `CAP-011` |
+| Last verification executed | `Temporary imports and typed fixtures compiled with pnpm --filter web exec tsc --noEmit and pnpm --filter extension exec tsc --noEmit. Node --experimental-strip-types runtime assertions passed for valid capture, quota-limited response, and rejection of user_id, non-HTTP URLs, oversized text, and an invalid plan. Shared package has only Zod as a runtime dependency.` |
+| Last successful Git commit | `b6d6d47` |
 | Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Create shared schemas/types package.` |
+| Next action | `Configure formatting and quality scripts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 3/8 | In progress |
+| P1 | CAP-008–015 | 4/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **10/112** | **In progress** |
+| **Total** | **CAP-001–112** | **11/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1816,3 +1816,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** The scaffold requests zero browser and host permissions. P5 introduces each permission with the feature that requires it.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-011 — Create shared schemas/types package.
+
+### [2026-11-21T23:12:49+08:00] CAP-010 — Scaffold MV3 Chrome extension — COMMIT
+- **Git commit:** b6d6d47
+
+### [2026-11-21T23:13:00+08:00] CAP-011 — Create shared schemas/types package — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-010 verified the Chrome extension scaffold.
+- **Next action:** Add portable schemas and type-check imports in both apps.
+
+### [2026-11-21T23:15:49+08:00] CAP-011 — Create shared schemas/types package — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added @capture/shared with schemas and inferred types for capture, errors, articles, topics, processing states, and plans. Linked both workspaces and enabled Next.js transpilation of shared TS.
+- **Verification:** Temporary imports and typed fixtures compiled with pnpm --filter web exec tsc --noEmit and pnpm --filter extension exec tsc --noEmit. Node --experimental-strip-types runtime assertions passed for valid capture, quota-limited response, and rejection of user_id, non-HTTP URLs, oversized text, and an invalid plan. Shared package has only Zod as a runtime dependency.
+- **Evidence:** packages/shared/src/index.ts and both consumer type-check commands. Temporary probes were removed.
+- **Decisions:** Expose plain TypeScript and browser-safe Zod only. Enforce server authorization and URL destination validation in later tasks.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-012 — Configure formatting and quality scripts.

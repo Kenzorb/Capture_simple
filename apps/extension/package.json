@@ -9,6 +9,9 @@
     "build": "wxt build --browser chrome --mv3",
     "postinstall": "wxt prepare"
   },
+  "dependencies": {
+    "@capture/shared": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "5.9.3",
     "wxt": "0.21.5"

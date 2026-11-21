@@ -367,7 +367,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-012 — Configure formatting and quality scripts
 
-- [ ] **CAP-012 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-012 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Set up ESLint/formatting/typecheck/test/build commands and root shortcuts; document exact commands in README.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-012 — Configure formatting and quality scripts` |
-| Last verified completed task | `CAP-011` |
-| Last verification executed | `Temporary imports and typed fixtures compiled with pnpm --filter web exec tsc --noEmit and pnpm --filter extension exec tsc --noEmit. Node --experimental-strip-types runtime assertions passed for valid capture, quota-limited response, and rejection of user_id, non-HTTP URLs, oversized text, and an invalid plan. Shared package has only Zod as a runtime dependency.` |
-| Last successful Git commit | `b6d6d47` |
+| Current task | `CAP-013 — Set up testing harness` |
+| Last verified completed task | `CAP-012` |
+| Last verification executed | `Root pnpm format:check, pnpm lint, pnpm typecheck, pnpm test, and pnpm build all exited 0. Type checks covered web, extension, and shared code. Both builds passed. pnpm test is the documented no-suite baseline before CAP-013.` |
+| Last successful Git commit | `71bc1f5` |
 | Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Configure formatting and quality scripts.` |
+| Next action | `Set up testing harness.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 4/8 | In progress |
+| P1 | CAP-008–015 | 5/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **11/112** | **In progress** |
+| **Total** | **CAP-001–112** | **12/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1833,3 +1833,29 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Expose plain TypeScript and browser-safe Zod only. Enforce server authorization and URL destination validation in later tasks.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-012 — Configure formatting and quality scripts.
+
+### [2026-11-21T23:15:56+08:00] CAP-011 — Create shared schemas/types package — COMMIT
+- **Git commit:** 71bc1f5
+
+### [2026-11-21T23:16:10+08:00] CAP-012 — Configure formatting and quality scripts — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-011 verified both workspaces can compile the shared contracts.
+- **Next action:** Add root lint, format, type-check, test baseline, and build commands.
+
+### [2026-11-21T23:21:14+08:00] CAP-012 — Configure formatting and quality scripts — FAILED
+- **Agent/session:** Codex
+- **Verification:** pnpm format:check passed; pnpm lint exited 1 with import/no-anonymous-default-export warning in apps/web/postcss.config.mjs.
+- **Next action:** Name the exported configuration and rerun all checks.
+
+### [2026-11-21T23:21:17+08:00] CAP-012 — Configure formatting and quality scripts — RESUMED
+- **Agent/session:** Codex
+- **Next action:** Name the PostCSS config export and verify the quality scripts.
+
+### [2026-11-21T23:22:42+08:00] CAP-012 — Configure formatting and quality scripts — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added root ESLint, Prettier, type-check, test, and build scripts and documented them in README.md. Set consistent LF checkout rules.
+- **Verification:** Root pnpm format:check, pnpm lint, pnpm typecheck, pnpm test, and pnpm build all exited 0. Type checks covered web, extension, and shared code. Both builds passed. pnpm test is the documented no-suite baseline before CAP-013.
+- **Evidence:** CAP-012 FAILED and RESUMED events record the warning fix. The final command sequence passed.
+- **Decisions:** Kept ESLint 9 to match the explicit peer range of the Next.js React lint plugin. Prettier preserves the two canonical planning documents and generated lockfile.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-013 — Set up testing harness.

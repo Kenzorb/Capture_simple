@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "wxt --browser chrome --mv3",
+    "typecheck": "wxt prepare && tsc --noEmit",
     "build": "wxt build --browser chrome --mv3",
     "postinstall": "wxt prepare"
   },

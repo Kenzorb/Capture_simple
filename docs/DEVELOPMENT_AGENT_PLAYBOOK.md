@@ -291,7 +291,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-005 — Verify accounts and access safely
 
-- [ ] **CAP-005 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-005 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Check which Supabase, hosting, background-jobs, AI, GitHub, monitoring and Stripe accounts are available. List required secrets by variable name only; do not request passwords in chat or commit them.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P0 — Discover, align, and secure prerequisites` |
-| Current task | `CAP-005 — Verify accounts and access safely` |
-| Last verified completed task | `CAP-004` |
-| Last verification executed | `UTF-8 document check passed for all required choices. Manually reviewed each row for a default, owner, and impact.` |
-| Last successful Git commit | `9487054` |
-| Active blockers | `None recorded yet; required accounts/access not yet assessed` |
+| Current task | `CAP-006 — Create implementation risk checklist` |
+| Last verified completed task | `CAP-005` |
+| Last verification executed | ``git remote -v` listed no remote. Environment name-only inspection and ignored-file inventory showed no configured provider variables or local env files. Setup coverage and key-literal scan passed. Hosted access was not verified.` |
+| Last successful Git commit | `1948136` |
+| Active blockers | `No blocker for P0 planning. GitHub remote/runners and hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify accounts and access safely.` |
+| Next action | `Create implementation risk checklist.` |
 
 ### 11.1 Phase progress overview
 
@@ -1581,7 +1581,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
-| P0 | CAP-001–007 | 4/7 | In progress |
+| P0 | CAP-001–007 | 5/7 | In progress |
 | P1 | CAP-008–015 | 0/8 | Not started |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **4/112** | **In progress** |
+| **Total** | **CAP-001–112** | **5/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1705,3 +1705,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Use localhost:3000, WXT, Inngest, OpenAI and a Free beta baseline. Hosted account access, spend, domains, prices, and launch approvals remain open.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-005 — Verify accounts and access safely.
+
+### [2026-11-21T22:58:20+08:00] CAP-004 — Make a decision register — COMMIT
+- **Git commit:** 1948136
+
+### [2026-11-21T22:58:47+08:00] CAP-005 — Verify accounts and access safely — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-004 recorded local defaults and open owner decisions.
+- **Next action:** Inventory visible access without inspecting credential values.
+
+### [2026-11-21T22:58:58+08:00] CAP-005 — Verify accounts and access safely — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added prerequisites, availability, configuration names, and safe credential handling to docs/SETUP.md.
+- **Verification:** `git remote -v` listed no remote. Environment name-only inspection and ignored-file inventory showed no configured provider variables or local env files. Setup coverage and key-literal scan passed. Hosted access was not verified.
+- **Evidence:** docs/SETUP.md § Account prerequisites.
+- **Decisions:** Proceed with local planning. Hosted access and secrets are required when their verification steps are reached.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-006 — Create implementation risk checklist.

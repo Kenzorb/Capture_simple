@@ -377,7 +377,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-013 — Set up testing harness
 
-- [ ] **CAP-013 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-013 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add Vitest, DOM/component testing, Playwright E2E scaffold, fixtures, a local test DB strategy and seed cleanup guidance.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P1 — Initialize repository, tooling, and CI` |
-| Current task | `CAP-013 — Set up testing harness` |
-| Last verified completed task | `CAP-012` |
-| Last verification executed | `Root pnpm format:check, pnpm lint, pnpm typecheck, pnpm test, and pnpm build all exited 0. Type checks covered web, extension, and shared code. Both builds passed. pnpm test is the documented no-suite baseline before CAP-013.` |
-| Last successful Git commit | `71bc1f5` |
+| Current task | `CAP-014 — Set up CI workflow` |
+| Last verified completed task | `CAP-013` |
+| Last verification executed | `CI=true pnpm test passed four tests across two files (three schema unit cases, one jsdom React Testing Library case). CI=true pnpm test:browser passed one Chromium smoke test using installed Chromium 153. pnpm typecheck passed, and ESLint/Prettier passed against the final file scope.` |
+| Last successful Git commit | `967b03b` |
 | Active blockers | `GitHub remote and hosted provider access remain unconfirmed. Public package downloads require sandbox escalation.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Set up testing harness.` |
+| Next action | `Set up CI workflow.` |
 
 ### 11.1 Phase progress overview
 
@@ -1582,7 +1582,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
-| P1 | CAP-008–015 | 5/8 | In progress |
+| P1 | CAP-008–015 | 6/8 | In progress |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **12/112** | **In progress** |
+| **Total** | **CAP-001–112** | **13/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1859,3 +1859,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Kept ESLint 9 to match the explicit peer range of the Next.js React lint plugin. Prettier preserves the two canonical planning documents and generated lockfile.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-013 — Set up testing harness.
+
+### [2026-11-21T23:22:48+08:00] CAP-012 — Configure formatting and quality scripts — COMMIT
+- **Git commit:** 967b03b
+
+### [2026-11-21T23:23:07+08:00] CAP-013 — Set up testing harness — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-012 verified root quality commands and both builds.
+- **Next action:** Add and run unit, component, and browser smoke tests.
+
+### [2026-11-21T23:27:58+08:00] CAP-013 — Set up testing harness — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added Vitest, jsdom, React Testing Library, Playwright, schema fixture, baseline tests, and local database test/reset guidance. Replaced the no-suite test script.
+- **Verification:** CI=true pnpm test passed four tests across two files (three schema unit cases, one jsdom React Testing Library case). CI=true pnpm test:browser passed one Chromium smoke test using installed Chromium 153. pnpm typecheck passed, and ESLint/Prettier passed against the final file scope.
+- **Evidence:** tests/unit/capture.test.ts, apps/web/tests/home.test.tsx, and tests/browser/sign-in.spec.ts. Browser test covered sign-in navigation and protected dashboard redirect.
+- **Decisions:** Use synthetic fixtures and isolate the browser server. The documented database strategy is implemented with the database phase; this harness uses no hosted credentials.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-014 — Set up CI workflow.

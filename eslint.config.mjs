@@ -17,7 +17,7 @@ export default defineConfig([
   ]),
   js.configs.recommended,
   {
-    files: ["apps/web/**/*.{js,jsx,mjs,ts,tsx}"],
+    files: ["apps/web/**/*.{js,jsx,ts,tsx}"],
     extends: [nextVitals],
     settings: { next: { rootDir: "apps/web/" } },
   },
@@ -26,7 +26,12 @@ export default defineConfig([
     extends: [nextTypescript],
   },
   {
-    files: ["apps/extension/**/*.{ts,tsx}", "packages/**/*.{ts,tsx}"],
+    files: [
+      "apps/extension/**/*.{ts,tsx}",
+      "packages/**/*.{ts,tsx}",
+      "tests/**/*.ts",
+      "*.config.{ts,mts}",
+    ],
     extends: [tseslint.configs.recommended],
   },
 ]);

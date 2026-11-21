@@ -281,7 +281,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-004 — Make a decision register
 
-- [ ] **CAP-004 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-004 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Choose/confirm app origin, dev/staging/prod environments, extension build tool, one job provider, AI provider and beta payment strategy. Record tradeoffs and owner approvals.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P0 — Discover, align, and secure prerequisites` |
-| Current task | `CAP-004 — Make a decision register` |
-| Last verified completed task | `CAP-003` |
-| Last verification executed | `Read docs/ARCHITECTURE.md as UTF-8 and checked scope rows, beta audience, and gate references with PowerShell. Manual comparison against spec §§7 and 18 and playbook §5 passed.` |
-| Last successful Git commit | `6a73f8d` |
+| Current task | `CAP-005 — Verify accounts and access safely` |
+| Last verified completed task | `CAP-004` |
+| Last verification executed | `UTF-8 document check passed for all required choices. Manually reviewed each row for a default, owner, and impact.` |
+| Last successful Git commit | `9487054` |
 | Active blockers | `None recorded yet; required accounts/access not yet assessed` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Make a decision register.` |
+| Next action | `Verify accounts and access safely.` |
 
 ### 11.1 Phase progress overview
 
@@ -1581,7 +1581,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
-| P0 | CAP-001–007 | 3/7 | In progress |
+| P0 | CAP-001–007 | 4/7 | In progress |
 | P1 | CAP-008–015 | 0/8 | Not started |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **3/112** | **In progress** |
+| **Total** | **CAP-001–112** | **4/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1688,3 +1688,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Use the Free beta as the development baseline. Keep live billing approval separate. No unresolved architecture issue prevents the documented functional scope.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-004 — Make a decision register.
+
+### [2026-11-21T22:57:48+08:00] CAP-003 — Lock MVP and paid-release scope — COMMIT
+- **Git commit:** 9487054
+
+### [2026-11-21T22:58:09+08:00] CAP-004 — Make a decision register — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-003 established the beta scope.
+- **Next action:** Record implementation defaults and owner decisions.
+
+### [2026-11-21T22:58:14+08:00] CAP-004 — Make a decision register — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added the decision register to docs/ARCHITECTURE.md.
+- **Verification:** UTF-8 document check passed for all required choices. Manually reviewed each row for a default, owner, and impact.
+- **Evidence:** docs/ARCHITECTURE.md § Decision register.
+- **Decisions:** Use localhost:3000, WXT, Inngest, OpenAI and a Free beta baseline. Hosted account access, spend, domains, prices, and launch approvals remain open.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-005 — Verify accounts and access safely.

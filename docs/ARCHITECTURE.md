@@ -23,3 +23,17 @@ Users can continue saving links after reaching the AI allowance. Failed extracti
 | AI provider | OpenAI structured output, server-side only. Keep model selection configurable and cap input, output and retries. | Engineering benchmarks candidate models in CAP-056 and CAP-061. Owner supplies scoped access and approves spending before real use. |
 | Beta payments | Free-only beta by default. Keep checkout disabled and use Stripe test mode for P9. | Project owner confirms cohort and billing strategy. Prices, currency, tax treatment, and live billing approval are pending. |
 | Source control and CI | Local Git and GitHub Actions workflow. | Project owner supplies the GitHub repository and runner access before remote CI verification. |
+
+## Environments and release policy
+
+| Environment | Data and credentials | Changes and verification |
+|---|---|---|
+| Development | Local Supabase, synthetic seed accounts and content, local job runner, scoped AI development key if real calls are needed, and Stripe test mode. Keep production credentials out of developer env files and local tooling. | Test migrations from an empty local database and on representative prior schemas. Run unit, integration, and browser checks locally or on disposable CI runners. |
+| Staging | Dedicated HTTPS origin, isolated database and job targets, scoped staging credentials, disposable accounts, and approved public article fixtures. Stripe uses test mode. | Apply reviewed migrations and verify callbacks, auth redirects, extension origins, a two-account smoke test, alerts, and recovery before promoting the same code revision. |
+| Production | Separate production origin, database, job and monitoring targets, private backups, and deployment-scoped credentials. Limit production mutation to the protected release workflow or authorized release operators. | Apply reviewed migrations after a verified backup. Run consented smoke tests, monitor errors and spend, and follow the recovery plan if a release fails. |
+
+GitHub pull requests and development scripts must have no production secret or deployment credential. Production deploys and database migrations must verify the target project and require an approved release environment. Keep callback and extension allowlists specific to each environment. Use forward-compatible migrations where practical and document recovery before applying data-changing releases.
+
+Free beta can run with billing disabled. The server must default billing off, disable checkout and portal routes and billing UI when off, and allow startup with Stripe configuration absent. Free allowances and saved knowledge remain available. Verify these conditions in CAP-092 and CAP-108. Live payments require a passing P9 gate and explicit owner approval.
+
+Get owner approval before provisioning production resources, enabling live billing, or publishing the extension. Confirm the pilot cohort, staging and production budgets, retention policy, and support path before inviting testers.

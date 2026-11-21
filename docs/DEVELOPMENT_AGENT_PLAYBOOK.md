@@ -271,7 +271,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-003 — Lock MVP and paid-release scope
 
-- [ ] **CAP-003 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-003 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Document MVP vs paid vs post-MVP scopes and the initial beta audience; avoid prematurely building semantic search, AI chat, PDFs, or graph UI.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P0 — Discover, align, and secure prerequisites` |
-| Current task | `CAP-003 — Lock MVP and paid-release scope` |
-| Last verified completed task | `CAP-002` |
-| Last verification executed | `Both canonical documents read as UTF-8; F01–F23 and post-MVP backlog cross-checked` |
-| Last successful Git commit | `9cc723b` |
+| Current task | `CAP-004 — Make a decision register` |
+| Last verified completed task | `CAP-003` |
+| Last verification executed | `Read docs/ARCHITECTURE.md as UTF-8 and checked scope rows, beta audience, and gate references with PowerShell. Manual comparison against spec §§7 and 18 and playbook §5 passed.` |
+| Last successful Git commit | `6a73f8d` |
 | Active blockers | `None recorded yet; required accounts/access not yet assessed` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Record launch scope and initial audience in docs/ARCHITECTURE.md.` |
+| Next action | `Make a decision register.` |
 
 ### 11.1 Phase progress overview
 
@@ -1581,7 +1581,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 
 | Phase | Steps | Complete | State |
 |---|---|---:|---|
-| P0 | CAP-001–007 | 2/7 | In progress |
+| P0 | CAP-001–007 | 3/7 | In progress |
 | P1 | CAP-008–015 | 0/8 | Not started |
 | P2 | CAP-016–025 | 0/10 | Not started |
 | P3 | CAP-026–033 | 0/8 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **2/112** | **In progress** |
+| **Total** | **CAP-001–112** | **3/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1671,3 +1671,20 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** The phase labels in spec §18 describe roadmap milestones. Use playbook P0–P11 for execution order. Treat profile editing as part of CAP-080 and manual text fallback as a CAP-082 recovery path under spec §6.4. Billing lifecycle is a paid launch gate, and topic merging may follow if CAP-070 verifies an alternative.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-003 — Lock MVP and paid-release scope.
+
+### [2026-11-21T22:57:06+08:00] CAP-002 — Import and cross-check source documents — COMMIT
+- **Git commit:** 6a73f8d
+
+### [2026-11-21T22:57:37+08:00] CAP-003 — Lock MVP and paid-release scope — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-002 mapped the specification features to the playbook.
+- **Next action:** Document the launch scope and audience.
+
+### [2026-11-21T22:57:43+08:00] CAP-003 — Lock MVP and paid-release scope — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added the release scope and beta audience to docs/ARCHITECTURE.md.
+- **Verification:** Read docs/ARCHITECTURE.md as UTF-8 and checked scope rows, beta audience, and gate references with PowerShell. Manual comparison against spec §§7 and 18 and playbook §5 passed.
+- **Evidence:** docs/ARCHITECTURE.md § Release scope.
+- **Decisions:** Use the Free beta as the development baseline. Keep live billing approval separate. No unresolved architecture issue prevents the documented functional scope.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-004 — Make a decision register.

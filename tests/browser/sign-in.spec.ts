@@ -28,6 +28,15 @@ test("an expired confirmation link redirects to sign-in with recovery guidance",
   expect(url.hash).toBe("");
 });
 
+test("the account API rejects direct signed-out requests", async ({
+  request,
+}) => {
+  const response = await request.get("/api/me");
+  expect(response.status()).toBe(401);
+  expect(response.headers()["cache-control"]).toContain("no-store");
+  expect(await response.json()).toEqual({ error: "unauthorized" });
+});
+
 test("password recovery is discoverable and requires a session to set a password", async ({
   page,
 }) => {

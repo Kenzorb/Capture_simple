@@ -27,10 +27,14 @@ export async function createServerSupabaseClient() {
   });
 }
 
-export async function getAuthenticatedUser() {
+export async function getAuthenticatedSession() {
   const supabase = await createServerSupabaseClient();
   if (!supabase) return null;
 
   const { data, error } = await supabase.auth.getUser();
-  return error ? null : data.user;
+  return error || !data.user ? null : { supabase, user: data.user };
+}
+
+export async function getAuthenticatedUser() {
+  return (await getAuthenticatedSession())?.user ?? null;
 }

@@ -489,11 +489,13 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 **Verify / acceptance:** New user can sign up, sign in again, navigate protected routes, sign out and lose access.
 
+**Owner-approved deferral:** Fresh signup email confirmation is deferred. Continue with the existing confirmed development account. Leave CAP-023 unchecked until the full signup acceptance flow passes.
+
 **Record:** Append a start and outcome entry for `CAP-023` in §12; update §11; check this box and commit only on verified success.
 
 #### CAP-024 — Protect dashboard/API boundaries
 
-- [ ] **CAP-024 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-024 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Redirect unauthenticated dashboard use, enforce API authentication independently of UI, and handle expired/revoked sessions.
 
@@ -1564,16 +1566,16 @@ _None at document creation._
 
 | Field | Current value |
 |---|---|
-| Overall status | `BLOCKED` |
+| Overall status | `IN PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
-| Last verified completed task | `CAP-022` |
-| Last verification executed | `An approved fresh signup created an account and delivered a real Gmail confirmation. The original test browser timed out before confirmation. Ten unit tests, TypeScript, and ESLint passed.` |
+| Current task | `CAP-025 — Generate typed database access` |
+| Last verified completed task | `CAP-024` |
+| Last verification executed | `Authenticated account lookup worked in the existing Chrome session. A disposable hosted session verified signed-out API rejection, cookie refresh, dashboard access, sign-out, and rejection of a revoked cookie. Seven browser tests, ten unit tests, lint, and type checking passed.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `The confirmation callback and repeat sign-in remain unverified for an actual fresh signup. Windows browser automation could not control the original test window, and the account remained unconfirmed when the test ended.` |
+| Active blockers | `None for CAP-025. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Open Capture and Gmail in the same normal Chrome profile for the next authorized fresh signup, then verify the callback, repeat sign-in, and sign-out.` |
+| Next action | `Verify generated schema types and introduce authenticated owner-scoped query helpers.` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1585,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 7/10 | In progress |
+| P2 | CAP-016–025 | 8/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -2172,3 +2174,18 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Agent/session:** Codex
 - **Verification:** The live signup form created the approved test account and displayed its confirmation notice. The matching confirmation arrived in Gmail. Windows browser automation could open the message but could not control the isolated Chrome for Testing window. The browser timed out after eight minutes, and the hosted account remained unconfirmed. Ten Vitest tests, TypeScript, and ESLint passed.
 - **Next action:** Repeat the actual confirmation in a normal Chrome profile that can access both Capture and Gmail. Verify repeat sign-in and sign-out before checking off CAP-023.
+
+### [2026-11-22T13:52:05+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — DEFERRED
+- **Agent/session:** Codex
+- **Decision:** The owner explicitly asked to skip fresh signup verification and continue with the existing confirmed development account. The CAP-023 checkbox remains open. Live recovery and signup email delivery are already verified.
+- **Next action:** Proceed to CAP-024.
+
+### [2026-11-22T13:52:05+08:00] CAP-024 — Protect dashboard/API boundaries — STARTED
+- **Agent/session:** Codex
+- **Next action:** Verify a server-side dashboard guard and an independently authenticated API response, including refresh, revocation, and logout.
+
+### [2026-11-22T13:57:24+08:00] CAP-024 — Protect dashboard/API boundaries — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added private, non-cacheable `GET /api/me`. The dashboard and API both validate the current Supabase user, and the API scopes its profile and plan lookups to that user.
+- **Verification:** The owner’s existing signed-in Chrome profile received the expected account and plan. A disposable hosted test verified anonymous HTTP 401, stale access-cookie refresh and rotation, dashboard access, sign-out, and HTTP 401 plus dashboard redirect when replaying the revoked cookie. Seven Chromium cases, ten unit tests, TypeScript, and ESLint passed.
+- **Next action:** CAP-025 — Generate typed database access.

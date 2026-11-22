@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
+import { getAuthenticatedUser } from "../../lib/supabase/server";
 
-export default function DashboardLayout(): never {
-  // Require a verified session when account sign-in is implemented.
-  redirect("/sign-in");
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  if (!(await getAuthenticatedUser())) redirect("/sign-in");
+  return children;
 }

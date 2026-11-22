@@ -29,6 +29,8 @@ A manual save can contain just the request ID, URL, and source.
 
 A successful call returns the saved article ID. A duplicate returns the existing ID with `duplicate: true`. Usage is optional. Capture remains saved when processing is delayed or unavailable.
 
+Capture compares canonical URLs for duplicates. It removes known tracking parameters and ordinary section anchors while preserving other query parameters and hash routes such as `#/docs`. It keeps the submitted source URL and leaves short links as separate URLs until the actual destination is known.
+
 ```json
 {
   "article_id": "a047728d-95a5-42ad-bc11-273c54edc241",

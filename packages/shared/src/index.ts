@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { maxCaptureUrlLength } from "./capture-url";
+
+export { canonicalizeCaptureUrl } from "./capture-url";
 
 export const processingStatusSchema = z.enum([
   "saved",
@@ -13,7 +16,7 @@ export const processingStatusSchema = z.enum([
 export const planSchema = z.enum(["free", "pro"]);
 
 const idSchema = z.uuid();
-const webUrlSchema = z.url({ protocol: /^https?$/ }).max(4096);
+const webUrlSchema = z.url({ protocol: /^https?$/ }).max(maxCaptureUrlLength);
 const dateTimeSchema = z.iso.datetime({ offset: true });
 const titleSchema = z.string().trim().min(1).max(500);
 const counterSchema = z.number().int().nonnegative();

@@ -531,7 +531,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-027 — Implement safe URL validation and canonicalization
 
-- [ ] **CAP-027 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-027 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Allow only supported HTTP(S) URLs, remove tracking params conservatively, keep content-affecting params/hash routes, normalize domain, reject invalid/dangerous protocols.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P3 — Capture API and reliable storage` |
-| Current task | `CAP-027 — Implement safe URL validation and canonicalization` |
-| Last verified completed task | `CAP-026` |
-| Last verification executed | `All six documented API examples passed the shared schemas. Malformed capture, pagination, and article payloads were rejected. Thirteen unit tests, type checking, and lint passed.` |
-| Last successful Git commit | `e40292c` |
-| Active blockers | `None for CAP-027. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-028 — Implement POST /api/captures` |
+| Last verified completed task | `CAP-027` |
+| Last verification executed | `Twenty-six unit tests passed, including URL redirect fixtures, tracking removal, query distinctions, hash routes, international domains, and invalid inputs. Shared and test TypeScript checks and lint passed.` |
+| Last successful Git commit | `e5b5ec6` |
+| Active blockers | `None for CAP-028. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Normalize and validate supported article URLs with fixture coverage.` |
+| Next action | `Implement and verify authenticated durable capture storage.` |
 
 ### 11.1 Phase progress overview
 
@@ -1586,7 +1586,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
-| P3 | CAP-026–033 | 1/8 | In progress |
+| P3 | CAP-026–033 | 2/8 | In progress |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
@@ -2210,3 +2210,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Reused shared capture and error schemas. Added validated article IDs, pagination, filter and sort options, and list and detail response schemas. Added request and response examples to `docs/API.md`.
 - **Verification:** Thirteen Vitest tests passed. The contract tests validated every documented JSON example and rejected malformed values. Shared and test TypeScript checks and ESLint passed.
 - **Next action:** CAP-027 — Implement safe URL validation and canonicalization.
+
+### [2026-11-22T14:06:57+08:00] CAP-027 — Implement safe URL validation and canonicalization — STARTED
+- **Agent/session:** Codex
+- **Next action:** Validate HTTP(S) capture targets and preserve query and fragment values that distinguish article content.
+
+### [2026-11-22T14:08:41+08:00] CAP-027 — Implement safe URL validation and canonicalization — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added shared validation and canonicalization for absolute HTTP(S) URLs. Canonical URLs drop known tracking keys and section anchors while retaining content query values, encoding, and hash routes.
+- **Verification:** Twenty-six Vitest tests passed, including redirect targets, tracking keys, distinct queries, hash routes, international hostnames, malformed URLs, credentials, and length limits. Shared and test TypeScript checks and lint passed.
+- **Next action:** CAP-028 — Implement POST /api/captures.

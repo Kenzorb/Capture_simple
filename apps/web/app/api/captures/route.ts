@@ -4,6 +4,11 @@ import {
   type CaptureResponse,
 } from "@capture/shared";
 import {
+  exceedsCaptureFieldBudget,
+  logCaptureRejection,
+  readCaptureJson,
+} from "../../../lib/capture-request";
+import {
   getCaptureTarget,
   saveOwnCapture,
 } from "../../../lib/supabase/captures";
@@ -14,10 +19,11 @@ function captureError(
   code: ApiError["error"]["code"],
   message: string,
   requestId?: string,
+  headers?: HeadersInit,
 ) {
   return Response.json(
     { error: { code, message, request_id: requestId } } satisfies ApiError,
-    { status },
+    { status, headers },
   );
 }
 
@@ -26,14 +32,24 @@ export async function POST(request: Request) {
   if (!session)
     return captureError(401, "unauthenticated", "Sign in to save a capture.");
 
-  const mediaType = request.headers.get("content-type")?.split(";", 1)[0];
-  if (mediaType?.trim().toLowerCase() !== "application/json") {
-    return captureError(400, "invalid_input", "Send the capture as JSON.");
+  const body = await readCaptureJson(request);
+  if (body.status === "invalid") {
+    return captureError(
+      400,
+      "invalid_input",
+      "Send the capture as uncompressed JSON.",
+    );
+  }
+  if (body.status === "too_large" || exceedsCaptureFieldBudget(body.data)) {
+    logCaptureRejection("payload_too_large");
+    return captureError(
+      413,
+      "payload_too_large",
+      "Capture details exceed the size limit.",
+    );
   }
 
-  const parsed = captureRequestSchema.safeParse(
-    await request.json().catch(() => null),
-  );
+  const parsed = captureRequestSchema.safeParse(body.data);
   if (!parsed.success)
     return captureError(400, "invalid_input", "Enter valid capture details.");
   const capture = parsed.data;
@@ -50,6 +66,30 @@ export async function POST(request: Request) {
   }
 
   const { data, error } = await saveOwnCapture(session, capture, target);
+  if (error?.code === "PT429") {
+    logCaptureRejection("rate_limited");
+    const seconds = Number(error.details);
+    const retryAfter =
+      Number.isInteger(seconds) && seconds >= 1 && seconds <= 60 ? seconds : 60;
+    return captureError(
+      429,
+      "rate_limited",
+      "Too many captures. Try again shortly.",
+      capture.request_id,
+      {
+        "Retry-After": String(retryAfter),
+      },
+    );
+  }
+  if (error?.code === "PT413") {
+    logCaptureRejection("payload_too_large");
+    return captureError(
+      413,
+      "payload_too_large",
+      "Capture details exceed the size limit.",
+      capture.request_id,
+    );
+  }
   if (error?.code === "23505") {
     return captureError(
       409,

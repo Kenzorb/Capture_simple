@@ -6,7 +6,7 @@ import { URL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 test(
-  "concurrent capture retries save one article per owner without charging usage",
+  "capture deduplication and request budgets are enforced per owner without charging usage",
   { timeout: 120_000 },
   async (t) => {
     const url = process.env.CAPTURE_TEST_SUPABASE_URL;
@@ -55,19 +55,24 @@ test(
         login.data.session && !login.error,
         "Could not sign in disposable account.",
       );
-      return { owner, token: login.data.session.access_token };
+      return { owner, client, token: login.data.session.access_token };
     }
 
-    async function save(token, body) {
-      const response = await globalThis.fetch(endpoint, {
+    function request(token, body, headers) {
+      return globalThis.fetch(endpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          ...headers,
         },
         body: JSON.stringify(body),
         signal: globalThis.AbortSignal.timeout(30_000),
       });
+    }
+
+    async function save(token, body) {
+      const response = await request(token, body);
       assert(
         response.status === 200 || response.status === 201,
         `Save returned HTTP ${response.status}.`,
@@ -84,6 +89,45 @@ test(
       url: `${canonical}&utm_source=${index}`,
       source: "manual_url",
     }));
+
+    for (const oversized of [
+      { extracted_text: "😀".repeat(25_001) },
+      { url: "https://example.com/" + "é".repeat(2049) },
+      { extracted_text: "\n".repeat(90_000) },
+    ]) {
+      const response = await request(first.token, {
+        ...requests[0],
+        ...oversized,
+      });
+      assert.equal(response.status, 413);
+      assert.equal((await response.json()).error.code, "payload_too_large");
+    }
+    const media = await request(first.token, requests[0], {
+      "Content-Type": "text/plain",
+    });
+    assert.equal(media.status, 400);
+    const encoded = await request(first.token, requests[0], {
+      "Content-Encoding": "gzip",
+    });
+    assert.equal(encoded.status, 400);
+    const chunked = await globalThis.fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${first.token}`,
+        "Content-Type": "application/json",
+      },
+      body: new globalThis.ReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array(70_000));
+          controller.enqueue(new Uint8Array(70_000));
+          controller.close();
+        },
+      }),
+      duplex: "half",
+      signal: globalThis.AbortSignal.timeout(30_000),
+    });
+    assert.equal(chunked.status, 413);
+    assert.equal((await chunked.json()).error.code, "payload_too_large");
 
     const results = await Promise.all(
       requests.map((request) => save(first.token, request)),
@@ -136,5 +180,73 @@ test(
     assert.equal(articles.count, 1);
     assert.equal(requestKeys.count, 6);
     assert.equal(usage.count, 0);
+
+    const burst = await Promise.all(
+      Array.from({ length: 12 }, (_, index) =>
+        request(first.token, {
+          request_id: randomUUID(),
+          url: `https://example.com/burst/${index}`,
+          source: "manual_url",
+        }),
+      ),
+    );
+    assert.equal(
+      burst.filter((response) => response.status === 201).length,
+      10,
+    );
+    const rejected = burst.filter((response) => response.status === 429);
+    assert.equal(rejected.length, 2);
+    for (const response of rejected) {
+      const retryAfter = Number(response.headers.get("retry-after"));
+      assert(
+        Number.isInteger(retryAfter) && retryAfter >= 1 && retryAfter <= 60,
+      );
+      assert.equal((await response.json()).error.code, "rate_limited");
+    }
+
+    const { error: directError } = await first.client.rpc(
+      "capture_save_article",
+      {
+        p_request_id: randomUUID(),
+        p_url: canonical,
+        p_canonical_url: canonical,
+        p_domain: "example.com",
+        p_title: "Direct fallback",
+        p_source: "manual_url",
+      },
+    );
+    assert.equal(directError?.code, "PT429");
+    assert.equal(
+      (await save(second.token, { ...requests[0], request_id: randomUUID() }))
+        .status,
+      200,
+    );
+
+    const [savedCount, billedCount] = await Promise.all([
+      admin
+        .from("articles")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", first.owner),
+      admin
+        .from("usage_events")
+        .select("user_id", { count: "exact", head: true })
+        .eq("user_id", first.owner),
+    ]);
+    assert(!savedCount.error && !billedCount.error);
+    assert.equal(savedCount.count, 11);
+    assert.equal(billedCount.count, 0);
+
+    const reset = await admin
+      .from("capture_rate_limits")
+      .update({
+        window_started_at: new Date(Date.now() - 70_000).toISOString(),
+      })
+      .eq("user_id", first.owner);
+    assert(!reset.error, "Could not age disposable rate window");
+    assert.equal(
+      (await save(first.token, { ...requests[0], request_id: randomUUID() }))
+        .status,
+      200,
+    );
   },
 );

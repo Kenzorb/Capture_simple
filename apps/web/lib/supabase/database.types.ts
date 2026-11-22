@@ -213,6 +213,32 @@ export type Database = {
         };
         Relationships: [];
       };
+      capture_rate_limits: {
+        Row: {
+          request_count: number;
+          user_id: string;
+          window_started_at: string;
+        };
+        Insert: {
+          request_count: number;
+          user_id: string;
+          window_started_at: string;
+        };
+        Update: {
+          request_count?: number;
+          user_id?: string;
+          window_started_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capture_rate_limits_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       capture_requests: {
         Row: {
           article_id: string;

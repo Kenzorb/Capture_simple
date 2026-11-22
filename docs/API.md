@@ -6,6 +6,8 @@ These contracts define the capture and article endpoints. Send authenticated req
 
 `POST /api/captures` accepts a client-generated UUID in `request_id`. Reuse it when retrying the same save. The URL must use HTTP or HTTPS and contain at most 4,096 characters. `title`, `extracted_text`, and `personal_note` are optional, with limits of 500, 100,000, and 4,000 characters. Use `chrome_extension` for an extension capture or `manual_url` for a pasted URL.
 
+Capture accepts uncompressed JSON up to 128 KiB. The URL and extracted text are independently limited to 4,096 and 100,000 UTF-8 bytes. Oversized requests return HTTP 413. The dashboard and API share a budget of 20 saves per account per minute, including duplicate requests. If the budget is exhausted, the API returns HTTP 429 with a `Retry-After` header in seconds.
+
 ```json
 {
   "request_id": "7a985dde-9cb2-42ec-b2c4-e7499466d159",

@@ -11,6 +11,11 @@ const captureMessages = new Map([
   ["saved", "Link saved to your library."],
   ["duplicate", "This link is already in your library."],
   ["invalid", "Enter an HTTP or HTTPS URL with a public domain."],
+  ["too-large", "This URL is too long to save."],
+  [
+    "rate-limited",
+    "You’ve saved links too quickly. Wait a minute and try again.",
+  ],
   ["conflict", "This form was already submitted. Try saving again."],
   ["unavailable", "Could not save this link. Try again."],
 ]);

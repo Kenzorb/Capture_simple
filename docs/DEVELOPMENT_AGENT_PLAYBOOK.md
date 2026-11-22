@@ -591,7 +591,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-033 — Add rate limiting and request budgets
 
-- [ ] **CAP-033 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-033 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Rate-limit capture per account/IP as appropriate, cap extracted_text bytes and URL length, restrict content types, and log safe error codes.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P3 — Capture API and reliable storage` |
-| Current task | `CAP-033 — Add rate limiting and request budgets` |
-| Last verified completed task | `CAP-032` |
-| Last verification executed | `Hosted Chromium verified the dashboard URL form, repeated and consecutive saves, local-target rejection, and durable link-only storage. Both hosted regressions, 37 unit tests, eight Chromium auth tests, lint, and type checking passed.` |
-| Last successful Git commit | `162b45a` |
-| Active blockers | `None for CAP-033. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current phase | `P4 — Web dashboard and captured-article experience` |
+| Current task | `CAP-034 — Implement authenticated dashboard shell` |
+| Last verified completed task | `CAP-033` |
+| Last verification executed | `Hosted tests verified oversized and chunked payload rejection, per-account concurrent rate limits, Retry-After, quota reset, and the dashboard warning. The article lifecycle regression, 41 unit tests, lint, and TypeScript passed.` |
+| Last successful Git commit | `2b60346` |
+| Active blockers | `None for CAP-034. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Enforce capture request budgets and rate limits, then verify oversized payloads and request bursts.` |
+| Next action | `Implement the authenticated dashboard shell and verify its navigation and responsive layouts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1586,8 +1586,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
-| P3 | CAP-026–033 | 7/8 | In progress |
-| P4 | CAP-034–039 | 0/6 | Not started |
+| P3 | CAP-026–033 | 8/8 | Complete |
+| P4 | CAP-034–039 | 0/6 | In progress |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
@@ -2270,3 +2270,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added a dashboard URL form with save, duplicate, and validation feedback. The dashboard and capture API share the durable save helper. Manual capture validates public domain syntax and saves the link without fetching the site. CAP-052 owns server fetching and its SSRF and timeout protections.
 - **Verification:** A disposable hosted Chromium session saved a URL on an unavailable port, verified persisted source and canonical URLs with no extracted content, rejected an IP and reserved local domain, reported a duplicate, and saved distinct links consecutively. Signed-out access was denied. Both hosted regressions, 37 Vitest tests, eight Chromium auth tests, TypeScript, ESLint, and Prettier passed.
 - **Next action:** CAP-033 — Add rate limiting and request budgets.
+
+### [2026-11-22T14:55:42+08:00] CAP-033 — Add rate limiting and request budgets — STARTED
+- **Agent/session:** Codex
+- **Next action:** Bound JSON and extracted-text sizes, then enforce a per-account save budget in the database transaction shared by the API and dashboard.
+
+### [2026-11-22T15:01:48+08:00] CAP-033 — Add rate limiting and request budgets — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added streamed 128 KiB JSON limits, URL and extracted-text UTF-8 byte limits, and safe rejection codes. The reviewed `20261122065542_limit_capture_requests.sql` migration enforces 20 saves per account per minute across the API, dashboard, and direct RPC. Oversized payloads return HTTP 413, and rate-limited API calls return HTTP 429 with Retry-After.
+- **Verification:** Hosted integration tests rejected oversized fixed-length and chunked payloads, unsupported content types and encodings, and excess concurrent saves. The test verified another account retained its own budget, expired windows reopened, direct RPC remained limited, and no usage was charged. Chromium verified the dashboard warning and an allowed retry. The hosted article lifecycle test, 41 Vitest tests, TypeScript, and ESLint passed.
+- **Decision:** All eight P3 tasks are verified. Move to P4.
+- **Next action:** CAP-034 — Implement authenticated dashboard shell.

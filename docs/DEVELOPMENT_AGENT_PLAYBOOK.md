@@ -463,7 +463,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-021 — Enable and test RLS everywhere
 
-- [ ] **CAP-021 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-021 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create narrowly scoped select/insert/update/delete policies for user-owned tables. Private worker/billing writes use server-side checks and restricted roles.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-021 — Enable and test RLS everywhere` |
-| Last verified completed task | `CAP-020` |
-| Last verification executed | `Hosted migration and db query --file supabase/tests/billing_schema.sql passed with billing disabled. The fixture verified Free defaults, rejection of Pro without billing identifiers, and duplicate event rejection.` |
-| Last successful Git commit | `2753fb9` |
+| Current task | `CAP-022 — Implement Supabase client/server adapters` |
+| Last verified completed task | `CAP-021` |
+| Last verification executed | `Hosted migration and db query --file supabase/tests/data_access.sql passed after correcting the FK fixture. Two authenticated roles verified own reads, note create/edit, and foreign read/edit/delete/reference denial. Anonymous reads and direct billing and article-status writes were denied.` |
+| Last successful Git commit | `edacafa` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `CAP-021 — Enable and test RLS everywhere` |
+| Next action | `CAP-022 — Implement Supabase client/server adapters` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 5/10 | In progress |
+| P2 | CAP-016–025 | 6/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **20/112** | **In progress** |
+| **Total** | **CAP-001–112** | **21/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2030,3 +2030,24 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Keep Stripe credentials, checkout and event handling outside this schema task.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-021 — Enable and test RLS everywhere
+
+### [2026-11-22T09:08:59+08:00] CAP-020 — Create billing tables — COMMIT
+- **Git commit:** edacafa
+
+### [2026-11-22T09:09:44+08:00] CAP-021 — Enable and test RLS everywhere — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** Previous task verified and committed. Use the dedicated capture-dev project.
+- **Next action:** Assign least-privilege authenticated access and verify two tenant identities and the anonymous role.
+
+### [2026-11-22T09:10:26+08:00] CAP-021 — Enable and test RLS everywhere — FAILED
+- **Agent/session:** Codex
+- **Verification:** Migration applied. The first negative fixture hit an existing note's unique constraint (23505) before reaching the intended foreign-key check.
+- **Next action:** Use a foreign article with no note for the reference checks and rerun.
+
+### [2026-11-22T09:11:01+08:00] CAP-021 — Enable and test RLS everywhere — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added authenticated owner-scoped reads and restricted profile and note writes. Kept billing, dispatch and processing writes service-side.
+- **Verification:** Hosted migration and db query --file supabase/tests/data_access.sql passed after correcting the FK fixture. Two authenticated roles verified own reads, note create/edit, and foreign read/edit/delete/reference denial. Anonymous reads and direct billing and article-status writes were denied.
+- **Decisions:** Use service-side capture and topic mutations to support transactional quotas and hierarchy rules. RLS remains enabled on each app table.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-022 — Implement Supabase client/server adapters

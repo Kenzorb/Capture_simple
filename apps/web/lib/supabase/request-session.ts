@@ -1,11 +1,14 @@
 import "server-only";
 
+import { bearerToken, verifyBearer } from "./bearer";
 import { getAuthenticatedSession } from "./server";
 
-export function getRequestSession(request: Request) {
-  const authorization = request.headers.get("authorization");
-  const token = authorization?.match(/^Bearer ([^\s,]+)$/i)?.[1];
-  return authorization !== null && !token
-    ? Promise.resolve(null)
-    : getAuthenticatedSession(token);
+export async function getRequestSession(request: Request) {
+  if (!request.headers.has("authorization")) return getAuthenticatedSession();
+  const token = bearerToken(request);
+  if (!token) return null;
+  const verified = await verifyBearer(token);
+  return verified && verified.claims.client_id === undefined
+    ? getAuthenticatedSession(token)
+    : null;
 }

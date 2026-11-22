@@ -9,6 +9,13 @@ import {
   readCaptureJson,
 } from "../../../lib/capture-request";
 import {
+  extensionCors,
+  extensionPreflight,
+  isExtensionOrigin,
+  rejectUnapprovedOrigin,
+} from "../../../lib/extension-cors";
+import { getExtensionBearer } from "../../../lib/supabase/bearer";
+import {
   getCaptureTarget,
   saveOwnCapture,
 } from "../../../lib/supabase/captures";
@@ -27,8 +34,23 @@ function captureError(
   );
 }
 
+export function OPTIONS(request: Request) {
+  return extensionPreflight(request, "POST");
+}
+
 export async function POST(request: Request) {
-  const session = await getRequestSession(request);
+  const headers = extensionCors(request, "POST");
+  const response = rejectUnapprovedOrigin(request)
+    ? captureError(403, "forbidden", "This origin cannot save captures.")
+    : await saveCapture(request);
+  headers.forEach((value, key) => response.headers.set(key, value));
+  return response;
+}
+
+async function saveCapture(request: Request) {
+  const session =
+    (await getExtensionBearer(request)) ??
+    (isExtensionOrigin(request) ? null : await getRequestSession(request));
   if (!session)
     return captureError(401, "unauthenticated", "Sign in to save a capture.");
 

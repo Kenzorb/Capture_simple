@@ -1,6 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import {
+  consentPath,
+  getExtensionConfig,
+  parseAuthorizationId,
+} from "../../lib/extension-config";
 import { getSupabaseConfig } from "../../lib/supabase/config";
 import { emailVerificationToken } from "../../lib/supabase/email-verification-link";
 import { createServerSupabaseClient } from "../../lib/supabase/server";
@@ -31,16 +36,29 @@ function emailCallbackUrl(path: "/auth/confirm" | "/auth/recovery") {
 }
 
 export async function signIn(formData: FormData) {
+  const extensionConfigured = Boolean(getExtensionConfig());
+  const authorizationId = extensionConfigured
+    ? parseAuthorizationId(formData.get("authorization_id"))
+    : null;
+  const manageExtension =
+    extensionConfigured && formData.get("manage_extension") === "1";
+  const signInError = (error: string) => {
+    const params = new URLSearchParams({ error });
+    if (authorizationId) params.set("authorization_id", authorizationId);
+    else if (manageExtension) params.set("manage_extension", "1");
+    return `/sign-in?${params}`;
+  };
   const email = readEmail(formData);
   const password = readPassword(formData);
-  if (!email || !password) redirect("/sign-in?error=invalid");
+  if (!email || !password) redirect(signInError("invalid"));
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) redirect("/sign-in?error=unavailable");
+  if (!supabase) redirect(signInError("unavailable"));
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) redirect("/sign-in?error=credentials");
-  redirect("/dashboard");
+  if (error) redirect(signInError("credentials"));
+  if (authorizationId) redirect(consentPath(authorizationId));
+  redirect(manageExtension ? "/oauth/extension-access" : "/dashboard");
 }
 
 export async function signUp(formData: FormData) {

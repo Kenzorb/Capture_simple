@@ -213,6 +213,21 @@ export type Database = {
         };
         Relationships: [];
       };
+      capture_extension_client: {
+        Row: {
+          client_id: string;
+          singleton: boolean;
+        };
+        Insert: {
+          client_id: string;
+          singleton?: boolean;
+        };
+        Update: {
+          client_id?: string;
+          singleton?: boolean;
+        };
+        Relationships: [];
+      };
       capture_rate_limits: {
         Row: {
           request_count: number;
@@ -663,6 +678,15 @@ export type Database = {
           p_update_note?: boolean;
         };
         Returns: boolean;
+      };
+      capture_extension_account: {
+        Args: never;
+        Returns: {
+          id: string;
+          email: string | null;
+          display_name: string | null;
+          plan: string;
+        }[];
       };
       capture_save_article: {
         Args: {

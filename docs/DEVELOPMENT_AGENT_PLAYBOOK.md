@@ -683,7 +683,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-041 — Connect extension to signed-in user
 
-- [ ] **CAP-041 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-041 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Implement sign-in/connect button, session persistence in extension-restricted storage, expiry/refresh handling, and disconnect/logout.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-041 — Connect extension to signed-in user` |
-| Last verified completed task | `CAP-040` |
-| Last verification executed | `Threat-model review verified the documented one-use PKCE handoff, exact callback and origin, credential locations, restricted messaging, and revocation boundaries against Chrome and Supabase references and the current code. Installed OAuth SDK methods, PKCE known vector, formatting, and diff checks passed.` |
-| Last successful Git commit | `1b79d83` |
-| Active blockers | `Hosted OAuth discovery is not yet exposed. CAP-041 includes implementation and development setup before end-to-end verification. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-042 — Read active tab metadata only on click` |
+| Last verified completed task | `CAP-041` |
+| Last verification executed | `Real Chromium OAuth on capture-dev verified the correct authenticated account, capture API submission, session refresh, scoped data access, local disconnect, and remote revocation of access and refresh tokens. Eight browser auth tests, two hosted API regressions, 47 unit tests, builds, lint, TypeScript, formatting, and bundle checks passed.` |
+| Last successful Git commit | `10957e6` |
+| Active blockers | `None for CAP-042. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Build consent, popup connection and restricted session storage, API and database authorization checks, and revocation. Verify connection and revocation using disposable accounts.` |
+| Next action | `Read only the active tab's URL, title, and domain after the user invokes Capture, and verify the permission boundary.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 1/9 | In progress |
+| P5 | CAP-040–048 | 2/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2353,3 +2353,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** Reviewed each handoff against the Chrome Identity and storage contracts, Supabase OAuth and session documentation, and the current Capture manifest, routes, and database permissions. The review confirmed that durable credentials and the verifier stay outside URLs and that authentication uses no page-to-extension message bridge. The installed SDK exposes the required OAuth methods. The PKCE known-vector, configuration and document checks, formatting, and Git diff checks passed.
 - **Environment:** Public OAuth discovery on the linked hosted development project returned 404. No hosted settings changed. Runtime connection, refresh, and revocation remain CAP-041 acceptance.
 - **Next action:** CAP-041 — Connect extension to signed-in user.
+
+### [2026-11-22T20:03:41+08:00] CAP-041 — Connect extension to signed-in user — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added Chrome Connect Capture and Disconnect, web consent and grant revocation, and trusted extension session storage with refresh. Limited extension credentials to the account and capture APIs and their owner-scoped database operations. Applied the migration on capture-dev and registered its exact public Chrome callback using the local public build identifiers.
+- **Verification:** The built extension opened the real Chrome OAuth consent window, exchanged its code with capture-dev, and returned the disposable account's correct identity from the API. It submitted a fixture capture and refreshed its session. Direct article access was denied. Disconnect cleared extension storage, and web revocation rejected the old access token for account and capture requests and the old refresh token at Supabase. The separate web session stayed authenticated. Eight Chromium auth tests, two hosted API regression suites, 47 unit tests, web and extension builds, ESLint, TypeScript, formatting, and the bundle scan passed.
+- **Next action:** CAP-042 — Read active tab metadata only on click.
+
+### [2026-11-22T16:11:57+08:00] CAP-041 — Connect extension to signed-in user — STARTED
+- **Agent/session:** Codex
+- **Next action:** Implement the OAuth consent, extension session, API authorization, and revocation paths before enabling a hosted test client.

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { getAuthenticatedUser } from "../../lib/supabase/server";
+import { getExtensionConfig } from "../../lib/extension-config";
 import { signOut } from "../(auth)/actions";
 import { AccountDisclosure } from "./account-disclosure";
 import { DashboardFocus } from "./dashboard-focus";
@@ -72,6 +73,14 @@ export default async function DashboardLayout({
                   <p className="px-2 py-1 text-sm break-all text-[#506458]">
                     {user.email}
                   </p>
+                )}
+                {getExtensionConfig() && (
+                  <Link
+                    href="/oauth/extension-access"
+                    className="block rounded-md px-2 py-2 text-sm font-semibold text-emerald-950 hover:bg-emerald-50"
+                  >
+                    Manage extension access
+                  </Link>
                 )}
                 <form action={signOut}>
                   <button

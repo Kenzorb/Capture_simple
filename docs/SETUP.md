@@ -23,6 +23,12 @@ npx supabase@3.2.0 db push --remote=DEV_PROJECT_REF --dry-run --skip-vault
 npx supabase@3.2.0 db push --remote=DEV_PROJECT_REF --skip-vault
 ```
 
+### Chrome extension connection
+
+Configure the extension using `apps/extension/.env.example` and the two `CAPTURE_EXTENSION_*` values in the web environment. The same public client ID and extension ID must be used in both builds. The development extension can use a public manifest key to keep its unpacked ID stable across machines. Copy only the public key into the extension configuration.
+
+Apply the extension authorization migration before enabling OAuth. In the dedicated Supabase project, configure OAuth with registration restricted to the operator, point consent to `/oauth/consent`, and register one public client with the exact Chrome callback. Set that same client ID in the database's single `capture_extension_client` row via the trusted release operator. Verify the account and revocation flow with disposable accounts. See the [extension authentication contract](EXTENSION_AUTH.md).
+
 ### Local Supabase development
 
 To run the database locally, start a Docker-compatible container engine and run these commands from the repository root.

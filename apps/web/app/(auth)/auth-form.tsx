@@ -27,10 +27,14 @@ export function AuthForm({
   mode,
   error,
   notice,
+  authorizationId,
+  manageExtension,
 }: {
   mode: "sign-in" | "sign-up";
   error?: string;
   notice?: string;
+  authorizationId?: string | null;
+  manageExtension?: boolean;
 }) {
   const isSignUp = mode === "sign-up";
   const label = isSignUp ? "Create account" : "Sign in";
@@ -59,6 +63,16 @@ export function AuthForm({
       )}
 
       <form action={isSignUp ? signUp : signIn} className="mt-8 space-y-4">
+        {authorizationId && (
+          <input
+            type="hidden"
+            name="authorization_id"
+            value={authorizationId}
+          />
+        )}
+        {manageExtension && (
+          <input type="hidden" name="manage_extension" value="1" />
+        )}
         <div>
           <label className="block font-medium" htmlFor="email">
             Email

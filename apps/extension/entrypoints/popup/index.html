@@ -9,7 +9,11 @@
   <body>
     <main>
       <h1>Capture</h1>
-      <p>Article saving is still being set up.</p>
+      <p id="status" role="status">Checking connection…</p>
+      <button id="connect" type="button" hidden>Connect Capture</button>
+      <button id="retry" type="button" hidden>Retry</button>
+      <button id="disconnect" type="button" hidden>Disconnect</button>
     </main>
+    <script type="module" src="./main.ts"></script>
   </body>
 </html>

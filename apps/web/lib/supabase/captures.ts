@@ -7,7 +7,10 @@ import {
 } from "@capture/shared";
 import type { getAuthenticatedSession } from "./server";
 
-type Session = NonNullable<Awaited<ReturnType<typeof getAuthenticatedSession>>>;
+type Session = Pick<
+  NonNullable<Awaited<ReturnType<typeof getAuthenticatedSession>>>,
+  "supabase"
+>;
 
 export function getCaptureTarget({ url, source }: CaptureRequest) {
   return source === "manual_url"

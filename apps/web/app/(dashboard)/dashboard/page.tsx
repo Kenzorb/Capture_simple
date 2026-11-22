@@ -7,7 +7,7 @@ import { readOwnOverview } from "../../../lib/supabase/overview";
 import { getAuthenticatedSession } from "../../../lib/supabase/server";
 import { SubmitButton } from "../../(auth)/submit-button";
 import { saveManualUrl } from "./actions";
-import { CaptureSourceTitle, CaptureStatus } from "./capture-presentation";
+import { CaptureStatus, CaptureTitle } from "./capture-presentation";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -149,7 +149,7 @@ export default async function DashboardPage({
                 className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-5"
               >
                 <div className="min-w-0 flex-1 break-words">
-                  <CaptureSourceTitle url={article.url} title={article.title} />
+                  <CaptureTitle id={article.id} title={article.title} />
                   <p className="mt-1 text-sm text-[#506458]">
                     {article.domain}
                   </p>

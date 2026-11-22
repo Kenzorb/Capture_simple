@@ -647,7 +647,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-038 — Build article detail baseline
 
-- [ ] **CAP-038 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-038 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Show original URL, title, source metadata, status, personal notes editor, archive/delete controls and fallback when no AI output exists.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P4 — Web dashboard and captured-article experience` |
-| Current task | `CAP-038 — Build article detail baseline` |
-| Last verified completed task | `CAP-037` |
-| Last verification executed | `Hosted Chromium verified malformed and non-public URL rejection, immediate library and API visibility before processing, save and duplicate links to the same capture, and signed-out and cross-account detail handling. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.` |
-| Last successful Git commit | `b0af8c1` |
-| Active blockers | `None for CAP-038. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-039 — Add responsive UI and accessibility baseline` |
+| Last verified completed task | `CAP-038` |
+| Last verification executed | `Hosted Chromium verified source navigation and metadata, the no-analysis view, persistent personal notes, archive and restore, explicit deletion confirmation, cross-account isolation, and long URLs at 320px. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.` |
+| Last successful Git commit | `e2f004c` |
+| Active blockers | `None for CAP-039. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Extend article detail with source metadata, personal notes, archive and delete controls, and the fallback for missing AI output.` |
+| Next action | `Audit key screens for responsive layout and accessible labels, keyboard and focus behavior, loading announcements, and color-independent statuses.` |
 
 ### 11.1 Phase progress overview
 
@@ -1587,7 +1587,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
-| P4 | CAP-034–039 | 4/6 | In progress |
+| P4 | CAP-034–039 | 5/6 | In progress |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
@@ -2321,3 +2321,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** The save and duplicate confirmations link to the persisted capture. The initial detail page shows the title, source, and processing status for the owner. Invalid IDs and other accounts' captures show the same unavailable view.
 - **Verification:** Hosted Chromium with disposable accounts verified invalid and non-public URLs, immediate manual-save visibility in the library and API while processing status was Saved, the original source link, canonical duplicate handling, and signed-out and cross-account access. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
 - **Next action:** CAP-038 — Build article detail baseline.
+
+### [2026-11-22T15:38:56+08:00] CAP-038 — Build article detail baseline — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add source metadata, personal notes, archive and delete controls, and the no-analysis view. Verify the full owner flow on the hosted backend.
+
+### [2026-11-22T15:43:26+08:00] CAP-038 — Build article detail baseline — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Capture titles open the detail page, which shows the original URL, source, capture time, optional author and publication date, processing status, and the AI notes fallback. Owners can create, edit, or clear a personal note, archive or restore a capture, and permanently delete it after confirmation. The API and dashboard use the same owner-scoped mutations.
+- **Verification:** Hosted Chromium with disposable accounts verified source navigation, metadata and empty AI notes, multiline note persistence across reloads, note clearing, archive and restore, deletion blocked until confirmed, and permanent deletion. A second account could neither view nor mutate the capture. The detail page fit at 320px with a long source URL. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
+- **Next action:** CAP-039 — Add responsive UI and accessibility baseline.

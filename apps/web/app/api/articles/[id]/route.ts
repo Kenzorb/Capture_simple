@@ -4,7 +4,11 @@ import {
   articleParamsSchema,
   type ArticleDetailResponse,
 } from "@capture/shared";
-import { readOwnArticle } from "../../../../lib/supabase/articles";
+import {
+  deleteOwnArticle,
+  editOwnArticle,
+  readOwnArticle,
+} from "../../../../lib/supabase/articles";
 import { getRequestSession } from "../../../../lib/supabase/request-session";
 import { articleError, articleResponseHeaders } from "../response";
 
@@ -93,15 +97,8 @@ export async function PATCH(
   if (!edit.success)
     return articleError(400, "invalid_input", "Enter valid article changes.");
 
-  const { title, personal_note, archived } = edit.data;
   return mutationResponse(
-    await target.session.supabase.rpc("capture_edit_article", {
-      p_article_id: target.id,
-      p_title: title,
-      p_personal_note: personal_note ?? undefined,
-      p_update_note: personal_note !== undefined,
-      p_archived: archived,
-    }),
+    await editOwnArticle(target.session, target.id, edit.data),
   );
 }
 
@@ -118,10 +115,5 @@ export async function DELETE(
       "Confirm permanent deletion of this article.",
     );
 
-  return mutationResponse(
-    await target.session.supabase.rpc("capture_delete_article", {
-      p_article_id: target.id,
-      p_confirmed: true,
-    }),
-  );
+  return mutationResponse(await deleteOwnArticle(target.session, target.id));
 }

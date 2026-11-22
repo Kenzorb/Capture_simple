@@ -146,6 +146,7 @@ export type CaptureResponse = z.infer<typeof captureResponseSchema>;
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type Article = z.infer<typeof articleSchema>;
 export type ArticleListQuery = z.infer<typeof articleListQuerySchema>;
+export type ArticleEdit = z.infer<typeof articleEditSchema>;
 export type ArticleListResponse = z.infer<typeof articleListResponseSchema>;
 export type ArticleDetailResponse = z.infer<typeof articleDetailResponseSchema>;
 export type Topic = z.infer<typeof topicSchema>;

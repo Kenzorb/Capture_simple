@@ -3,6 +3,7 @@ import "server-only";
 import {
   articleCursorPayloadSchema,
   type Article,
+  type ArticleEdit,
   type ArticleListQuery,
 } from "@capture/shared";
 import type { getAuthenticatedSession } from "./server";
@@ -67,4 +68,25 @@ export function readOwnArticle({ supabase, user }: Session, id: string) {
     .eq("user_id", user.id)
     .eq("id", id)
     .maybeSingle();
+}
+
+export function editOwnArticle(
+  { supabase }: Session,
+  id: string,
+  { title, personal_note, archived }: ArticleEdit,
+) {
+  return supabase.rpc("capture_edit_article", {
+    p_article_id: id,
+    p_title: title,
+    p_personal_note: personal_note ?? undefined,
+    p_update_note: personal_note !== undefined,
+    p_archived: archived,
+  });
+}
+
+export function deleteOwnArticle({ supabase }: Session, id: string) {
+  return supabase.rpc("capture_delete_article", {
+    p_article_id: id,
+    p_confirmed: true,
+  });
 }

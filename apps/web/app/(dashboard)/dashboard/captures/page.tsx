@@ -10,8 +10,9 @@ import {
 } from "../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../lib/supabase/server";
 import {
-  CaptureSourceTitle,
   CaptureStatus,
+  CaptureTime,
+  CaptureTitle,
   statusLabels,
 } from "../capture-presentation";
 
@@ -20,11 +21,6 @@ export const metadata: Metadata = { title: "All captures" };
 const libraryPath = "/dashboard/captures";
 const controlClass =
   "w-full rounded-lg border border-[#b8c8bd] bg-white px-3 py-2 font-normal";
-const captureTime = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "UTC",
-});
 
 export default async function CapturesPage({
   searchParams,
@@ -41,6 +37,7 @@ export default async function CapturesPage({
     domain,
     archived,
     sort,
+    capture,
   } = await searchParams;
   const parsed = articleListQuerySchema.safeParse({
     q: typeof q === "string" ? q.trim() || undefined : q,
@@ -75,6 +72,11 @@ export default async function CapturesPage({
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         All captures
       </h1>
+      {capture === "deleted" && (
+        <p role="status" className="mt-3 text-emerald-900">
+          Capture deleted.
+        </p>
+      )}
       {query.q && (
         <p className="mt-2 break-words text-[#506458]">
           Results for <strong>{query.q}</strong>
@@ -182,12 +184,10 @@ export default async function CapturesPage({
               key={article.id}
               className="px-4 py-3 break-words sm:px-5 sm:py-4"
             >
-              <CaptureSourceTitle url={article.url} title={article.title} />
+              <CaptureTitle id={article.id} title={article.title} />
               <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#506458]">
                 <span>{article.domain}</span>
-                <time dateTime={article.captured_at}>
-                  {captureTime.format(new Date(article.captured_at))} UTC
-                </time>
+                <CaptureTime value={article.captured_at} />
                 <CaptureStatus status={article.status} />
               </div>
             </li>

@@ -4,14 +4,40 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { readOwnArticle } from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
-import { CaptureSourceTitle, CaptureStatus } from "../../capture-presentation";
+import { SubmitButton } from "../../../../(auth)/submit-button";
+import {
+  CaptureOriginalLink,
+  CaptureStatus,
+  CaptureTime,
+} from "../../capture-presentation";
+import { deleteCapture, savePersonalNote, setCaptureArchived } from "./actions";
 
 export const metadata: Metadata = { title: "Capture details" };
 
+const feedback = new Map<string, { text: string; error?: boolean }>([
+  ["note", { text: "Personal note saved." }],
+  ["archived", { text: "Capture archived." }],
+  ["restored", { text: "Capture restored to active captures." }],
+  [
+    "invalid-note",
+    { text: "Enter a note of up to 4,000 characters.", error: true },
+  ],
+  [
+    "confirm-delete",
+    { text: "Confirm permanent deletion first.", error: true },
+  ],
+  [
+    "failed",
+    { text: "Could not update this capture. Try again.", error: true },
+  ],
+]);
+
 export default async function CaptureDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ change?: string | string[] }>;
 }) {
   const session = await getAuthenticatedSession();
   if (!session) redirect("/sign-in");
@@ -19,30 +45,141 @@ export default async function CaptureDetailPage({
   const { data: article, error } = parsed.success
     ? await readOwnArticle(session, parsed.data.id)
     : { data: null, error: null };
+  const { change } = await searchParams;
+  const message = typeof change === "string" ? feedback.get(change) : undefined;
+  const archived = Boolean(article?.archived_at);
+  const note = article?.personal_notes[0]?.body ?? "";
 
   return (
     <>
       <Link
-        href="/dashboard/captures"
+        href={
+          archived ? "/dashboard/captures?archived=true" : "/dashboard/captures"
+        }
         className="text-sm font-semibold text-emerald-950 underline underline-offset-2"
       >
-        Back to all captures
+        {archived ? "Back to archived captures" : "Back to all captures"}
       </Link>
       {article ? (
         <article className="mt-4 max-w-3xl rounded-xl border border-[#dde5dd] bg-white p-5 sm:p-6">
           <h1 className="text-3xl font-semibold break-words tracking-tight">
             {article.title}
           </h1>
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[#506458]">
-            <span>{article.domain}</span>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
             <CaptureStatus status={article.status} />
+            {archived && (
+              <span className="rounded-md bg-[#edf0eb] px-2 py-1 text-xs font-semibold text-[#465349]">
+                Archived
+              </span>
+            )}
           </div>
-          <p className="mt-4">
-            <CaptureSourceTitle
-              url={article.url}
-              title="Open original article"
-            />
-          </p>
+          {message && (
+            <p
+              role={message.error ? "alert" : "status"}
+              className={
+                message.error ? "mt-4 text-red-800" : "mt-4 text-emerald-900"
+              }
+            >
+              {message.text}
+            </p>
+          )}
+          <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+            <div className="min-w-0 sm:col-span-2">
+              <dt className="font-medium text-[#506458]">Original article</dt>
+              <dd className="mt-1">
+                <CaptureOriginalLink url={article.url} />
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="font-medium text-[#506458]">Source</dt>
+              <dd className="mt-1 break-words">{article.domain}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-[#506458]">Captured</dt>
+              <dd className="mt-1">
+                <CaptureTime value={article.captured_at} />
+              </dd>
+            </div>
+            {article.author && (
+              <div className="min-w-0">
+                <dt className="font-medium text-[#506458]">Author</dt>
+                <dd className="mt-1 break-words">{article.author}</dd>
+              </div>
+            )}
+            {article.published_at && (
+              <div>
+                <dt className="font-medium text-[#506458]">Published</dt>
+                <dd className="mt-1">
+                  <CaptureTime value={article.published_at} dateOnly />
+                </dd>
+              </div>
+            )}
+          </dl>
+          <section className="mt-6 border-t border-[#dde5dd] pt-5">
+            <h2 className="text-lg font-semibold">AI notes</h2>
+            <p className="mt-1 text-sm text-[#506458]">
+              No AI notes available for this capture.
+            </p>
+          </section>
+          <section className="mt-6 border-t border-[#dde5dd] pt-5">
+            <h2 className="text-lg font-semibold">Personal notes</h2>
+            <form
+              action={savePersonalNote.bind(null, article.id)}
+              className="mt-3"
+            >
+              <label
+                htmlFor="capture-note"
+                className="block text-sm font-medium"
+              >
+                Personal note
+              </label>
+              <textarea
+                key={note}
+                id="capture-note"
+                name="note"
+                defaultValue={note}
+                maxLength={4000}
+                rows={6}
+                className="mt-1 block w-full rounded-lg border border-emerald-950/30 px-3 py-2"
+              />
+              <div className="mt-3">
+                <SubmitButton label="Save note" />
+              </div>
+            </form>
+          </section>
+          <section className="mt-6 border-t border-[#dde5dd] pt-5">
+            <h2 className="text-lg font-semibold">Manage capture</h2>
+            <form
+              action={setCaptureArchived.bind(null, article.id, !archived)}
+              className="mt-3"
+            >
+              <SubmitButton
+                label={archived ? "Restore capture" : "Archive capture"}
+              />
+            </form>
+            <details className="mt-4">
+              <summary className="w-fit cursor-pointer font-semibold text-red-800">
+                Delete capture
+              </summary>
+              <form
+                action={deleteCapture.bind(null, article.id)}
+                className="mt-3"
+              >
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    className="mt-1"
+                    type="checkbox"
+                    name="confirm"
+                    required
+                  />
+                  Permanently delete this capture and its personal note.
+                </label>
+                <div className="mt-3">
+                  <SubmitButton label="Delete permanently" />
+                </div>
+              </form>
+            </details>
+          </section>
         </article>
       ) : (
         <div className="mt-4">

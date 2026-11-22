@@ -18,6 +18,7 @@ export const processingStatusSchema = z.enum([
 ]);
 
 export const planSchema = z.enum(["free", "pro"]);
+export const maxExtractedTextBytes = 100_000;
 
 const idSchema = z.uuid();
 const webUrlSchema = z.url({ protocol: /^https?$/ }).max(maxCaptureUrlLength);
@@ -29,7 +30,7 @@ export const captureRequestSchema = z.strictObject({
   request_id: idSchema,
   url: webUrlSchema,
   title: titleSchema.optional(),
-  extracted_text: z.string().max(100_000).optional(),
+  extracted_text: z.string().max(maxExtractedTextBytes).optional(),
   source: z.enum(["chrome_extension", "manual_url"]),
   personal_note: z.string().max(4000).optional(),
 });

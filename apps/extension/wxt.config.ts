@@ -7,7 +7,7 @@ export default defineConfig({
     return {
       name: "Capture",
       minimum_chrome_version: "126",
-      permissions: ["identity", "storage", "activeTab"],
+      permissions: ["identity", "storage", "activeTab", "scripting"],
       host_permissions: auth ? [`${auth.web}/*`, `${auth.auth}/*`] : [],
       key: import.meta.env.WXT_CAPTURE_EXTENSION_KEY || undefined,
     };

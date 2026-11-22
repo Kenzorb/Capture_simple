@@ -1,6 +1,6 @@
 import { browser } from "wxt/browser";
 import type { ExtensionCommand, ExtensionStatus } from "../../auth/message";
-import { tabMetadata } from "../../capture/tab-metadata";
+import { readActivePage } from "../../capture/readable-page";
 
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
 const connect = document.querySelector<HTMLButtonElement>("#connect")!;
@@ -13,6 +13,12 @@ const details = document.querySelector<HTMLDListElement>("#page-details")!;
 const pageTitle = document.querySelector<HTMLElement>("#page-title")!;
 const pageDomain = document.querySelector<HTMLElement>("#page-domain")!;
 const pageUrl = document.querySelector<HTMLElement>("#page-url")!;
+const pageAuthor = document.querySelector<HTMLElement>("#page-author")!;
+const authorLabel = document.querySelector<HTMLElement>("#page-author-label")!;
+const articlePreview =
+  document.querySelector<HTMLDetailsElement>("#article-preview")!;
+const excerpt =
+  document.querySelector<HTMLParagraphElement>("#article-excerpt")!;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
 function clearPreview() {
@@ -21,6 +27,11 @@ function clearPreview() {
   pageTitle.textContent = "";
   pageDomain.textContent = "";
   pageUrl.textContent = "";
+  pageAuthor.textContent = "";
+  pageAuthor.hidden = authorLabel.hidden = true;
+  articlePreview.open = false;
+  articlePreview.hidden = true;
+  excerpt.textContent = "";
 }
 
 function render(result: ExtensionStatus) {
@@ -69,12 +80,9 @@ async function previewActiveTab() {
   clearPreview();
   capture.disabled = true;
   try {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
+    captureStatus.textContent = "Reading page…";
+    const page = await readActivePage();
     if (capture.hidden) return;
-    const page = tabMetadata(tab);
     if (!page) {
       captureStatus.textContent =
         "Capture can’t read this page. Open a regular website and try again.";
@@ -84,7 +92,22 @@ async function previewActiveTab() {
     pageDomain.textContent = page.domain;
     pageUrl.textContent = page.url;
     details.hidden = false;
-    captureStatus.textContent = "Page details read.";
+    if (page.byline) {
+      pageAuthor.textContent = page.byline;
+      pageAuthor.hidden = authorLabel.hidden = false;
+    }
+    if (page.extractedText) {
+      const previewLimit = 600;
+      excerpt.textContent =
+        page.extractedText.length > previewLimit
+          ? `${page.extractedText.slice(0, previewLimit).trimEnd().toWellFormed()}…`
+          : page.extractedText;
+      articlePreview.hidden = false;
+      captureStatus.textContent = "Readable text found.";
+    } else {
+      captureStatus.textContent =
+        "Only the page link is available. Capture couldn’t find readable text.";
+    }
   } catch {
     if (!capture.hidden)
       captureStatus.textContent = "Could not read the active tab. Try again.";

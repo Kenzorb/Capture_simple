@@ -1,8 +1,7 @@
 import { Buffer } from "node:buffer";
-import { maxCaptureUrlLength } from "@capture/shared";
+import { maxCaptureUrlLength, maxExtractedTextBytes } from "@capture/shared";
 
 const maxBodyBytes = 128 * 1024;
-const maxExtractedTextBytes = 100_000;
 
 export function exceedsCaptureFieldBudget(input: unknown) {
   if (!input || typeof input !== "object") return false;

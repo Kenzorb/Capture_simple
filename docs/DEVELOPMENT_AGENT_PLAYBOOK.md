@@ -703,7 +703,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-043 — Extract readable page content
 
-- [ ] **CAP-043 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-043 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Run Readability or comparable parser on a safe snapshot of the chosen tab; sanitize, strip scripts, limit text size, preserve title/byline where possible.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-043 — Extract readable page content` |
-| Last verified completed task | `CAP-042` |
-| Last verification executed | `Chromium verified the toolbar permission grant, click-only metadata preview, loss of access after cross-origin navigation, a clear restricted-page state, and no metadata upload or persistence. Manifest, extension build, 47 unit tests, ESLint, TypeScript, and formatting passed.` |
-| Last successful Git commit | `e4a61d8` |
-| Active blockers | `None for CAP-043. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-044 — Build minimal popup UX` |
+| Last verified completed task | `CAP-043` |
+| Last verification executed | `Chromium verified extraction from published news, blog and documentation markup, plain-text sanitization, and URL-only fallback for non-articles and injection failures. The web and extension builds, 50 unit tests, ESLint, TypeScript, and formatting passed.` |
+| Last successful Git commit | `25a7019` |
+| Active blockers | `None for CAP-044. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Add on-demand readable content extraction with bounded text and a URL-only fallback, then verify it against representative article fixtures.` |
+| Next action | `Build the keyboard-accessible popup preview, note field, Save control, and capture outcome states.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 3/9 | In progress |
+| P5 | CAP-040–048 | 4/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2373,3 +2373,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added a connected popup action that queries only the active, current-window tab when clicked. It previews the URL, title, and domain using temporary `activeTab` permission and shows a clear message for restricted or unavailable pages. The metadata stays in the popup.
 - **Verification:** Chromium with an isolated synthetic account state exercised the real toolbar action on a fixture outside the configured hosts. The extension had no tab URL or title before invocation. The popup opened with an empty preview, queried once after Capture was clicked, and showed the correct fields. Access ended on cross-origin navigation, and `chrome://version/` showed the restricted-page message. The manifest contains no broad tab, history, or all-site access. The test observed no metadata in storage or network requests. The extension build, 47 unit tests, ESLint, TypeScript, and formatting passed.
 - **Next action:** CAP-043 — Extract readable page content.
+
+### [2026-11-22T20:28:15+08:00] CAP-043 — Extract readable page content — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add on-demand extraction from a bounded, inert tab snapshot and verify real article and URL-only fallback behavior.
+
+### [2026-11-22T20:36:59+08:00] CAP-043 — Extract readable page content — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Capture page runs a bounded snapshot function in the active tab's isolated top frame and parses the result with Mozilla Readability. The popup shows a plain-text excerpt and available author, with a link-only preview for non-articles or extraction failures. The extension and API share the UTF-8 text limit.
+- **Verification:** Chromium exercised the built extension using published NASA news, Chrome blog, MDN documentation and a public non-article page replayed with external assets blocked. A synthetic fixture verified script, event handler, hidden text, form, navigation, and iframe exclusions before parsing, along with plain-text rendering and author preservation. Visible modal, restricted-page, non-article, and forced script-failure states passed, and the extraction issued no content request. The web and extension builds, 50 unit tests, ESLint, TypeScript, and Prettier passed.
+- **Next action:** CAP-044 — Build minimal popup UX.

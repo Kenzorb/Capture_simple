@@ -8,9 +8,11 @@ test("visitors can reach sign-in and the dashboard requires it", async ({
   await expect(page).toHaveURL(/\/sign-in$/);
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 
-  await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/sign-in$/);
-  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  for (const route of ["/dashboard", "/dashboard/captures?q=example"]) {
+    await page.goto(route);
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  }
 });
 
 test("an expired confirmation link redirects to sign-in with recovery guidance", async ({

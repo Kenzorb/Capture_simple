@@ -607,7 +607,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-034 — Implement authenticated dashboard shell
 
-- [ ] **CAP-034 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-034 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Build responsive layout, top search, user menu, left sidebar, loading skeletons, empty states, and routing; use accessible components.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P4 — Web dashboard and captured-article experience` |
-| Current task | `CAP-034 — Implement authenticated dashboard shell` |
-| Last verified completed task | `CAP-033` |
-| Last verification executed | `Hosted tests verified oversized and chunked payload rejection, per-account concurrent rate limits, Retry-After, quota reset, and the dashboard warning. The article lifecycle regression, 41 unit tests, lint, and TypeScript passed.` |
-| Last successful Git commit | `2b60346` |
-| Active blockers | `None for CAP-034. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-035 — Build overview and empty-state onboarding` |
+| Last verified completed task | `CAP-034` |
+| Last verification executed | `Hosted Chromium verified layout at 1440px, 390px, and 320px, active navigation, keyboard skip, authenticated search and empty states, link saving, account menu, and sign-out. Eight Chromium auth tests, 41 unit tests, lint, and TypeScript passed.` |
+| Last successful Git commit | `8d37567` |
+| Active blockers | `None for CAP-035. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement the authenticated dashboard shell and verify its navigation and responsive layouts.` |
+| Next action | `Add real recent captures and status counts to Overview, with first-capture guidance for empty accounts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1587,7 +1587,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
-| P4 | CAP-034–039 | 0/6 | In progress |
+| P4 | CAP-034–039 | 1/6 | In progress |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
@@ -2281,3 +2281,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** Hosted integration tests rejected oversized fixed-length and chunked payloads, unsupported content types and encodings, and excess concurrent saves. The test verified another account retained its own budget, expired windows reopened, direct RPC remained limited, and no usage was charged. Chromium verified the dashboard warning and an allowed retry. The hosted article lifecycle test, 41 Vitest tests, TypeScript, and ESLint passed.
 - **Decision:** All eight P3 tasks are verified. Move to P4.
 - **Next action:** CAP-034 — Implement authenticated dashboard shell.
+
+### [2026-11-22T15:05:28+08:00] CAP-034 — Implement authenticated dashboard shell — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add authenticated navigation, top search, account controls, loading and empty states, then verify desktop and narrow-screen routes.
+
+### [2026-11-22T15:10:51+08:00] CAP-034 — Implement authenticated dashboard shell — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added protected Overview and All captures navigation, top title search, an account menu, keyboard skip navigation, a loading skeleton, and empty and no-result states. The All captures route reads the signed-in user's article titles and source links.
+- **Verification:** A disposable hosted account exercised desktop and mobile routes in Chromium at 1440px, 390px, and 320px without horizontal overflow. Long titles wrapped, keyboard skip and active navigation worked, search showed matching saved articles, the save form persisted a new link, and signing out blocked library access. Reviewed desktop and mobile screenshots. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
+- **Next action:** CAP-035 — Build overview and empty-state onboarding.

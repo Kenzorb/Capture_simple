@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { maxCaptureUrlLength } from "@capture/shared";
 import type { Metadata } from "next";
-import { signOut } from "../../(auth)/actions";
 import { SubmitButton } from "../../(auth)/submit-button";
 import { saveManualUrl } from "./actions";
 
@@ -29,21 +28,19 @@ export default async function DashboardPage({
   const message = capture && captureMessages.get(capture);
   const saved = capture === "saved" || capture === "duplicate";
   return (
-    <main className="mx-auto max-w-5xl px-6 py-16">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-4xl font-semibold tracking-tight">Your library</h1>
-        <form action={signOut}>
-          <button type="submit" className="font-semibold underline">
-            Sign out
-          </button>
-        </form>
-      </header>
+    <>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+        Your library
+      </h1>
       {error === "sign-out" && (
         <p role="alert" className="mt-4 text-red-800">
           Sign-out failed. Try again.
         </p>
       )}
-      <section className="mt-8 max-w-2xl rounded-xl border border-emerald-950/15 bg-white p-5 sm:p-6">
+      <section
+        id="save-link"
+        className="mt-8 max-w-2xl rounded-xl border border-emerald-950/15 bg-white p-5 sm:p-6"
+      >
         <h2 className="text-xl font-semibold">Save a link</h2>
         <form action={saveManualUrl} className="mt-4">
           <input type="hidden" name="request_id" value={randomUUID()} />
@@ -73,6 +70,6 @@ export default async function DashboardPage({
           </p>
         )}
       </section>
-    </main>
+    </>
   );
 }

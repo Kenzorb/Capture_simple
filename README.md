@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm dev --hostname 127.0.0.1
 ```
 
-Open `http://localhost:3000`. The current web and extension scaffolds start without provider credentials. For environment setup, local services, and Chrome installation, see [Setup](docs/SETUP.md#local-startup).
+Open `http://127.0.0.1:3000`. The web and extension can start without provider credentials. For environment setup, local services, and Chrome installation, see [Setup](docs/SETUP.md#local-startup).
 
 ## Development commands
 

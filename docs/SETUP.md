@@ -2,7 +2,7 @@
 
 ## Local startup
 
-1. Follow the [README startup commands](../README.md#run-locally) from the repository root and check that the landing page opens at `http://localhost:3000`.
+1. Follow the [README startup commands](../README.md#run-locally) from the repository root and check that the landing page opens at `http://127.0.0.1:3000`.
 2. For integrations, copy the root `.env.example` to `apps/web/.env.local`. Fill values for the integrations you are exercising and restart the web server after changes.
 3. In a second terminal at the repository root, run `pnpm --filter extension build`. In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `apps/extension/.output/chrome-mv3`. Open the Capture popup from the Extensions menu. After another build, reload Capture on the extensions page.
 4. Run `pnpm test`. Install the test browser with `pnpm exec playwright install chromium`, then run `pnpm test:browser`. These tests start a separate web server on port 3173.
@@ -11,13 +11,9 @@
 
 Capture can use a dedicated hosted development project. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `apps/web/.env.local` using the development project's connection settings. Keep database credentials and privileged keys in your local secret store.
 
-For email confirmation, set `NEXT_PUBLIC_APP_URL` to the web origin you open in the browser and allow its `/auth/confirm` URL in the Supabase Auth redirect settings. The default hosted mail service delivers to organization members. Open the confirmation link in the browser that submitted the form so the session can use the original PKCE verifier.
+For local signup and password recovery, open `http://127.0.0.1:3000` and set `NEXT_PUBLIC_APP_URL` to that same origin. Allow both `http://127.0.0.1:3000/auth/confirm` and `http://127.0.0.1:3000/auth/recovery` in the development project's Auth redirect settings. The default hosted email service delivers to organization members.
 
-For a `localhost` signup, keep the web server running and open the link in that same browser on the computer running Capture. On a phone or another computer, `localhost` points to that device. Supabase can confirm the email even when the browser cannot reach Capture's callback. After email confirmation, password sign-in is available from the Capture web app.
-
-If `localhost:3000` serves a different page but Capture opens at `127.0.0.1:3000`, use `http://127.0.0.1:3000` for both the browser and `NEXT_PUBLIC_APP_URL`. Add `http://127.0.0.1:3000/auth/confirm` to the development project's Auth redirect URLs before testing a new signup.
-
-Password recovery uses the same `/auth/confirm` redirect. Start from **Forgot password?** on the sign-in page, then open the reset link in the same browser that requested it.
+Keep Capture running and open the newest email link in the browser profile on the Windows computer that submitted the form. You can read the email on a phone and copy the link to Chrome on Windows. If Supabase already confirmed your signup email but could not open Capture, sign in with your chosen password. To reset a password, start from **Forgot password?** and wait for the recovery page before choosing the new password.
 
 From the repository root, sign in to the Supabase CLI and dry-run the versioned migrations against the development project. Replace `DEV_PROJECT_REF` with the project reference and confirm the target before running the apply command.
 

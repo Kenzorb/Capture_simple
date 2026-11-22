@@ -1568,12 +1568,12 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Hosted signup email is confirmed. Capture is connected to Auth. Supabase recorded the approved recovery request. TypeScript, Vitest and three Chromium cases passed.` |
+| Last verification executed | `Both hosted redirects matched. Disposable confirmation, sign-in, sign-out, password change, and rejection of the old password and used recovery link passed. TypeScript, ESLint, Prettier, seven Vitest tests, and four Chromium cases passed.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `CAP-023 needs one successful confirmation callback and repeat sign-in from a fresh signup in the same browser on the Windows host.` |
+| Active blockers | `CAP-023 still needs the successful browser code exchange from an actual fresh signup email. The owner’s reset request was recorded and awaits their password entry.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Retest with an authorized test identity, keeping the Capture server and the signup browser open on the same computer.` |
+| Next action | `Verify an actual signup email in the Chrome profile that requested it at http://127.0.0.1:3000, then confirm repeat sign-in and sign-out.` |
 
 ### 11.1 Phase progress overview
 
@@ -2124,3 +2124,10 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added password reset request and authenticated password form, and routed verified recovery exchanges to the password form. Configured local Capture with the hosted development publishable key in an ignored environment file.
 - **Verification:** Supabase confirmed the email and recorded the authorized reset request from the user's Chrome session on the localhost IPv4 origin. Type checking, formatting, lint, four Vitest tests, and three live Chromium cases passed. Signed-out access to the password update page redirects to reset request. Password entry is with the user.
 - **Next action:** Finish the user-driven recovery and separately verify a successful new-account confirmation callback before marking CAP-023 complete.
+
+### [2026-11-22T10:51:41+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Changes:** Set the hosted development site URL to the working IPv4 origin and allowlisted the signup and recovery callbacks. Added a dedicated recovery callback and guidance for expired links. Kept Supabase’s default email templates after the hosted service rejected custom templates on the current plan.
+- **Verification:** The hosted config comparison reported zero updates for the two scoped settings. Disposable admin-generated signup and recovery links verified both hosted redirects. Chromium exercised sign-in, protected pages, sign-out, password change, rejection of the old password, and acceptance of the new one. Supabase rejected reuse of the recovery link and the disposable account was removed. TypeScript, ESLint, Prettier, seven Vitest tests, and four browser regression cases passed. Supabase also recorded the owner’s fresh reset request from Chrome on Windows.
+- **Blockers/risks:** Admin-generated links do not exercise the browser code exchange used by real signup emails. The owner needs to open the fresh reset email in the requesting Chrome profile and enter the new password.
+- **Next action:** Complete signup from an actual confirmation email and verify the browser code exchange and repeat sign-in before checking off CAP-023.

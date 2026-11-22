@@ -43,3 +43,18 @@ test("password recovery is discoverable and requires a session to set a password
     "Open a new password reset link",
   );
 });
+
+test("an expired recovery link returns to the reset request form", async ({
+  page,
+}) => {
+  await page.goto(
+    "/auth/recovery?error=access_denied&error_code=otp_expired#error=access_denied",
+  );
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "the same browser",
+  );
+  const url = new URL(page.url());
+  expect(url.pathname).toBe("/forgot-password");
+  expect(url.searchParams.get("error")).toBe("callback");
+  expect(url.hash).toBe("");
+});

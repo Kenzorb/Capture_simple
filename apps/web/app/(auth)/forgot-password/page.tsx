@@ -6,6 +6,10 @@ const messages = new Map([
   ["invalid", "Enter a valid email address."],
   ["unavailable", "Password reset is temporarily unavailable."],
   ["session", "Open a new password reset link to continue."],
+  [
+    "callback",
+    "The reset link could not finish signing you in. Request a new link and open it in the same browser on this computer.",
+  ],
 ]);
 
 export default async function ForgotPasswordPage({

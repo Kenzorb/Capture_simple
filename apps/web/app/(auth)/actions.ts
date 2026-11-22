@@ -21,10 +21,10 @@ function readPassword(formData: FormData, minimumLength = 1) {
     : null;
 }
 
-function confirmationUrl() {
+function emailCallbackUrl(path: "/auth/confirm" | "/auth/recovery") {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  return appUrl && URL.canParse("/auth/confirm", appUrl)
-    ? new URL("/auth/confirm", appUrl).href
+  return appUrl && URL.canParse(path, appUrl)
+    ? new URL(path, appUrl).href
     : null;
 }
 
@@ -47,7 +47,7 @@ export async function signUp(formData: FormData) {
   if (!email || !password) redirect("/sign-up?error=invalid");
 
   const supabase = await createServerSupabaseClient();
-  const redirectTo = confirmationUrl();
+  const redirectTo = emailCallbackUrl("/auth/confirm");
   if (!supabase || !redirectTo) redirect("/sign-up?error=unavailable");
 
   const { data, error } = await supabase.auth.signUp({
@@ -65,7 +65,7 @@ export async function requestPasswordReset(formData: FormData) {
   if (!email) redirect("/forgot-password?error=invalid");
 
   const supabase = await createServerSupabaseClient();
-  const redirectTo = confirmationUrl();
+  const redirectTo = emailCallbackUrl("/auth/recovery");
   if (!supabase || !redirectTo) redirect("/forgot-password?error=unavailable");
 
   // Keep the same response for known and unknown email addresses.

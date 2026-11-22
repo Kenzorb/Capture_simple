@@ -9,7 +9,10 @@ const messages = new Map([
     "credentials",
     "Sign-in failed. Check your credentials and email confirmation.",
   ],
-  ["failed", "We couldn’t create your account. Try again later."],
+  [
+    "failed",
+    "We couldn’t create your account. Auth email may be temporarily limited. Wait before trying again.",
+  ],
   [
     "confirmation",
     "The confirmation link could not be used. Try signing in or requesting a new account confirmation.",

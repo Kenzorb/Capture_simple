@@ -11,7 +11,7 @@
 
 Capture can use a dedicated hosted development project. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `apps/web/.env.local` using the development project's connection settings. Keep database credentials and privileged keys in your local secret store.
 
-For local signup and password recovery, open `http://127.0.0.1:3000` and set `NEXT_PUBLIC_APP_URL` to that same origin. Allow both `http://127.0.0.1:3000/auth/confirm` and `http://127.0.0.1:3000/auth/recovery` in the development project's Auth redirect settings. The default hosted email service delivers to organization members.
+For local signup and password recovery, open `http://127.0.0.1:3000` and set both `NEXT_PUBLIC_APP_URL` and the Supabase Auth Site URL to that origin. Allow both `http://127.0.0.1:3000/auth/confirm` and `http://127.0.0.1:3000/auth/recovery` in the development project's Auth redirect settings. If you use another origin, allow the callback URLs with the `?sb_flow_id=*` suffix for that origin so Supabase preserves the browser flow ID. The built-in hosted email service sends to organization members and allows two messages per hour across the project.
 
 Keep Capture running and open the newest email link in the browser profile on the Windows computer that submitted the form. You can read the email on a phone and copy the link to Chrome on Windows. If Supabase already confirmed your signup email but could not open Capture, sign in with your chosen password. To reset a password, start from **Forgot password?** and wait for the recovery page before choosing the new password.
 

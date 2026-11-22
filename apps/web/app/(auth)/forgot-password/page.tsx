@@ -34,8 +34,9 @@ export default async function ForgotPasswordPage({
       )}
       {notice === "sent" ? (
         <p role="status" className="mt-4">
-          If an account exists for that address, you’ll receive a reset link.
-          Open it in this same browser on this device.
+          Check your email for a reset link and open it in this same browser. If
+          no email arrives, check spam and wait up to an hour before trying
+          again. Your email address must have a Capture account.
         </p>
       ) : (
         <form action={requestPasswordReset} className="mt-8 space-y-4">

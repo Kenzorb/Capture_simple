@@ -68,8 +68,13 @@ export async function requestPasswordReset(formData: FormData) {
   const redirectTo = emailCallbackUrl("/auth/recovery");
   if (!supabase || !redirectTo) redirect("/forgot-password?error=unavailable");
 
-  // Keep the same response for known and unknown email addresses.
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  if (error?.code === "over_email_send_rate_limit") {
+    console.warn("Supabase has reached its Auth email sending limit.");
+  }
+  // Keep recipient-specific outcomes neutral so the page cannot confirm registration.
   redirect("/forgot-password?notice=sent");
 }
 

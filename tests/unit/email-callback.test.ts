@@ -18,7 +18,7 @@ test("signup sends the verified session to the dashboard", async () => {
   const response = await handleEmailCallback(
     new Request(origin + "/auth/confirm?code=fixture-code"),
   );
-  expect(exchange).toHaveBeenCalledWith("fixture-code");
+  expect(exchange).toHaveBeenCalledWith("fixture-code", undefined);
   expect(response.status).toBe(303);
   expect(response.headers.get("location")).toBe("/dashboard");
 });
@@ -26,9 +26,14 @@ test("signup sends the verified session to the dashboard", async () => {
 test("recovery sends the verified session to the password form", async () => {
   exchange.mockResolvedValue({ data: {}, error: null });
   const response = await handleEmailCallback(
-    new Request(origin + "/auth/recovery?code=fixture-code"),
+    new Request(
+      origin + "/auth/recovery?code=fixture-code&sb_flow_id=fixture-flow",
+    ),
     "recovery",
   );
+  expect(exchange).toHaveBeenCalledWith("fixture-code", {
+    flowId: "fixture-flow",
+  });
   expect(response.status).toBe(303);
   expect(response.headers.get("location")).toBe("/reset-password");
 });

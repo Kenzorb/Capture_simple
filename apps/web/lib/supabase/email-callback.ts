@@ -6,11 +6,15 @@ export async function handleEmailCallback(
 ) {
   const params = new URL(request.url).searchParams;
   const code = params.get("code");
+  const flowId = params.get("sb_flow_id");
   const errorCode = params.get("error_code");
   const supabase =
     code && !errorCode ? await createServerSupabaseClient() : null;
   if (supabase && code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(
+      code,
+      flowId ? { flowId } : undefined,
+    );
     if (!error) {
       // Older reset emails use the signup callback and rely on the SDK's PKCE flow type.
       const legacyRecovery =

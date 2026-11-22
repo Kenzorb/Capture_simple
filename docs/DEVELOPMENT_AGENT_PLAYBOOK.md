@@ -1568,12 +1568,12 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Both hosted redirects matched. Disposable confirmation, sign-in, sign-out, password change, and rejection of the old password and used recovery link passed. TypeScript, ESLint, Prettier, seven Vitest tests, and four Chromium cases passed.` |
+| Last verification executed | `Hosted logs confirmed a bad PKCE verifier and later email rate limits. The Supabase SDK regression verifies the original verifier after a later signup. Eight Vitest tests, four Chromium cases, TypeScript, ESLint, and Prettier passed.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `CAP-023 still needs the successful browser code exchange from an actual fresh signup email. The owner’s reset request was recorded and awaits their password entry.` |
+| Active blockers | `CAP-023 still needs a successful callback from a fresh signup email. The owner’s recovery link failed and later requests hit the hosted email limit. A fresh reset email is needed after the limit clears.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify an actual signup email in the Chrome profile that requested it at http://127.0.0.1:3000, then confirm repeat sign-in and sign-out.` |
+| Next action | `Retest with fresh emails at http://127.0.0.1:3000 in the requesting Chrome profile after the hosted email limit clears.` |
 
 ### 11.1 Phase progress overview
 
@@ -2131,3 +2131,10 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** The hosted config comparison reported zero updates for the two scoped settings. Disposable admin-generated signup and recovery links verified both hosted redirects. Chromium exercised sign-in, protected pages, sign-out, password change, rejection of the old password, and acceptance of the new one. Supabase rejected reuse of the recovery link and the disposable account was removed. TypeScript, ESLint, Prettier, seven Vitest tests, and four browser regression cases passed. Supabase also recorded the owner’s fresh reset request from Chrome on Windows.
 - **Blockers/risks:** Admin-generated links do not exercise the browser code exchange used by real signup emails. The owner needs to open the fresh reset email in the requesting Chrome profile and enter the new password.
 - **Next action:** Complete signup from an actual confirmation email and verify the browser code exchange and repeat sign-in before checking off CAP-023.
+
+### [2026-11-22T11:08:05+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Findings:** Hosted Auth logged a mismatched PKCE verifier at 10:51 AM Singapore time and throttled later recovery requests. Capture had presented a generic email notice for throttled requests.
+- **Changes:** Enabled Supabase’s flow IDs and selected the verifier matching the callback. Clarified the reset notice without exposing whether an email address has an account. The hosted Site URL already matches the Capture origin.
+- **Verification:** The installed Supabase SDK selected the later signup’s verifier without a flow ID and selected the original recovery verifier with the ID. Eight Vitest tests, four Chromium cases, TypeScript, ESLint, Prettier, and the diff check passed.
+- **Next action:** Retest with an actual reset email after the limit clears, then verify fresh mailbox signup and repeat sign-in before checking off CAP-023.

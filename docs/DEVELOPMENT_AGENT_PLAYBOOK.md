@@ -753,7 +753,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-048 — Audit extension build and permissions
 
-- [ ] **CAP-048 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-048 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Inspect manifest, CSP, bundled output and cross-origin handling; verify no AI/Stripe/service-role key in build; prepare safe development ID settings.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-048 — Audit extension build and permissions` |
-| Last verified completed task | `CAP-047` |
-| Last verification executed | `All nine CAP-047 checks passed in Chromium 156.0.8078.4 with the built MV3 extension and hosted Supabase. See the matrix in §12 for fixtures and results.` |
-| Last successful Git commit | `8009db2` |
-| Active blockers | `None for CAP-048. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current phase | `P6 — Background extraction and AI note generation` |
+| Current task | `CAP-049 — Select and configure durable background jobs` |
+| Last verified completed task | `CAP-048` |
+| Last verification executed | `Chrome MV3 manifest and CSP checks, public development ID verification, a clean nine-file credential scan, and hosted Chromium OAuth, capture, cross-origin, and isolation checks passed. All 59 unit tests passed.` |
+| Last successful Git commit | `7304f6e` |
+| Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Audit the built extension bundle and manifest, then verify least privilege and document the findings.` |
+| Next action | `Configure the durable job provider and prove a job finishes after the API response and an intentional retry.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 8/9 | In progress |
+| P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2436,3 +2436,16 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 
 - **Outcome:** All nine checks passed. The test removed its disposable account. No application code changes were needed.
 - **Next action:** CAP-048 — Audit extension build and permissions.
+
+### [2026-11-22T23:52:28+08:00] CAP-048 — Audit extension build and permissions — STARTED
+
+- **Plan:** Review the built manifest, CSP, credential boundaries, and public development ID. Verify the bundle and repeat the Chrome runtime checks before closing P5.
+
+### [2026-11-23T00:02:59+08:00] CAP-048 — Audit extension build and permissions — COMPLETE
+
+- **Changes:** The packaged MV3 CSP allows packaged scripts, blocks embedded objects and base URL overrides, and permits connections only to the configured Capture and Supabase Auth origins. The build accepts only an RSA SPKI public key for the stable unpacked ID. Development registration steps are in [Extension authentication](EXTENSION_AUTH.md).
+- **Manifest and bundle:** Ran the WXT Chrome MV3 build and inspected its nine output files. Verified four permissions for OAuth (`identity`), local sessions (`storage`), and explicit page capture (`activeTab`, `scripting`). Host access was limited to the configured hosts. There were no declared content scripts, public extension resources, or external messaging configuration. The local scan checked configured secret values, credential variable names, known AI, Stripe, Supabase and private-key formats, and legacy JWTs with the `service_role` claim. It found no matches. The public key produced the configured unpacked ID. A separate unconfigured build had no host permissions and blocked all connections. A synthetic private-key input was rejected without being printed.
+- **Chromium runtime:** Chromium 156.0.8078.4 on Windows with hosted Supabase completed OAuth, saved an article, and opened the library. Chrome enforced the connection policy on an unrelated host. The captured `GET /api/me` sent no Origin header, and `POST /api/captures` sent the Chrome extension origin. Neither sent a Cookie header. Both API routes allowed their configured method and extension origin in preflight, rejected an unrelated origin and wrong method, and omitted credentialed CORS. An unauthenticated account request returned 401. An unrelated page had no extension messaging or storage access. Disposable accounts were removed.
+- **Other checks:** All 59 tests passed, along with extension TypeScript, lint, formatting, and diff checks.
+- **P5 gate:** Passed. All nine extension tasks are verified. Fresh signup remains deferred under CAP-023.
+- **Next action:** CAP-049 — Select and configure durable background jobs.

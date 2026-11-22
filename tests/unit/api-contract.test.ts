@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import {
   apiErrorSchema,
+  articleDeleteSchema,
   articleDetailResponseSchema,
+  articleEditSchema,
   articleListQuerySchema,
   articleListResponseSchema,
   articleParamsSchema,
@@ -26,6 +28,8 @@ test("the documented JSON examples match the shared API schemas", () => {
     captureResponseSchema,
     articleListResponseSchema,
     articleDetailResponseSchema,
+    articleEditSchema,
+    articleDeleteSchema,
     apiErrorSchema,
   ];
 
@@ -33,6 +37,22 @@ test("the documented JSON examples match the shared API schemas", () => {
   schemas.forEach((schema, index) => {
     expect(schema.parse(examples[index])).toEqual(examples[index]);
   });
+});
+
+test("article mutations only allow permitted fields and explicit deletion confirmation", () => {
+  expect(articleEditSchema.safeParse({}).success).toBe(false);
+  expect(
+    articleEditSchema.safeParse({ title: "Valid", user_id: "other" }).success,
+  ).toBe(false);
+  expect(
+    articleEditSchema.parse({ personal_note: null, archived: false }),
+  ).toEqual({
+    personal_note: null,
+    archived: false,
+  });
+  for (const body of [{}, { confirmed: false }, { confirmed: "true" }]) {
+    expect(articleDeleteSchema.safeParse(body).success).toBe(false);
+  }
 });
 
 test("article pagination accepts defaults and validates URL query values", () => {

@@ -7,7 +7,7 @@ import { URL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 test(
-  "hosted article reads are paginated and scoped to the authenticated owner",
+  "hosted article reads and lifecycle mutations are scoped to the authenticated owner",
   { timeout: 120_000 },
   async () => {
     const url = process.env.CAPTURE_TEST_SUPABASE_URL;
@@ -203,6 +203,143 @@ test(
       assert.equal(
         (await json("/not-a-uuid", one.header, 400)).error.code,
         "invalid_input",
+      );
+
+      async function mutate(method, path, headers, body, expected) {
+        const response = await globalThis.fetch(origin + path, {
+          method,
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          signal: globalThis.AbortSignal.timeout(25000),
+        });
+        assert.equal(
+          response.status,
+          expected,
+          `${method} returned an unexpected status`,
+        );
+        return response;
+      }
+
+      const saved = await mutate(
+        "POST",
+        "/api/captures",
+        one.header,
+        {
+          request_id: randomUUID(),
+          url: "https://example.test/lifecycle",
+          title: "First title",
+          source: "chrome_extension",
+          extracted_text: "Disposable article content",
+          personal_note: "First note",
+        },
+        201,
+      );
+      const { article_id: id } = await saved.json();
+      const path = "/api/articles/" + id;
+      const detailPath = "/" + id;
+      assert(
+        !(
+          await admin.from("article_topics").insert({
+            article_id: id,
+            user_id: one.owner,
+            topic_id: topic,
+            assignment_source: "manual",
+          })
+        ).error,
+        "Could not seed a topic assignment",
+      );
+
+      await mutate("PATCH", path, {}, { title: "Anonymous edit" }, 401);
+      await mutate(
+        "PATCH",
+        path,
+        two.header,
+        { title: "Cross-owner edit" },
+        404,
+      );
+      await mutate("DELETE", path, two.header, { confirmed: true }, 404);
+      await mutate("PATCH", path, one.header, { status: "ready" }, 400);
+      await mutate("DELETE", path, one.header, { confirmed: false }, 400);
+      assert.equal(
+        (await json(detailPath, one.header)).article.title,
+        "First title",
+      );
+
+      await mutate(
+        "PATCH",
+        path,
+        one.cookie,
+        { title: "Edited title", personal_note: "Edited note" },
+        204,
+      );
+      let changed = await json(detailPath, one.header);
+      assert.equal(changed.article.title, "Edited title");
+      assert.equal(changed.personal_note, "Edited note");
+      await mutate("PATCH", path, one.header, { personal_note: null }, 204);
+      assert.equal((await json(detailPath, one.header)).personal_note, null);
+      await mutate(
+        "PATCH",
+        path,
+        one.header,
+        { personal_note: "Note to cascade", archived: true },
+        204,
+      );
+      changed = await json(detailPath, one.header);
+      assert(changed.article.archived_at);
+      await mutate("PATCH", path, one.header, { archived: true }, 204);
+      assert.equal(
+        (await json(detailPath, one.header)).article.archived_at,
+        changed.article.archived_at,
+      );
+      assert(
+        !(await json("", one.header)).articles.some(
+          (article) => article.id === id,
+        ),
+      );
+      assert.deepEqual(
+        (await json("?archived=true", one.header)).articles.map(
+          (article) => article.id,
+        ),
+        [id],
+      );
+
+      await mutate("PATCH", path, one.header, { archived: false }, 204);
+      assert.equal(
+        (await json(detailPath, one.header)).article.archived_at,
+        null,
+      );
+      assert(
+        (await json("", one.header)).articles.some(
+          (article) => article.id === id,
+        ),
+      );
+      await mutate("DELETE", path, one.header, { confirmed: true }, 204);
+      assert.equal(
+        (await json(detailPath, one.header, 404)).error.code,
+        "not_found",
+      );
+
+      const related = await Promise.all(
+        [
+          "article_contents",
+          "personal_notes",
+          "article_topics",
+          "capture_requests",
+        ].map((table) =>
+          admin
+            .from(table)
+            .select("article_id", { count: "exact", head: true })
+            .eq("article_id", id),
+        ),
+      );
+      assert(
+        related.every(({ error, count }) => !error && count === 0),
+        "Delete left related rows behind",
+      );
+      assert.equal((await json("/" + ids[0], one.header)).topics[0].id, topic);
+      assert.equal(
+        (await json("/" + ids[3], two.header)).article.title,
+        "Private second owner",
       );
     } finally {
       for (const id of users)

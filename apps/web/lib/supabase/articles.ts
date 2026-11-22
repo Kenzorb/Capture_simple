@@ -31,7 +31,7 @@ export function encodeArticleCursor({ captured_at, id }: Cursor) {
 
 export function listOwnArticles(
   { supabase, user }: Session,
-  { limit, status, domain, q, sort }: ArticleListQuery,
+  { limit, status, domain, q, sort, archived }: ArticleListQuery,
   cursor: Cursor | null,
 ) {
   const ascending = sort === "captured_asc";
@@ -44,6 +44,8 @@ export function listOwnArticles(
     .limit(limit + 1);
 
   if (status) query.eq("status", status);
+  if (archived) query.not("archived_at", "is", null);
+  else query.is("archived_at", null);
   if (domain) query.eq("domain", domain.toLowerCase());
   if (q) query.textSearch("title", q, { config: "simple", type: "websearch" });
   if (cursor) {

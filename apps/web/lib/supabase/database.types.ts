@@ -624,6 +624,20 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      capture_delete_article: {
+        Args: { p_article_id: string; p_confirmed: boolean };
+        Returns: boolean;
+      };
+      capture_edit_article: {
+        Args: {
+          p_archived?: boolean;
+          p_article_id: string;
+          p_personal_note?: string;
+          p_title?: string;
+          p_update_note?: boolean;
+        };
+        Returns: boolean;
+      };
       capture_save_article: {
         Args: {
           p_canonical_url: string;

@@ -49,6 +49,8 @@ Processing statuses are `saved`, `queued`, `processing`, `ready`, `failed`, `quo
 
 For example, `GET /api/articles?limit=20&status=ready&sort=captured_desc` returns a page of ready articles.
 
+The list returns active articles by default. Use `archived=true` to list archived articles. Archived articles remain accessible by ID.
+
 ```json
 {
   "articles": [
@@ -88,6 +90,24 @@ For example, `GET /api/articles?limit=20&status=ready&sort=captured_desc` return
   "personal_note": "Use this for spring planting.",
   "topics": []
 }
+```
+
+## Edit or delete an article
+
+`PATCH /api/articles/:id` accepts any combination of `title`, `personal_note`, and `archived`. Omitted fields retain their existing values. Set `personal_note` to null to remove it, and set `archived` to false to restore an archived article. A successful edit returns HTTP 204.
+
+```json
+{
+  "title": "Planning a spring garden",
+  "personal_note": null,
+  "archived": false
+}
+```
+
+`DELETE /api/articles/:id` permanently removes the article and associated content and personal data. Confirm with the user before sending the request. It requires a JSON body with `confirmed` set to true and returns HTTP 204 on success. Missing or unowned articles return HTTP 404 for both operations.
+
+```json
+{ "confirmed": true }
 ```
 
 ## Errors

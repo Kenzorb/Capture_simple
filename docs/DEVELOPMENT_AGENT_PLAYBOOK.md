@@ -571,7 +571,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-031 — Implement edits, archive, and delete
 
-- [ ] **CAP-031 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-031 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Allow permitted title/personal note/archive operations, user-scoped deletion, cascading cleanup and clear confirmation behavior.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P3 — Capture API and reliable storage` |
-| Current task | `CAP-031 — Implement edits, archive, and delete` |
-| Last verified completed task | `CAP-030` |
-| Last verification executed | `The hosted two-user article test verified isolated list and detail access, notes and topics, filters, and stable bidirectional pagination. The hosted deduplication regression, 26 unit tests, lint, and type checking passed.` |
-| Last successful Git commit | `7c942b8` |
-| Active blockers | `None for CAP-031. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-032 — Implement manual URL capture path` |
+| Last verified completed task | `CAP-031` |
+| Last verification executed | `The hosted two-user lifecycle verified edits, archive and restore, explicit deletion confirmation, and cascading cleanup. The hosted deduplication regression, 27 unit tests, lint, and TypeScript passed.` |
+| Last successful Git commit | `406e217` |
+| Active blockers | `None for CAP-032. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement owner-scoped article edits, archiving, restoration, and deletion with lifecycle tests.` |
+| Next action | `Add a manual URL form and verify that submitted sources save without depending on extraction.` |
 
 ### 11.1 Phase progress overview
 
@@ -1586,7 +1586,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
-| P3 | CAP-026–033 | 5/8 | In progress |
+| P3 | CAP-026–033 | 6/8 | In progress |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
@@ -2250,3 +2250,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added private `GET /api/articles` and `GET /api/articles/:id` routes with cookie and bearer authentication. Lists support status, domain, title search, and stable cursor sorting. Detail returns the owner's personal note and topics along with safe article fields.
 - **Verification:** The hosted two-user integration test passed for signed-out rejection, owner lists, cross-owner detail HTTP 404, cookie and bearer reads, note and topic isolation, filters, invalid inputs, and both sort directions with tied timestamps. The hosted deduplication regression, 26 Vitest tests, web and shared TypeScript checks, ESLint, and Prettier passed.
 - **Next action:** CAP-031 — Implement edits, archive, and delete.
+
+### [2026-11-22T14:34:31+08:00] CAP-031 — Implement edits, archive, and delete — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add authenticated, transactional article updates and explicit permanent deletion, then verify the lifecycle and cascading cleanup.
+
+### [2026-11-22T14:39:38+08:00] CAP-031 — Implement edits, archive, and delete — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added owner-scoped article edit, archive, restore, and confirmed deletion APIs. Active article lists exclude archived items by default. Applied the additive `20261122063431_edit_and_delete_articles.sql` migration to capture-dev and regenerated database types.
+- **Verification:** The hosted lifecycle test used two disposable accounts and exercised create, title and note updates, note removal, archive, restore, required deletion confirmation, cross-owner denial, and cleanup of related text, notes, topic assignments, and request IDs. The hosted deduplication regression, 27 Vitest tests, TypeScript, ESLint, and Prettier passed.
+- **Next action:** CAP-032 — Implement manual URL capture path.

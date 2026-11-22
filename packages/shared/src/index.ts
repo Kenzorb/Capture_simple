@@ -96,6 +96,10 @@ export const articleListQuerySchema = z.strictObject({
   domain: z.string().trim().min(1).max(253).optional(),
   q: z.string().trim().min(1).max(200).optional(),
   sort: z.enum(["captured_desc", "captured_asc"]).default("captured_desc"),
+  archived: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
 });
 
 export const articleListResponseSchema = z.object({
@@ -104,6 +108,22 @@ export const articleListResponseSchema = z.object({
 });
 
 export const articleParamsSchema = z.strictObject({ id: idSchema });
+export const articleEditSchema = z
+  .strictObject({
+    title: titleSchema.optional(),
+    personal_note: z.string().max(4000).nullable().optional(),
+    archived: z.boolean().optional(),
+  })
+  .refine(
+    ({ title, personal_note, archived }) =>
+      title !== undefined ||
+      personal_note !== undefined ||
+      archived !== undefined,
+  );
+
+export const articleDeleteSchema = z.strictObject({
+  confirmed: z.literal(true),
+});
 export const articleCursorPayloadSchema = articleSchema.pick({
   id: true,
   captured_at: true,

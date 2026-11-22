@@ -7,6 +7,7 @@ import type {
   ProcessingStatus,
 } from "@capture/shared";
 import { beforeEach, expect, it, vi } from "vitest";
+import { captureLinks } from "../../apps/extension/capture/links";
 import { bindCaptureForm } from "../../apps/extension/entrypoints/popup/capture-form";
 
 const markup = readFileSync(
@@ -19,12 +20,15 @@ const preview = {
   extractedText: null,
 };
 
-function mount(save?: Parameters<typeof bindCaptureForm>[2]) {
+function mount(
+  save?: Parameters<typeof bindCaptureForm>[2],
+  articleHref?: Parameters<typeof bindCaptureForm>[3],
+) {
   const form = document.querySelector<HTMLFormElement>("#capture-form")!;
   const feedback = document.querySelector<HTMLElement>("#save-status")!;
   const note = form.querySelector("textarea")!;
   const button = form.querySelector<HTMLButtonElement>("button")!;
-  const setPreview = bindCaptureForm(form, feedback, save);
+  const setPreview = bindCaptureForm(form, feedback, save, articleHref);
   setPreview(preview);
   return { form, feedback, note, button, setPreview };
 }
@@ -122,4 +126,40 @@ it("offers a retry when the save handler fails", async () => {
   setPreview({ ...preview, url: "https://example.com/next" });
   expect(note.value).toBe("");
   expect(feedback.textContent).toBe("");
+});
+
+it("opens the server-returned capture on the configured origin and clears the link for a new preview", async () => {
+  const links = captureLinks("https://capture.example");
+  const response = success("ready", true);
+  const { form, button, setPreview } = mount(
+    vi.fn().mockResolvedValue(response),
+    links.article,
+  );
+  const link = form.querySelector<HTMLAnchorElement>("#saved-article")!;
+  expect(links.library).toBe("https://capture.example/dashboard/captures");
+  expect(link.hidden).toBe(true);
+  button.focus();
+  button.click();
+  await vi.waitFor(() => expect(link.hidden).toBe(false));
+  expect(link.href).toBe(`${links.library}/${response.article_id}`);
+  expect(link.target).toBe("_blank");
+  expect(link.relList.contains("noopener")).toBe(true);
+  expect(document.activeElement).toBe(link);
+  setPreview({ ...preview, url: "https://example.com/next" });
+  expect(link.hidden).toBe(true);
+  expect(link.hasAttribute("href")).toBe(false);
+});
+
+it("keeps the article link hidden when the response has an invalid ID", async () => {
+  const links = captureLinks("https://capture.example");
+  const { form, button } = mount(
+    vi.fn().mockResolvedValue({ ...success("saved"), article_id: "../.." }),
+    links.article,
+  );
+  button.click();
+  await vi.waitFor(() => expect(button.hidden).toBe(true));
+  const link = form.querySelector("#saved-article")!;
+  expect(link.hasAttribute("hidden")).toBe(true);
+  expect(link.hasAttribute("href")).toBe(false);
+  expect(links.article("https://untrusted.example/article")).toBeNull();
 });

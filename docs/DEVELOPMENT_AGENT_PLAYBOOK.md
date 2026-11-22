@@ -733,7 +733,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-046 — Deep-link to captured article
 
-- [ ] **CAP-046 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-046 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Open web app article in a new tab and support “Open library”; build URL only from trusted application origin and server-returned IDs.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-046 — Deep-link to captured article` |
-| Last verified completed task | `CAP-045` |
-| Last verification executed | `Hosted Chromium verified real popup saving, rapid resubmission, a lost response, reopening and retrying with the same request ID through a session refresh, one stored capture with its note, the article link, and timeout recovery. The extension build, 57 unit tests, lint, TypeScript, formatting, and bundle checks passed.` |
-| Last successful Git commit | `644e6d5` |
-| Active blockers | `None for CAP-046. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-047 — Test extension across browser edge cases` |
+| Last verified completed task | `CAP-046` |
+| Last verification executed | `Chromium with hosted Supabase verified separate tabs for the saved article and library, owner access, recovery for missing or unauthorized articles, and sign-in when signed out. The Chrome build, 59 tests, lint, TypeScript, formatting, and diff checks passed.` |
+| Last successful Git commit | `a5cf3e6` |
+| Active blockers | `None for CAP-047. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify the saved article opens in a new tab, add Open library, and test correct account and missing or unauthorized article handling.` |
+| Next action | `Run and record the Chrome edge-case test matrix with browser version, fixtures, and evidence.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 6/9 | In progress |
+| P5 | CAP-040–048 | 7/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2403,3 +2403,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Save to Capture sends an authenticated request through the worker and shows a link formed from the configured web origin and the returned article ID. The worker coalesces matching saves, reuses a stored request ID for recent matching drafts in the Chrome session, and bounds each POST. Retry metadata contains fingerprints and IDs only.
 - **Verification:** Chromium used a disposable account with real hosted OAuth and a real capture request. Rapid resubmission produced one POST. The test dropped the response after a confirmed 201, closed and reopened the popup, and forced a 401 before the retry reached the API. Refresh and retry kept the same request ID, and Supabase contained one article, one personal note, and one request record. The popup showed the stored article link. A stalled POST reached its timeout and restored Save with the note available. The extension build, 57 unit tests, ESLint, TypeScript, Prettier, and bundle checks passed.
 - **Next action:** CAP-046 — Deep-link to captured article.
+
+### [2026-11-22T21:52:31+08:00] CAP-046 — Deep-link to captured article — STARTED
+
+- **Plan:** Add Open library, constrain saved article destinations to the configured web origin and a validated article ID, and verify new tabs and account isolation in Chrome.
+
+### [2026-11-22T21:55:34+08:00] CAP-046 — Deep-link to captured article — COMPLETE
+
+- **Changes:** Added Open library to the extension popup and restricted saved article links to the configured origin and validated IDs returned by Capture. Both links open in a new tab.
+- **Verification:** Chromium with hosted Supabase clicked both popup links and confirmed that the owner could see the saved article and note. Missing captures and captures opened under a second account showed the same recovery screen. Signed-out visitors landed at sign-in. The Chrome build, all 59 tests, lint, TypeScript, formatting, and diff checks passed.
+- **Next action:** CAP-047 — Test extension across browser edge cases.

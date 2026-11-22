@@ -1,6 +1,7 @@
 import { browser } from "wxt/browser";
 import { extensionAuthConfig } from "../../auth/config";
 import type { ExtensionCommand, ExtensionStatus } from "../../auth/message";
+import { captureLinks } from "../../capture/links";
 import { readActivePage } from "../../capture/readable-page";
 import { bindCaptureForm } from "./capture-form";
 
@@ -22,6 +23,12 @@ const articlePreview =
 const excerpt =
   document.querySelector<HTMLParagraphElement>("#article-excerpt")!;
 const config = extensionAuthConfig();
+const links = config && captureLinks(config.web);
+const libraryLink = document.querySelector<HTMLAnchorElement>("#open-library")!;
+if (links) {
+  libraryLink.href = links.library;
+  libraryLink.hidden = false;
+}
 let accountId: string | undefined;
 const setCapturePage = bindCaptureForm(
   document.querySelector<HTMLFormElement>("#capture-form")!,
@@ -39,11 +46,7 @@ const setCapturePage = bindCaptureForm(
         });
       }
     : undefined,
-  config
-    ? (id) =>
-        new URL(`/dashboard/captures/${encodeURIComponent(id)}`, config.web)
-          .href
-    : undefined,
+  links?.article,
 );
 let timer: ReturnType<typeof setTimeout> | undefined;
 

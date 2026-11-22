@@ -110,13 +110,15 @@ textarea {
   font-size: 13px;
 }
 
-#saved-article {
+#saved-article,
+#open-library {
   margin-top: 8px;
   color: #174c38;
   font-weight: 600;
 }
 
-#saved-article:focus-visible {
+#saved-article:focus-visible,
+#open-library:focus-visible {
   outline: 2px solid #17674a;
   outline-offset: 3px;
 }

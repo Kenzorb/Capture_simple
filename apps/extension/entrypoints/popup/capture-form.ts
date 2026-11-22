@@ -34,7 +34,7 @@ export function bindCaptureForm(
   form: HTMLFormElement,
   feedback: HTMLElement,
   saveCapture?: SaveCapture,
-  articleHref?: (id: string) => string,
+  articleHref?: (id: string) => string | null,
 ) {
   const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
   const note = form.querySelector<HTMLTextAreaElement>("textarea")!;
@@ -90,8 +90,9 @@ export function bindCaptureForm(
           ? "This page is already in your library."
           : savedMessages[result.processing_status];
         saved = true;
-        if (articleHref) {
-          articleLink.href = articleHref(result.article_id);
+        const href = articleHref?.(result.article_id);
+        if (href) {
+          articleLink.href = href;
           articleLink.hidden = false;
         }
       }

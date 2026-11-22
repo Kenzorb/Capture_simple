@@ -627,7 +627,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-036 — Build All Captures library
 
-- [ ] **CAP-036 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-036 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Render paginated article list/cards, source domain, capture time, processing badge, status and filters.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P4 — Web dashboard and captured-article experience` |
-| Current task | `CAP-036 — Build All Captures library` |
-| Last verified completed task | `CAP-035` |
-| Last verification executed | `Hosted Chromium verified first-capture guidance, immediate first save, exact active status counts, five newest captures, owner and archive isolation, and 320px navigation. Eight Chromium auth tests, 41 unit tests, lint, and TypeScript passed.` |
-| Last successful Git commit | `2d391bc` |
-| Active blockers | `None for CAP-036. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-037 — Build manual URL-save form` |
+| Last verified completed task | `CAP-036` |
+| Last verification executed | `Hosted Chromium verified capture metadata, filtered pagination, empty and archived views, account isolation, 320px rendering, and immediate save visibility in the library and API. Eight Chromium auth tests, 41 Vitest tests, ESLint, and TypeScript passed.` |
+| Last successful Git commit | `dba4c0d` |
+| Active blockers | `None for CAP-037. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Add capture times, status badges, and filters to the paginated All captures view, then verify live data and empty filters.` |
+| Next action | `Finish manual URL save feedback and link the successful result to its capture detail.` |
 
 ### 11.1 Phase progress overview
 
@@ -1587,7 +1587,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
-| P4 | CAP-034–039 | 2/6 | In progress |
+| P4 | CAP-034–039 | 3/6 | In progress |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
@@ -2301,3 +2301,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Overview shows up to five recent active captures, their source links and statuses, and exact counts for Saved, In progress, Ready, and Needs attention. Empty accounts receive first-capture guidance based on real data. Missing count data is shown as unavailable.
 - **Verification:** A disposable hosted Chromium account started empty, saved its first link, and immediately displayed it and the updated count. Populated fixtures verified all status groups, chronological ordering, archive and cross-account isolation, 320px rendering, and View all navigation. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
 - **Next action:** CAP-036 — Build All Captures library.
+
+### [2026-11-22T15:22:50+08:00] CAP-036 — Build All Captures library — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add library filters and capture metadata, then verify pagination and save-to-library updates against the hosted backend.
+
+### [2026-11-22T15:25:44+08:00] CAP-036 — Build All Captures library — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** All captures displays source domains, UTC capture times, and processing badges. Status, source domain, collection, sorting, and title search are retained across cursor pages. Empty results have distinct messages, and reset clears the active filters.
+- **Verification:** Disposable accounts on the hosted backend verified capture metadata, filtered pagination across 21 matching results, empty filters and reset, archived results and account isolation, 320px layout, and immediate visibility of a new manual save in the library and API. Eight Chromium auth tests, 41 Vitest tests, ESLint, and TypeScript passed.
+- **Next action:** CAP-037 — Build manual URL-save form.

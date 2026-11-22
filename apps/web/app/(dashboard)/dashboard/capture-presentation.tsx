@@ -1,6 +1,6 @@
 import { canonicalizeCaptureUrl, type ProcessingStatus } from "@capture/shared";
 
-const statusLabels: Record<ProcessingStatus, string> = {
+export const statusLabels: Record<ProcessingStatus, string> = {
   saved: "Saved",
   queued: "Queued",
   processing: "Processing",

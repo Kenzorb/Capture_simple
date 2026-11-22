@@ -453,7 +453,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-020 — Create billing tables
 
-- [ ] **CAP-020 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-020 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add subscriptions and billing_events with unique Stripe event IDs and internal plan fields; do not grant Pro just because client says so.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-020 — Create billing tables` |
-| Last verified completed task | `CAP-019` |
-| Last verification executed | `Hosted migration and db query --file supabase/tests/processing_schema.sql passed. Assertions covered idempotency, outbox uniqueness, owner scope, atomic conditional reservation capacity, over-cap rejection and conversion to used quota. Fixtures rolled back.` |
-| Last successful Git commit | `8d56fa9` |
+| Current task | `CAP-021 — Enable and test RLS everywhere` |
+| Last verified completed task | `CAP-020` |
+| Last verification executed | `Hosted migration and db query --file supabase/tests/billing_schema.sql passed with billing disabled. The fixture verified Free defaults, rejection of Pro without billing identifiers, and duplicate event rejection.` |
+| Last successful Git commit | `2753fb9` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `CAP-020 — Create billing tables` |
+| Next action | `CAP-021 — Enable and test RLS everywhere` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 4/10 | In progress |
+| P2 | CAP-016–025 | 5/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **19/112** | **In progress** |
+| **Total** | **CAP-001–112** | **20/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2014,3 +2014,19 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** This task verifies schema invariants in one test session. Multi-session contention belongs to CAP-078 and CAP-095.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-020 — Create billing tables
+
+### [2026-11-22T09:07:43+08:00] CAP-019 — Create processing and usage tables — COMMIT
+- **Git commit:** 2753fb9
+
+### [2026-11-22T09:08:06+08:00] CAP-020 — Create billing tables — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** Previous task verified and committed. Use the dedicated capture-dev project.
+- **Next action:** Add private subscription and verified-event persistence without enabling billing.
+
+### [2026-11-22T09:08:48+08:00] CAP-020 — Create billing tables — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added subscription state and billing-event deduplication with RLS enabled.
+- **Verification:** Hosted migration and db query --file supabase/tests/billing_schema.sql passed with billing disabled. The fixture verified Free defaults, rejection of Pro without billing identifiers, and duplicate event rejection.
+- **Decisions:** Keep Stripe credentials, checkout and event handling outside this schema task.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-021 — Enable and test RLS everywhere

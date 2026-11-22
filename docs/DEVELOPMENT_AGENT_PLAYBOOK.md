@@ -423,7 +423,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-017 — Create users and article tables
 
-- [ ] **CAP-017 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-017 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add profiles, articles, article_contents, personal_notes and relevant indexes, timestamps, canonical URL uniqueness, ownership and delete rules.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-017 — Create users and article tables` |
-| Last verified completed task | `CAP-016` |
-| Last verification executed | `Fresh hosted capture-dev accepted baseline migration; history and schema permissions checked; second dry run is up to date.` |
+| Current task | `CAP-018 — Create topic and relationship tables` |
+| Last verified completed task | `CAP-017` |
+| Last verification executed | `Hosted Supabase db push and db query --file supabase/tests/article_schema.sql exited 0. Assertions covered one capture per user, long URLs, duplicate rejection, cross-owner note rejection, and deletion cascades. All fixtures rolled back.` |
 | Last successful Git commit | `cdcd51a` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Create and test profile, article, and personal note migrations for CAP-017 against the dedicated development project.` |
+| Next action | `CAP-018 — Create topic and relationship tables` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 1/10 | In progress |
+| P2 | CAP-016–025 | 2/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **16/112** | **In progress** |
+| **Total** | **CAP-001–112** | **17/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1969,3 +1969,16 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Agent/session:** Codex
 - **Verification:** Baseline migration and role permission checks passed against the fresh hosted development database. The hosted migration is current.
 - **Next action:** Start CAP-017 from the current progress pointer.
+
+### [2026-11-22T09:02:18+08:00] CAP-017 — Create users and article tables — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-016 baseline verified on dedicated hosted capture-dev.
+- **Next action:** Version profile and article tables and run integrity tests on capture-dev.
+
+### [2026-11-22T09:04:08+08:00] CAP-017 — Create users and article tables — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added auth-backed profiles, articles, content and personal notes with owner-scoped constraints and cascades.
+- **Verification:** Hosted Supabase db push and db query --file supabase/tests/article_schema.sql exited 0. Assertions covered one capture per user, long URLs, duplicate rejection, cross-owner note rejection, and deletion cascades. All fixtures rolled back.
+- **Decisions:** Use a generated SHA-256 canonical URL key to support long URLs. Enable RLS at table creation; client policies follow in CAP-021.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-018 — Create topic and relationship tables

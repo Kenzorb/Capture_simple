@@ -1568,7 +1568,7 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Email verified on capture-dev. The live server served Capture on IPv4 while IPv6 returned 404. Both Chromium recovery and dashboard tests passed on IPv4.` |
+| Last verification executed | `Hosted signup email is confirmed. Capture is connected to Auth. Supabase recorded the approved recovery request. TypeScript, Vitest and three Chromium cases passed.` |
 | Last successful Git commit | `1ab6e29` |
 | Active blockers | `CAP-023 needs one successful confirmation callback and repeat sign-in from a fresh signup in the same browser on the Windows host.` |
 | MVP launch gate | `NOT READY` |
@@ -2118,3 +2118,9 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Expired or used links now redirect to Capture sign-in with recovery guidance. Added a browser regression and documented using the same reachable IPv4 origin for development callbacks.
 - **Verification:** Live IPv4 Capture returned HTTP 200 while IPv6 localhost returned 404. IPv4 expired callback redirected with HTTP 303. Both Chromium cases passed against the existing IPv4 server using a temporary Playwright config. Prettier and diff checks passed. The original link returned otp_expired after provider confirmation.
 - **Next action:** Use the reachable origin with a fresh authorized signup and verify successful code exchange in the signup browser.
+
+### [2026-11-22T10:27:22+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Changes:** Added password reset request and authenticated password form, and routed verified recovery exchanges to the password form. Configured local Capture with the hosted development publishable key in an ignored environment file.
+- **Verification:** Supabase confirmed the email and recorded the authorized reset request from the user's Chrome session on the localhost IPv4 origin. Type checking, formatting, lint, four Vitest tests, and three live Chromium cases passed. Signed-out access to the password update page redirects to reset request. Password entry is with the user.
+- **Next action:** Finish the user-driven recovery and separately verify a successful new-account confirmation callback before marking CAP-023 complete.

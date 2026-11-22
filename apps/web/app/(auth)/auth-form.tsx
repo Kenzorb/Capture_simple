@@ -86,6 +86,14 @@ export function AuthForm({
           )}
         </div>
         <SubmitButton label={label} />
+        {!isSignUp && (
+          <Link
+            className="ml-4 font-semibold underline"
+            href="/forgot-password"
+          >
+            Forgot password?
+          </Link>
+        )}
       </form>
 
       <p className="mt-6">

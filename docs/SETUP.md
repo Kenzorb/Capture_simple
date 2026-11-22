@@ -17,6 +17,8 @@ For a `localhost` signup, keep the web server running and open the link in that 
 
 If `localhost:3000` serves a different page but Capture opens at `127.0.0.1:3000`, use `http://127.0.0.1:3000` for both the browser and `NEXT_PUBLIC_APP_URL`. Add `http://127.0.0.1:3000/auth/confirm` to the development project's Auth redirect URLs before testing a new signup.
 
+Password recovery uses the same `/auth/confirm` redirect. Start from **Forgot password?** on the sign-in page, then open the reset link in the same browser that requested it.
+
 From the repository root, sign in to the Supabase CLI and dry-run the versioned migrations against the development project. Replace `DEV_PROJECT_REF` with the project reference and confirm the target before running the apply command.
 
 ```sh

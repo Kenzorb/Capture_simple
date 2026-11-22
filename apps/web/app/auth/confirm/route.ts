@@ -7,11 +7,14 @@ export async function GET(request: NextRequest) {
   const supabase =
     code && !errorCode ? await createServerSupabaseClient() : null;
   if (supabase && code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // The SDK returns the PKCE flow type at runtime but omits it from AuthTokenResponse.
+      const isRecovery =
+        "redirectType" in data && data.redirectType === "recovery";
       return new Response(null, {
         status: 303,
-        headers: { Location: "/dashboard" },
+        headers: { Location: isRecovery ? "/reset-password" : "/dashboard" },
       });
     }
   }

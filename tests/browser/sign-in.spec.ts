@@ -27,3 +27,19 @@ test("an expired confirmation link redirects to sign-in with recovery guidance",
   expect(url.searchParams.get("error")).toBe("confirmation-expired");
   expect(url.hash).toBe("");
 });
+
+test("password recovery is discoverable and requires a session to set a password", async ({
+  page,
+}) => {
+  await page.goto("/sign-in");
+  await page.getByRole("link", { name: "Forgot password?" }).click();
+  await expect(
+    page.getByRole("button", { name: "Send reset link" }),
+  ).toBeVisible();
+
+  await page.goto("/reset-password");
+  await expect(page).toHaveURL(/\/forgot-password\?error=session$/);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Open a new password reset link",
+  );
+});

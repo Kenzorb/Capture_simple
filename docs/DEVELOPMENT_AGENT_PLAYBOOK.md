@@ -1568,7 +1568,7 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Hosted signup and email verification confirmed by read-only query. Safari could not reach the loopback callback. Four Vitest tests and formatting passed after clarifying the instructions.` |
+| Last verification executed | `Email verified on capture-dev. The live server served Capture on IPv4 while IPv6 returned 404. Both Chromium recovery and dashboard tests passed on IPv4.` |
 | Last successful Git commit | `1ab6e29` |
 | Active blockers | `CAP-023 needs one successful confirmation callback and repeat sign-in from a fresh signup in the same browser on the Windows host.` |
 | MVP launch gate | `NOT READY` |
@@ -2112,3 +2112,9 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** User reported Safari could not connect to the localhost callback. Read-only Supabase query verified one account and one confirmed email. This proves provider confirmation. The original test browser had closed and the end-to-end callback session remains unverified. Vitest passed all four tests and Prettier passed.
 - **Changes:** Clarified the signup notice and local setup instructions to keep Capture running and confirm from the same browser on the same device.
 - **Next action:** Verify a fresh authorized signup with a reachable callback and the original browser session before marking the task complete.
+
+### [2026-11-22T10:09:02+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Changes:** Expired or used links now redirect to Capture sign-in with recovery guidance. Added a browser regression and documented using the same reachable IPv4 origin for development callbacks.
+- **Verification:** Live IPv4 Capture returned HTTP 200 while IPv6 localhost returned 404. IPv4 expired callback redirected with HTTP 303. Both Chromium cases passed against the existing IPv4 server using a temporary Playwright config. Prettier and diff checks passed. The original link returned otp_expired after provider confirmation.
+- **Next action:** Use the reachable origin with a fresh authorized signup and verify successful code exchange in the signup browser.

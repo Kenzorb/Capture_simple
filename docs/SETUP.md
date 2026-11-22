@@ -15,6 +15,8 @@ For email confirmation, set `NEXT_PUBLIC_APP_URL` to the web origin you open in 
 
 For a `localhost` signup, keep the web server running and open the link in that same browser on the computer running Capture. On a phone or another computer, `localhost` points to that device. Supabase can confirm the email even when the browser cannot reach Capture's callback. After email confirmation, password sign-in is available from the Capture web app.
 
+If `localhost:3000` serves a different page but Capture opens at `127.0.0.1:3000`, use `http://127.0.0.1:3000` for both the browser and `NEXT_PUBLIC_APP_URL`. Add `http://127.0.0.1:3000/auth/confirm` to the development project's Auth redirect URLs before testing a new signup.
+
 From the repository root, sign in to the Supabase CLI and dry-run the versioned migrations against the development project. Replace `DEV_PROJECT_REF` with the project reference and confirm the target before running the apply command.
 
 ```sh

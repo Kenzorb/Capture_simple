@@ -14,6 +14,10 @@ const messages = new Map([
     "confirmation",
     "The confirmation link could not be used. Try signing in or requesting a new account confirmation.",
   ],
+  [
+    "confirmation-expired",
+    "This confirmation link has expired or was already used. If you already confirmed your email, sign in.",
+  ],
 ]);
 
 export function AuthForm({

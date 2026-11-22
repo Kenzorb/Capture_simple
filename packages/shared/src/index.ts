@@ -79,10 +79,42 @@ export const topicSchema = z.object({
   created_at: dateTimeSchema,
 });
 
+const articleCursorSchema = z.string().min(1).max(512);
+
+export const articleListQuerySchema = z.strictObject({
+  cursor: articleCursorSchema.optional(),
+  limit: z
+    .string()
+    .regex(/^[1-9]\d{0,2}$/)
+    .transform(Number)
+    .pipe(z.number().int().min(1).max(100))
+    .default(20),
+  status: processingStatusSchema.optional(),
+  domain: z.string().trim().min(1).max(253).optional(),
+  q: z.string().trim().min(1).max(200).optional(),
+  sort: z.enum(["captured_desc", "captured_asc"]).default("captured_desc"),
+});
+
+export const articleListResponseSchema = z.object({
+  articles: z.array(articleSchema),
+  next_cursor: articleCursorSchema.nullable(),
+});
+
+export const articleParamsSchema = z.strictObject({ id: idSchema });
+
+export const articleDetailResponseSchema = z.object({
+  article: articleSchema,
+  personal_note: z.string().nullable(),
+  topics: z.array(topicSchema),
+});
+
 export type ProcessingStatus = z.infer<typeof processingStatusSchema>;
 export type Plan = z.infer<typeof planSchema>;
 export type CaptureRequest = z.infer<typeof captureRequestSchema>;
 export type CaptureResponse = z.infer<typeof captureResponseSchema>;
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type Article = z.infer<typeof articleSchema>;
+export type ArticleListQuery = z.infer<typeof articleListQuerySchema>;
+export type ArticleListResponse = z.infer<typeof articleListResponseSchema>;
+export type ArticleDetailResponse = z.infer<typeof articleDetailResponseSchema>;
 export type Topic = z.infer<typeof topicSchema>;

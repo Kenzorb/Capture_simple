@@ -713,7 +713,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-044 — Build minimal popup UX
 
-- [ ] **CAP-044 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-044 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Show current page, optional personal note, save button, loading, already-saved, queued, quota-limited, unsupported and error states.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-044 — Build minimal popup UX` |
-| Last verified completed task | `CAP-043` |
-| Last verification executed | `Chromium verified extraction from published news, blog and documentation markup, plain-text sanitization, and URL-only fallback for non-articles and injection failures. The web and extension builds, 50 unit tests, ESLint, TypeScript, and formatting passed.` |
-| Last successful Git commit | `25a7019` |
-| Active blockers | `None for CAP-044. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-045 — Send idempotent capture requests` |
+| Last verified completed task | `CAP-044` |
+| Last verification executed | `Chromium verified keyboard capture and authoring a note, with a local preview in 49 ms. Simulated responses exercised loading, duplicate, queued, quota-limited, unsupported, and retry states. The extension build, 57 unit tests, lint, TypeScript, and formatting passed.` |
+| Last successful Git commit | `bf7dc0f` |
+| Active blockers | `None for CAP-045. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Build the keyboard-accessible popup preview, note field, Save control, and capture outcome states.` |
+| Next action | `Wire popup saving to the authenticated capture API, preserve the request ID across retries, and verify one durable capture after repeated attempts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 4/9 | In progress |
+| P5 | CAP-040–048 | 5/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2383,3 +2383,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Capture page runs a bounded snapshot function in the active tab's isolated top frame and parses the result with Mozilla Readability. The popup shows a plain-text excerpt and available author, with a link-only preview for non-articles or extraction failures. The extension and API share the UTF-8 text limit.
 - **Verification:** Chromium exercised the built extension using published NASA news, Chrome blog, MDN documentation and a public non-article page replayed with external assets blocked. A synthetic fixture verified script, event handler, hidden text, form, navigation, and iframe exclusions before parsing, along with plain-text rendering and author preservation. Visible modal, restricted-page, non-article, and forced script-failure states passed, and the extraction issued no content request. The web and extension builds, 50 unit tests, ESLint, TypeScript, and Prettier passed.
 - **Next action:** CAP-044 — Build minimal popup UX.
+
+### [2026-11-22T21:04:16+08:00] CAP-044 — Build minimal popup UX — STARTED
+- **Agent/session:** Codex
+- **Next action:** Implement and test the popup preview, optional note, save form, and user-facing status transitions. Leave authenticated submission to CAP-045.
+
+### [2026-11-22T21:09:53+08:00] CAP-044 — Build minimal popup UX — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added keyboard focus from Capture to the page preview, a collapsible personal note field, the Save control and accessible feedback for pending, successful, duplicate, queued, quota-limited, unsupported, and retryable outcomes. The current build explains Save availability and keeps the control disabled until CAP-045 supplies authenticated submission.
+- **Verification:** Chromium exercised the built popup with Tab, Enter, and Shift+Tab, confirmed focus after capture, entered a note, and verified that the UI made no capture request. The fixture preview appeared in 49 ms. Unit tests used simulated save responses with the production form controller, verified that status messages reflect the result and that failed saves preserve the note. The extension build, 57 unit tests, ESLint, TypeScript, and Prettier passed.
+- **Next action:** CAP-045 — Send idempotent capture requests.

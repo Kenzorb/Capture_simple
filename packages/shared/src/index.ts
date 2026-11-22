@@ -19,6 +19,7 @@ export const processingStatusSchema = z.enum([
 
 export const planSchema = z.enum(["free", "pro"]);
 export const maxExtractedTextBytes = 100_000;
+export const maxPersonalNoteLength = 4_000;
 
 const idSchema = z.uuid();
 const webUrlSchema = z.url({ protocol: /^https?$/ }).max(maxCaptureUrlLength);
@@ -32,7 +33,7 @@ export const captureRequestSchema = z.strictObject({
   title: titleSchema.optional(),
   extracted_text: z.string().max(maxExtractedTextBytes).optional(),
   source: z.enum(["chrome_extension", "manual_url"]),
-  personal_note: z.string().max(4000).optional(),
+  personal_note: z.string().max(maxPersonalNoteLength).optional(),
 });
 
 export const captureResponseSchema = z.object({
@@ -116,7 +117,7 @@ export const articleParamsSchema = z.strictObject({ id: idSchema });
 export const articleEditSchema = z
   .strictObject({
     title: titleSchema.optional(),
-    personal_note: z.string().max(4000).nullable().optional(),
+    personal_note: z.string().max(maxPersonalNoteLength).nullable().optional(),
     archived: z.boolean().optional(),
   })
   .refine(

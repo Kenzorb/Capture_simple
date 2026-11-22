@@ -1,6 +1,7 @@
 import { browser } from "wxt/browser";
 import type { ExtensionCommand, ExtensionStatus } from "../../auth/message";
 import { readActivePage } from "../../capture/readable-page";
+import { bindCaptureForm } from "./capture-form";
 
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
 const connect = document.querySelector<HTMLButtonElement>("#connect")!;
@@ -19,9 +20,14 @@ const articlePreview =
   document.querySelector<HTMLDetailsElement>("#article-preview")!;
 const excerpt =
   document.querySelector<HTMLParagraphElement>("#article-excerpt")!;
+const setCapturePage = bindCaptureForm(
+  document.querySelector<HTMLFormElement>("#capture-form")!,
+  document.querySelector<HTMLElement>("#save-status")!,
+);
 let timer: ReturnType<typeof setTimeout> | undefined;
 
 function clearPreview() {
+  setCapturePage(null);
   details.hidden = true;
   captureStatus.textContent = "";
   pageTitle.textContent = "";
@@ -77,6 +83,7 @@ async function send(command: ExtensionCommand) {
 
 async function previewActiveTab() {
   if (capture.hidden || capture.disabled) return;
+  const returnFocus = document.activeElement === capture;
   clearPreview();
   capture.disabled = true;
   try {
@@ -92,6 +99,7 @@ async function previewActiveTab() {
     pageDomain.textContent = page.domain;
     pageUrl.textContent = page.url;
     details.hidden = false;
+    setCapturePage(page);
     if (page.byline) {
       pageAuthor.textContent = page.byline;
       pageAuthor.hidden = authorLabel.hidden = false;
@@ -113,6 +121,14 @@ async function previewActiveTab() {
       captureStatus.textContent = "Could not read the active tab. Try again.";
   } finally {
     capture.disabled = false;
+    if (
+      returnFocus &&
+      (document.activeElement === document.body ||
+        document.activeElement === capture)
+    ) {
+      if (details.hidden) capture.focus();
+      else pageTitle.focus();
+    }
   }
 }
 

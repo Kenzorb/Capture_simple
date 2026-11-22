@@ -26,7 +26,8 @@ p {
   overflow-wrap: anywhere;
 }
 
-#capture-status:empty {
+#capture-status:empty,
+#save-status:empty {
   margin: 0;
 }
 
@@ -44,11 +45,12 @@ dd {
   overflow-wrap: anywhere;
 }
 
-#article-preview {
+#article-preview,
+#capture-form {
   margin-top: 12px;
 }
 
-#article-preview summary {
+summary {
   cursor: pointer;
   font-weight: 600;
 }
@@ -72,6 +74,40 @@ button {
 button:focus-visible {
   outline: 2px solid #17674a;
   outline-offset: 3px;
+}
+
+summary:focus-visible,
+textarea:focus-visible,
+#page-title:focus-visible,
+#save-status:focus-visible {
+  outline: 2px solid #17674a;
+  outline-offset: 3px;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px;
+  border: 1px solid #62766d;
+  border-radius: 6px;
+  font: inherit;
+  resize: vertical;
+}
+
+#capture-form button {
+  width: 100%;
+}
+
+#save-availability {
+  color: #506458;
+  font-size: 13px;
 }
 
 button:disabled {

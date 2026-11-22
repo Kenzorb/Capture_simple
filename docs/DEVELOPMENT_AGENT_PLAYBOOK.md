@@ -1568,12 +1568,12 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Hosted Supabase preserved the browser flow ID on both callbacks. The Supabase SDK regression verifies the original recovery verifier after a later signup. Eight Vitest tests, four Chromium cases, TypeScript, ESLint, and Prettier passed.` |
+| Last verification executed | `Hosted Supabase verified disposable signup codes and copied reset links in separate browsers. The password change, repeat sign-in, sign-out, and rejection of an old password and used link passed. Ten Vitest tests, five Chromium cases, TypeScript, ESLint, and Prettier passed.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `CAP-023 still needs a successful callback from a fresh signup email. The owner’s recovery link failed and later requests hit the hosted email limit. A fresh reset email is needed after the limit clears.` |
+| Active blockers | `CAP-023 still needs browser verification from an actual fresh signup email. Supabase accepted the owner’s latest reset request. The owner needs to verify the email in Capture and set the password.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Retest with fresh emails at http://127.0.0.1:3000 in the requesting Chrome profile after the hosted email limit clears.` |
+| Next action | `Verify the owner’s new recovery email using the Capture form and run the actual fresh signup email acceptance check.` |
 
 ### 11.1 Phase progress overview
 
@@ -2144,3 +2144,10 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** Hosted Supabase preserved `sb_flow_id` on both admin-generated redirects with the existing Site URL. The disposable account was deleted. No email was sent in this check.
 - **Git commit:** The tested fix is in `9a16861`.
 - **Next action:** Resume actual email delivery and callback verification when the hosted mail limit clears. CAP-023 remains unchecked.
+
+### [2026-11-22T12:10:23+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — VERIFIED CHECKPOINT
+- **Agent/session:** Codex
+- **Findings:** The hosted recovery request and redirect succeeded, but the user’s callback still failed to finish signing in. The hosted project rejected the code-template update with the default-provider entitlement error.
+- **Changes:** Added a verification form for signup and password recovery. It verifies one-time codes or copied Supabase email links without depending on the browser cookie that initiated the request. Kept the hosted templates as they were and documented optional code templates.
+- **Verification:** Disposable hosted credentials confirmed signup in a clean Chromium context and reset a password by pasting a provider link in another context. The new password worked, the old password and reused link were rejected, and the account was deleted. TypeScript, ESLint, Prettier, ten Vitest tests, and five Chromium tests passed. Supabase accepted one fresh reset request for the owner.
+- **Next action:** The owner needs to verify their new reset email and enter the new password. Verify a fresh signup from actual email delivery before checking off CAP-023.

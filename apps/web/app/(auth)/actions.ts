@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getSupabaseConfig } from "../../lib/supabase/config";
+import { emailVerificationToken } from "../../lib/supabase/email-verification-link";
 import { createServerSupabaseClient } from "../../lib/supabase/server";
 
 function readEmail(formData: FormData) {
@@ -90,6 +92,34 @@ export async function updatePassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password });
   if (error) redirect("/reset-password?error=failed");
   redirect("/dashboard");
+}
+
+export async function verifyEmail(
+  flow: "signup" | "recovery",
+  formData: FormData,
+) {
+  const recovery = flow === "recovery";
+  const page = recovery ? "/verify-email?flow=recovery&" : "/verify-email?";
+  const email = readEmail(formData);
+  const submitted = formData.get("verification");
+  const value = typeof submitted === "string" ? submitted.trim() : "";
+  const type = recovery ? "recovery" : "signup";
+  const config = getSupabaseConfig();
+  if (!config) redirect(`${page}error=unavailable`);
+
+  const tokenHash = emailVerificationToken(value, config.url, type);
+  const verification = tokenHash
+    ? { token_hash: tokenHash, type }
+    : email && /^\d{6,10}$/.test(value)
+      ? { email, token: value, type }
+      : null;
+  if (!verification) redirect(`${page}error=invalid`);
+
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(`${page}error=unavailable`);
+  const { data, error } = await supabase.auth.verifyOtp(verification);
+  if (error || !data.session) redirect(`${page}error=code`);
+  redirect(recovery ? "/reset-password" : "/dashboard");
 }
 
 export async function signOut() {

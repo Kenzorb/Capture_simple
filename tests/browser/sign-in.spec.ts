@@ -34,13 +34,13 @@ test("password recovery is discoverable and requires a session to set a password
   await page.goto("/sign-in");
   await page.getByRole("link", { name: "Forgot password?" }).click();
   await expect(
-    page.getByRole("button", { name: "Send reset link" }),
+    page.getByRole("button", { name: "Send reset email" }),
   ).toBeVisible();
 
   await page.goto("/reset-password");
   await expect(page).toHaveURL(/\/forgot-password\?error=session$/);
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "Open a new password reset link",
+    "Verify a new password reset email",
   );
 });
 
@@ -51,10 +51,30 @@ test("an expired recovery link returns to the reset request form", async ({
     "/auth/recovery?error=access_denied&error_code=otp_expired#error=access_denied",
   );
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "the same browser",
+    "verify it in Capture",
   );
   const url = new URL(page.url());
   expect(url.pathname).toBe("/forgot-password");
   expect(url.searchParams.get("error")).toBe("callback");
   expect(url.hash).toBe("");
+});
+
+test("signup and recovery provide email verification forms", async ({
+  page,
+}) => {
+  await page.goto("/sign-in?notice=confirm-email");
+  await page
+    .getByRole("link", { name: "verify your confirmation email" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Confirm your email" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Email code or link")).toBeVisible();
+
+  await page.goto("/forgot-password?notice=sent");
+  await page.getByRole("link", { name: "Verify your reset email" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Verify your reset email" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Email code or link")).toBeVisible();
 });

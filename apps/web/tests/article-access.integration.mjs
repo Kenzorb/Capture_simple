@@ -1,0 +1,215 @@
+import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
+import { randomUUID } from "node:crypto";
+import process from "node:process";
+import test from "node:test";
+import { URL } from "node:url";
+import { createClient } from "@supabase/supabase-js";
+
+test(
+  "hosted article reads are paginated and scoped to the authenticated owner",
+  { timeout: 120_000 },
+  async () => {
+    const url = process.env.CAPTURE_TEST_SUPABASE_URL;
+    const publicKey = process.env.CAPTURE_TEST_SUPABASE_PUBLIC;
+    const secret = process.env.CAPTURE_TEST_SUPABASE_SECRET;
+    assert(
+      url && publicKey && secret,
+      "Set credentials for the disposable Supabase test project.",
+    );
+    const appUrl = new URL(
+      process.env.CAPTURE_TEST_APP_URL ?? "http://127.0.0.1:3000",
+    );
+    assert.equal(
+      appUrl.hostname,
+      "127.0.0.1",
+      "Run this test against the local Capture web app.",
+    );
+    const origin = appUrl.origin;
+    const options = {
+      auth: { autoRefreshToken: false, persistSession: false },
+    };
+    const admin = createClient(url, secret, options);
+    const users = [];
+    async function fixture() {
+      const email = "capture-read-check-" + randomUUID() + "@example.test";
+      const password = randomUUID() + "Aa7!";
+      const created = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+      assert(created.data.user && !created.error, "Could not create user");
+      const owner = created.data.user.id;
+      users.push(owner);
+      const client = createClient(url, publicKey, options);
+      const login = await client.auth.signInWithPassword({ email, password });
+      assert(login.data.session && !login.error, "Could not sign in");
+      const session = login.data.session;
+      const cookie =
+        "sb-" +
+        new URL(url).hostname.split(".")[0] +
+        "-auth-token=base64-" +
+        Buffer.from(JSON.stringify(session)).toString("base64url");
+      return {
+        owner,
+        header: { Authorization: "Bearer " + session.access_token },
+        cookie: { Cookie: cookie },
+      };
+    }
+    const read = (path, headers = {}) =>
+      globalThis.fetch(origin + "/api/articles" + path, {
+        headers,
+        signal: globalThis.AbortSignal.timeout(25000),
+      });
+    async function json(path, headers, status = 200) {
+      const response = await read(path, headers);
+      assert.equal(
+        response.status,
+        status,
+        path.split("?")[0] + " returned an unexpected status",
+      );
+      assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+      return response.json();
+    }
+    try {
+      const one = await fixture();
+      const two = await fixture();
+      const ids = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
+      const titled = [
+        "Lunar atlas",
+        "Ocean currents",
+        "Old archive",
+        "Private second owner",
+      ];
+      const same = "2026-11-20T02:00:00.123456Z";
+      const rows = ids.map((id, i) => ({
+        id,
+        user_id: i === 3 ? two.owner : one.owner,
+        title: titled[i],
+        url: "https://example.test/" + id,
+        canonical_url: "https://example.test/" + id,
+        domain: i === 1 ? "ocean.example.test" : "example.test",
+        status: i === 0 ? "ready" : "saved",
+        captured_at: i === 2 ? "2026-11-19T02:00:00Z" : same,
+      }));
+      assert(
+        !(await admin.from("articles").insert(rows)).error,
+        "Could not seed articles",
+      );
+      const topic = randomUUID();
+      assert(
+        !(
+          await admin.from("personal_notes").insert({
+            article_id: ids[0],
+            user_id: one.owner,
+            body: "Owner note",
+          })
+        ).error,
+        "Could not seed note",
+      );
+      assert(
+        !(
+          await admin
+            .from("topics")
+            .insert({ id: topic, user_id: one.owner, name: "Astronomy" })
+        ).error,
+        "Could not seed topic",
+      );
+      assert(
+        !(
+          await admin.from("article_topics").insert({
+            article_id: ids[0],
+            user_id: one.owner,
+            topic_id: topic,
+            assignment_source: "manual",
+          })
+        ).error,
+        "Could not seed assignment",
+      );
+
+      assert.equal((await json("", {}, 401)).error.code, "unauthenticated");
+      assert.equal(
+        (await json("/" + ids[0], {}, 401)).error.code,
+        "unauthenticated",
+      );
+      const all = await json("", one.header);
+      assert.equal(all.articles.length, 3);
+      assert(
+        all.articles.every(
+          (row) =>
+            !Object.hasOwn(row, "user_id") &&
+            !Object.hasOwn(row, "canonical_url"),
+        ),
+      );
+      const other = await json("", two.header);
+      assert.deepEqual(
+        other.articles.map((row) => row.id),
+        [ids[3]],
+      );
+      assert.equal(
+        (await json("/" + ids[0], two.header, 404)).error.code,
+        "not_found",
+      );
+      assert.equal(
+        (await json("/" + ids[3], one.header, 404)).error.code,
+        "not_found",
+      );
+      const detail = await json("/" + ids[0], one.cookie);
+      assert.equal(detail.article.id, ids[0]);
+      assert.equal(detail.personal_note, "Owner note");
+      assert.deepEqual(
+        detail.topics.map((row) => row.id),
+        [topic],
+      );
+      assert(!Object.hasOwn(detail.article, "user_id"));
+      const without = await json("/" + ids[1], one.header);
+      assert.equal(without.personal_note, null);
+      assert.deepEqual(without.topics, []);
+      const filtered = await json(
+        "?status=ready&domain=EXAMPLE.TEST&q=lunar",
+        one.header,
+      );
+      assert.deepEqual(
+        filtered.articles.map((row) => row.id),
+        [ids[0]],
+      );
+      assert.deepEqual((await json("?status=failed", one.header)).articles, []);
+      for (const sort of ["captured_asc", "captured_desc"]) {
+        const expected =
+          sort === "captured_asc"
+            ? [ids[2], ...ids.slice(0, 2).sort()]
+            : [...ids.slice(0, 2).sort().reverse(), ids[2]];
+        const found = [];
+        let pageCursor;
+        for (let i = 0; i < 3; i++) {
+          const query =
+            "?limit=1&sort=" +
+            sort +
+            (pageCursor ? "&cursor=" + encodeURIComponent(pageCursor) : "");
+          const page = await json(query, one.header);
+          assert.equal(page.articles.length, 1);
+          found.push(page.articles[0].id);
+          pageCursor = page.next_cursor;
+          assert.equal(typeof pageCursor, i < 2 ? "string" : "object");
+        }
+        assert.deepEqual(found, expected);
+        assert.equal(pageCursor, null);
+      }
+      assert.equal(
+        (await json("?cursor=bad", one.header, 400)).error.code,
+        "invalid_input",
+      );
+      assert.equal(
+        (await json("/not-a-uuid", one.header, 400)).error.code,
+        "invalid_input",
+      );
+    } finally {
+      for (const id of users)
+        assert(
+          !(await admin.auth.admin.deleteUser(id)).error,
+          "Could not clean fixture",
+        );
+    }
+  },
+);

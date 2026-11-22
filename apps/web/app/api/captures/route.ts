@@ -4,7 +4,7 @@ import {
   type ApiError,
   type CaptureResponse,
 } from "@capture/shared";
-import { getAuthenticatedSession } from "../../../lib/supabase/server";
+import { getRequestSession } from "../../../lib/supabase/request-session";
 
 function captureError(
   status: number,
@@ -19,12 +19,7 @@ function captureError(
 }
 
 export async function POST(request: Request) {
-  const authorization = request.headers.get("authorization");
-  const token = authorization?.match(/^Bearer ([^\s,]+)$/i)?.[1];
-  const session =
-    authorization !== null && !token
-      ? null
-      : await getAuthenticatedSession(token);
+  const session = await getRequestSession(request);
   if (!session)
     return captureError(401, "unauthenticated", "Sign in to save a capture.");
 

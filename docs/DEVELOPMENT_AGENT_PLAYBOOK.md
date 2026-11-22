@@ -561,7 +561,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-030 — Implement article list and detail APIs
 
-- [ ] **CAP-030 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-030 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add cursor/limit pagination, status filters, sorting, safe fields, detail notes/topics retrieval; avoid returning other users’ sources.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P3 — Capture API and reliable storage` |
-| Current task | `CAP-030 — Implement article list and detail APIs` |
-| Last verified completed task | `CAP-029` |
-| Last verification executed | `The hosted concurrent duplicate test returned one new article and nine duplicates with one ID. A second owner received a different article, and no usage was charged. The previous browser, unit, and TypeScript checks passed.` |
-| Last successful Git commit | `cf03ce9` |
-| Active blockers | `None for CAP-030. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-031 — Implement edits, archive, and delete` |
+| Last verified completed task | `CAP-030` |
+| Last verification executed | `The hosted two-user article test verified isolated list and detail access, notes and topics, filters, and stable bidirectional pagination. The hosted deduplication regression, 26 unit tests, lint, and type checking passed.` |
+| Last successful Git commit | `7c942b8` |
+| Active blockers | `None for CAP-031. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement cursor-paginated article listing and owner-scoped detail responses.` |
+| Next action | `Implement owner-scoped article edits, archiving, restoration, and deletion with lifecycle tests.` |
 
 ### 11.1 Phase progress overview
 
@@ -1586,7 +1586,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
-| P3 | CAP-026–033 | 4/8 | In progress |
+| P3 | CAP-026–033 | 5/8 | In progress |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
@@ -2240,3 +2240,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added a reproducible integration test for concurrent retries and distinct request IDs that share a canonical URL. The save transaction uses the existing owner and canonical URL uniqueness constraint, stores each request ID once, and returns the existing article for duplicates.
 - **Verification:** The hosted test passed twice. Ten concurrent requests produced one article and nine duplicates sharing its ID. Six distinct request keys were bound to that article. The second owner received a separate article for the same URL and request ID. No usage events were recorded, and both disposable accounts were cleaned up. ESLint and Prettier passed.
 - **Next action:** CAP-030 — Implement article list and detail APIs.
+
+### [2026-11-22T14:25:47+08:00] CAP-030 — Implement article list and detail APIs — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add authenticated article list and detail routes. Verify stable pagination and isolation with two hosted test accounts.
+
+### [2026-11-22T14:30:52+08:00] CAP-030 — Implement article list and detail APIs — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added private `GET /api/articles` and `GET /api/articles/:id` routes with cookie and bearer authentication. Lists support status, domain, title search, and stable cursor sorting. Detail returns the owner's personal note and topics along with safe article fields.
+- **Verification:** The hosted two-user integration test passed for signed-out rejection, owner lists, cross-owner detail HTTP 404, cookie and bearer reads, note and topic isolation, filters, invalid inputs, and both sort directions with tied timestamps. The hosted deduplication regression, 26 Vitest tests, web and shared TypeScript checks, ESLint, and Prettier passed.
+- **Next action:** CAP-031 — Implement edits, archive, and delete.

@@ -104,6 +104,10 @@ export const articleListResponseSchema = z.object({
 });
 
 export const articleParamsSchema = z.strictObject({ id: idSchema });
+export const articleCursorPayloadSchema = articleSchema.pick({
+  id: true,
+  captured_at: true,
+});
 
 export const articleDetailResponseSchema = z.object({
   article: articleSchema,

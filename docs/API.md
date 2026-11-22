@@ -45,7 +45,7 @@ Processing statuses are `saved`, `queued`, `processing`, `ready`, `failed`, `quo
 
 ## List articles
 
-`GET /api/articles` accepts `limit` from 1 to 100 and defaults to 20. Optional filters are `status`, `domain`, and search query `q`. Sort by `captured_desc` (default) or `captured_asc`. To continue, send the previous `next_cursor` as `cursor` with the same filters and sort. A null cursor means the final page.
+`GET /api/articles` accepts `limit` from 1 to 100 and defaults to 20. Optional filters are `status`, `domain`, and full-text title search `q`. Sort by `captured_desc` (default) or `captured_asc`. To continue, send the previous `next_cursor` as `cursor` with the same filters and sort. A null cursor means the final page.
 
 For example, `GET /api/articles?limit=20&status=ready&sort=captured_desc` returns a page of ready articles.
 

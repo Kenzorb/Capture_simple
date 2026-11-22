@@ -433,7 +433,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-018 — Create topic and relationship tables
 
-- [ ] **CAP-018 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-018 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add topics, article_topics, concepts/article_concepts if needed, with valid parent relations, ownership constraints, one primary topic/article, and cycle protections.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-018 — Create topic and relationship tables` |
-| Last verified completed task | `CAP-017` |
-| Last verification executed | `Hosted Supabase db push and db query --file supabase/tests/article_schema.sql exited 0. Assertions covered one capture per user, long URLs, duplicate rejection, cross-owner note rejection, and deletion cascades. All fixtures rolled back.` |
-| Last successful Git commit | `cdcd51a` |
+| Current task | `CAP-019 — Create processing and usage tables` |
+| Last verified completed task | `CAP-018` |
+| Last verification executed | `Hosted Supabase migration and db query --file supabase/tests/topic_schema.sql passed. Assertions covered normalized sibling and root uniqueness, cycles, owner-scoped links, one primary topic, and delete cascades.` |
+| Last successful Git commit | `978477e` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `CAP-018 — Create topic and relationship tables` |
+| Next action | `CAP-019 — Create processing and usage tables` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 2/10 | In progress |
+| P2 | CAP-016–025 | 3/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **17/112** | **In progress** |
+| **Total** | **CAP-001–112** | **18/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1982,3 +1982,19 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Use a generated SHA-256 canonical URL key to support long URLs. Enable RLS at table creation; client policies follow in CAP-021.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-018 — Create topic and relationship tables
+
+### [2026-11-22T09:04:18+08:00] CAP-017 — Create users and article tables — COMMIT
+- **Git commit:** 978477e
+
+### [2026-11-22T09:04:50+08:00] CAP-018 — Create topic and relationship tables — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** Previous task verified and committed. Use the dedicated capture-dev project.
+- **Next action:** Add owner-scoped topic trees, article links, and concepts with database constraints.
+
+### [2026-11-22T09:05:53+08:00] CAP-018 — Create topic and relationship tables — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added the topic tree, article-topic assignments, concepts, and article-concept relations with owner-aware foreign keys.
+- **Verification:** Hosted Supabase migration and db query --file supabase/tests/topic_schema.sql passed. Assertions covered normalized sibling and root uniqueness, cycles, owner-scoped links, one primary topic, and delete cascades.
+- **Decisions:** Serialize hierarchy checks per owner through a private RLS-protected revision row to prevent conflicting concurrent moves.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-019 — Create processing and usage tables

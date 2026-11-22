@@ -9,6 +9,7 @@ import {
   listOwnArticles,
 } from "../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../lib/supabase/server";
+import { DashboardHeading } from "../../dashboard-focus";
 import {
   CaptureStatus,
   CaptureTime,
@@ -69,9 +70,12 @@ export default async function CapturesPage({
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+      <DashboardHeading
+        view={`${firstPage}|${query.cursor ?? ""}|${capture === "deleted" ? "deleted" : ""}`}
+        className="text-3xl font-semibold tracking-tight sm:text-4xl"
+      >
         All captures
-      </h1>
+      </DashboardHeading>
       {capture === "deleted" && (
         <p role="status" className="mt-3 text-emerald-900">
           Capture deleted.

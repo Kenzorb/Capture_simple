@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { getAuthenticatedUser } from "../../lib/supabase/server";
 import { signOut } from "../(auth)/actions";
+import { AccountDisclosure } from "./account-disclosure";
+import { DashboardFocus } from "./dashboard-focus";
 import { DashboardNavigation } from "./dashboard-navigation";
 
 export default async function DashboardLayout({
@@ -58,7 +60,7 @@ export default async function DashboardLayout({
                 Search
               </button>
             </Form>
-            <details className="relative shrink-0">
+            <AccountDisclosure>
               <summary className="cursor-pointer list-none rounded-lg border border-[#b8c8bd] px-3 py-2 text-sm font-semibold text-emerald-950 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800">
                 Account{" "}
                 <span aria-hidden="true" className="text-xs">
@@ -80,7 +82,7 @@ export default async function DashboardLayout({
                   </button>
                 </form>
               </div>
-            </details>
+            </AccountDisclosure>
           </div>
         </header>
         <main
@@ -88,7 +90,7 @@ export default async function DashboardLayout({
           tabIndex={-1}
           className="mx-auto w-full max-w-6xl min-w-0 px-4 py-8 sm:px-8 sm:py-11 lg:px-10"
         >
-          {children}
+          <DashboardFocus>{children}</DashboardFocus>
         </main>
       </div>
     </div>

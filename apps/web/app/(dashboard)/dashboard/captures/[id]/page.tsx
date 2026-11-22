@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { readOwnArticle } from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
 import { SubmitButton } from "../../../../(auth)/submit-button";
+import { DashboardHeading } from "../../../dashboard-focus";
 import {
   CaptureOriginalLink,
   CaptureStatus,
@@ -49,6 +50,7 @@ export default async function CaptureDetailPage({
   const message = typeof change === "string" ? feedback.get(change) : undefined;
   const archived = Boolean(article?.archived_at);
   const note = article?.personal_notes[0]?.body ?? "";
+  const view = `/dashboard/captures/${parsed.success ? parsed.data.id : "missing"}`;
 
   return (
     <>
@@ -62,9 +64,12 @@ export default async function CaptureDetailPage({
       </Link>
       {article ? (
         <article className="mt-4 max-w-3xl rounded-xl border border-[#dde5dd] bg-white p-5 sm:p-6">
-          <h1 className="text-3xl font-semibold break-words tracking-tight">
+          <DashboardHeading
+            view={view}
+            className="text-3xl font-semibold break-words tracking-tight"
+          >
             {article.title}
-          </h1>
+          </DashboardHeading>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
             <CaptureStatus status={article.status} />
             {archived && (
@@ -183,9 +188,12 @@ export default async function CaptureDetailPage({
         </article>
       ) : (
         <div className="mt-4">
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <DashboardHeading
+            view={view}
+            className="text-3xl font-semibold tracking-tight"
+          >
             {error ? "Capture details" : "Capture not found"}
-          </h1>
+          </DashboardHeading>
           {error && (
             <p role="alert" className="mt-3 text-red-800">
               Could not load this capture. Refresh to try again.

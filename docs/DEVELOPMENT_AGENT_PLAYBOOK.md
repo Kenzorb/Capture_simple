@@ -657,7 +657,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-039 — Add responsive UI and accessibility baseline
 
-- [ ] **CAP-039 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-039 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Use accessible labels, keyboard navigation, focus management, loading announcements and clear color-independent status indicators.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P4 — Web dashboard and captured-article experience` |
-| Current task | `CAP-039 — Add responsive UI and accessibility baseline` |
-| Last verified completed task | `CAP-038` |
-| Last verification executed | `Hosted Chromium verified source navigation and metadata, the no-analysis view, persistent personal notes, archive and restore, explicit deletion confirmation, cross-account isolation, and long URLs at 320px. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.` |
-| Last successful Git commit | `e2f004c` |
-| Active blockers | `None for CAP-039. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current phase | `P5 — Chrome extension and secure account connection` |
+| Current task | `CAP-040 — Implement extension connection/auth contract` |
+| Last verified completed task | `CAP-039` |
+| Last verification executed | `Manual Chrome tab-through and eight axe scans across four screens at 320px and 1440px passed. Hosted Chromium on the production build verified focus, account disclosure, skip link, and submitting announcements. Eight browser auth tests, 41 unit tests, build, ESLint, TypeScript, and Prettier passed.` |
+| Last successful Git commit | `c7c344c` |
+| Active blockers | `None for CAP-040. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Audit key screens for responsive layout and accessible labels, keyboard and focus behavior, loading announcements, and color-independent statuses.` |
+| Next action | `Choose and document the extension authentication handoff, token lifecycle, and origin boundaries, then verify the contract against the threat model.` |
 
 ### 11.1 Phase progress overview
 
@@ -1587,8 +1587,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
-| P4 | CAP-034–039 | 5/6 | In progress |
-| P5 | CAP-040–048 | 0/9 | Not started |
+| P4 | CAP-034–039 | 6/6 | Complete |
+| P5 | CAP-040–048 | 0/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2331,3 +2331,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Capture titles open the detail page, which shows the original URL, source, capture time, optional author and publication date, processing status, and the AI notes fallback. Owners can create, edit, or clear a personal note, archive or restore a capture, and permanently delete it after confirmation. The API and dashboard use the same owner-scoped mutations.
 - **Verification:** Hosted Chromium with disposable accounts verified source navigation, metadata and empty AI notes, multiline note persistence across reloads, note clearing, archive and restore, deletion blocked until confirmed, and permanent deletion. A second account could neither view nor mutate the capture. The detail page fit at 320px with a long source URL. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
 - **Next action:** CAP-039 — Add responsive UI and accessibility baseline.
+
+### [2026-11-22T15:45:51+08:00] CAP-039 — Add responsive UI and accessibility baseline — STARTED
+- **Agent/session:** Codex
+- **Next action:** Audit the key screens with automated accessibility scans and a manual keyboard pass, then correct and retest any issues.
+
+### [2026-11-22T16:01:44+08:00] CAP-039 — Add responsive UI and accessibility baseline — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added consistent visible focus outlines and moved focus to the new heading after dashboard navigation and filter changes. The Account disclosure closes on Escape and when focus leaves it. Pending forms announce submission while their submit button is disabled.
+- **Verification:** Manual keyboard tab-through in Chrome covered sign-in, the dashboard skip link and save form, library filters and capture links, and the detail note and management controls. Axe reported zero violations across four screens at 320px and 1440px with no horizontal overflow. Production-build Chromium verified client navigation and filter focus, skip link, Account dismissal and focus return, and the pending live announcement. Eight browser auth tests, 41 unit tests, build, lint, TypeScript, and formatting passed.
+- **Environment:** The existing port 3000 dev server failed its hot-reload WebSocket handshake and used full-page navigation. Client-side acceptance passed on the local production build connected to the hosted development backend.
+- **Next action:** P4 gate passed with all six tasks verified. Begin CAP-040 — Implement extension connection/auth contract.

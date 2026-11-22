@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { readOwnOverview } from "../../../lib/supabase/overview";
 import { getAuthenticatedSession } from "../../../lib/supabase/server";
 import { SubmitButton } from "../../(auth)/submit-button";
+import { DashboardHeading } from "../dashboard-focus";
 import { saveManualUrl } from "./actions";
 import { CaptureStatus, CaptureTitle } from "./capture-presentation";
 
@@ -46,9 +47,12 @@ export default async function DashboardPage({
     recent?.length === 0 && counts.every(({ count }) => count === 0);
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+      <DashboardHeading
+        view="/dashboard"
+        className="text-3xl font-semibold tracking-tight sm:text-4xl"
+      >
         Your library
-      </h1>
+      </DashboardHeading>
       {error === "sign-out" && (
         <p role="alert" className="mt-4 text-red-800">
           Sign-out failed. Try again.

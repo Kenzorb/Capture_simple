@@ -743,7 +743,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-047 — Test extension across browser edge cases
 
-- [ ] **CAP-047 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-047 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Cover dynamic pages, article with images, heavy scripts, unsupported chrome:// pages, offline API, expired session and large content.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-047 — Test extension across browser edge cases` |
-| Last verified completed task | `CAP-046` |
-| Last verification executed | `Chromium with hosted Supabase verified separate tabs for the saved article and library, owner access, recovery for missing or unauthorized articles, and sign-in when signed out. The Chrome build, 59 tests, lint, TypeScript, formatting, and diff checks passed.` |
-| Last successful Git commit | `a5cf3e6` |
-| Active blockers | `None for CAP-047. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-048 — Audit extension build and permissions` |
+| Last verified completed task | `CAP-047` |
+| Last verification executed | `All nine CAP-047 checks passed in Chromium 156.0.8078.4 with the built MV3 extension and hosted Supabase. See the matrix in §12 for fixtures and results.` |
+| Last successful Git commit | `8009db2` |
+| Active blockers | `None for CAP-048. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Run and record the Chrome edge-case test matrix with browser version, fixtures, and evidence.` |
+| Next action | `Audit the built extension bundle and manifest, then verify least privilege and document the findings.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 7/9 | In progress |
+| P5 | CAP-040–048 | 8/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2413,3 +2413,26 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added Open library to the extension popup and restricted saved article links to the configured origin and validated IDs returned by Capture. Both links open in a new tab.
 - **Verification:** Chromium with hosted Supabase clicked both popup links and confirmed that the owner could see the saved article and note. Missing captures and captures opened under a second account showed the same recovery screen. Signed-out visitors landed at sign-in. The Chrome build, all 59 tests, lint, TypeScript, formatting, and diff checks passed.
 - **Next action:** CAP-047 — Test extension across browser edge cases.
+
+### [2026-11-22T23:48:39+08:00] CAP-047 — Test extension across browser edge cases — STARTED
+
+- **Plan:** Exercise the built extension in headed Chromium using controlled page, network, and session fixtures. Record browser version, fixtures, and measured outcomes.
+
+### [2026-11-22T23:50:55+08:00] CAP-047 — Test extension across browser edge cases — COMPLETE
+
+- **Verification:** Ran the popup in headed Chromium 156.0.8078.4 on Windows with the MV3 build from `8009db2`, the local web app, and a disposable account on hosted Supabase. HTTPS fixtures were served through Playwright at `https://popup.example.test/cap047/<run-id>/`. Each save below was initiated through the popup.
+
+| Case | URL or fixture | Result | Observed evidence |
+|---|---|---|---|
+| Dynamic article | `/dynamic`. A page script inserts the article after 150 ms. | Pass | Popup preview included the inserted article. The API returned HTTP 201 with 2,880 extracted bytes. |
+| Article with images | `/images`. Article includes a loaded SVG and a caption. | Pass | Popup preview included article text. The API returned HTTP 201 with 2,902 extracted bytes, and the image alt-text marker was absent from the submitted text. |
+| Heavy scripts | `/scripts`. A roughly 680 KiB script runs one million loop iterations and sets a DOM marker. | Pass | The script completed and the popup preview included the article. HTTP 201 with 2,886 extracted bytes. Script and hidden-text markers were absent from the submission. |
+| Unsupported Chrome page | `chrome://version/` | Pass | Popup directed the user to a regular website, kept the save form hidden, and sent no capture request. |
+| Offline capture API | `/offline`. Simulated a network failure before the worker could send the capture POST. | Pass | Popup showed retry feedback, preserved the note, and re-enabled Save. Restoring the API and retrying reused the same request ID and created exactly one hosted article with the note. |
+| Expired access session | `/expired`. Set the extension session's stored expiry to the past with its valid refresh token. | Pass | Hosted refresh restored the session. Save returned HTTP 201. |
+| Expired session with rejected refresh | `/expired`. Set stored expiry to the past and supplied an invalid refresh token in the disposable profile. | Pass | No capture POST was sent. The extension cleared the stale session and offered Connect Capture when the popup reopened. |
+| Large content | `/large`. Over 200,000 bytes of article content including multibyte Unicode. | Pass | HTTP 201 with exactly 100,000 extracted UTF-8 bytes and no replacement characters. |
+| Link-only fallback | `/link`. Short page with insufficient article text. | Pass | Popup explained the link-only fallback. HTTP 201 with zero extracted bytes. |
+
+- **Outcome:** All nine checks passed. The test removed its disposable account. No application code changes were needed.
+- **Next action:** CAP-048 — Audit extension build and permissions.

@@ -1,0 +1,1 @@
+-- Add synthetic local test fixtures alongside their schema migrations.

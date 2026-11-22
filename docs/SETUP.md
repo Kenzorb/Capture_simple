@@ -7,9 +7,21 @@
 3. In a second terminal at the repository root, run `pnpm --filter extension build`. In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `apps/extension/.output/chrome-mv3`. Open the Capture popup from the Extensions menu. After another build, reload Capture on the extensions page.
 4. Run `pnpm test`. Install the test browser with `pnpm exec playwright install chromium`, then run `pnpm test:browser`. These tests start a separate web server on port 3173.
 
-### Supabase
+### Hosted Supabase development
 
-The local database startup becomes available after CAP-016 adds `supabase/config.toml` and migrations. Start a Docker-compatible container engine and run these commands from the repository root.
+Capture can use a dedicated hosted development project. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `apps/web/.env.local` using the development project's connection settings. Keep database credentials and privileged keys in your local secret store.
+
+From the repository root, sign in to the Supabase CLI and dry-run the versioned migrations against the development project. Replace `DEV_PROJECT_REF` with the project reference and confirm the target before running the apply command.
+
+```sh
+npx supabase@3.2.0 login
+npx supabase@3.2.0 db push --remote=DEV_PROJECT_REF --dry-run --skip-vault
+npx supabase@3.2.0 db push --remote=DEV_PROJECT_REF --skip-vault
+```
+
+### Local Supabase development
+
+To run the database locally, start a Docker-compatible container engine and run these commands from the repository root.
 
 ```sh
 npx supabase start

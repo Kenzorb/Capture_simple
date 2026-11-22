@@ -413,7 +413,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-016 — Initialize Supabase and migrations
 
-- [ ] **CAP-016 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-016 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Set up Supabase project/local instance and versioned SQL migrations; keep schema changes reversible when practical.
 
@@ -1564,16 +1564,16 @@ _None at document creation._
 
 | Field | Current value |
 |---|---|
-| Overall status | `BLOCKED` |
+| Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-016 — Initialize Supabase and migrations` |
-| Last verified completed task | `CAP-015` |
-| Last verification executed | `Supabase 3.2.0 init and migration creation passed. Local start exited 1 because Docker and Podman are unavailable. TOML and layout checks passed. Database reset could not run.` |
+| Current task | `CAP-017 — Create users and article tables` |
+| Last verified completed task | `CAP-016` |
+| Last verification executed | `Fresh hosted capture-dev accepted baseline migration; history and schema permissions checked; second dry run is up to date.` |
 | Last successful Git commit | `a4e3c2c` |
-| Active blockers | `CAP-016 requires a running Docker-compatible engine on Windows. Hosted GitHub and provider access remain unconfirmed.` |
+| Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Run the pinned Supabase startup and local database reset with Docker or Podman available, then verify the baseline migration before CAP-017.` |
+| Next action | `Create and test profile, article, and personal note migrations for CAP-017 against the dedicated development project.` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 0/10 | In progress |
+| P2 | CAP-016–025 | 1/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **15/112** | **In progress** |
+| **Total** | **CAP-001–112** | **16/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1601,7 +1601,7 @@ Record answers here as decisions are made; record private keys only in secret st
 
 | Topic | Default / open question | Status |
 |---|---|---|
-| Supabase project | Which dev/staging/prod project? | Unconfirmed |
+| Supabase project | Which dev/staging/prod project? | Hosted capture-dev verified; staging and production unconfirmed |
 | GitHub repository | Repo name, owner and CI access? | Unconfirmed |
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
 | Background jobs | Inngest, one durable provider | Default proposed; verify |
@@ -1946,3 +1946,18 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** CAP-016 stopped at the local container-runtime dependency. The last completed CI workflow passed through both builds and the smoke test in act, and failed on the intentional test assertion in a separate run. Native cache upload warned about missing gzip.
 - **Git commit:** a4e3c2c (CAP-015); handoff recorded in a separate docs commit.
 - **Next action:** Resume CAP-016 once the engine is available. Leave its checkbox unchecked until clean replay passes.
+
+### [2026-11-22T08:49:51+08:00] CAP-016 — Initialize Supabase and migrations — RESUMED
+- **Agent/session:** Codex
+- **Context/dependencies:** Owner supplied a new hosted development project in place of a local Windows container engine.
+- **Verification:** Supabase CLI project listing confirmed capture-dev is active and running PostgreSQL 17. A read-only query against project gbkuuimhbuyzaaxbhvxb found zero public tables and no migration history.
+- **Next action:** Dry-run the baseline migration, apply it to capture-dev, and verify history and privileges.
+
+### [2026-11-22T08:51:17+08:00] CAP-016 — Initialize Supabase and migrations — COMPLETED
+- **Agent/session:** Codex
+- **Context/dependencies:** Owner supplied the dedicated hosted capture-dev project, ref gbkuuimhbuyzaaxbhvxb.
+- **Changes:** Versioned the Supabase project config, seed entry point, and baseline permission migration. Documented the hosted setup alongside local development.
+- **Verification:** Supabase CLI 3.2.0 read-only preflight found zero public tables and no migration history. `db push --remote=gbkuuimhbuyzaaxbhvxb --dry-run --skip-vault` listed only the baseline. The confirmed push applied migration 20261121160117. Read-only SQL confirmed the history row, denied CREATE on public to anon and authenticated, and retained anon USAGE. A second dry run reported the remote database up to date.
+- **Decisions:** Used a fresh hosted development project to verify code-based replay. The CLI labels this project's main branch production; the target was verified by name and exact project ref as the owner's dedicated development project.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-017 — Create users and article tables.

@@ -505,7 +505,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-025 — Generate typed database access
 
-- [ ] **CAP-025 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-025 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Generate DB types from migrations and expose owner-scoped query helpers; avoid ad-hoc SQL hidden in route handlers.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-025 — Generate typed database access` |
-| Last verified completed task | `CAP-024` |
-| Last verification executed | `Authenticated account lookup worked in the existing Chrome session. A disposable hosted session verified signed-out API rejection, cookie refresh, dashboard access, sign-out, and rejection of a revoked cookie. Seven browser tests, ten unit tests, lint, and type checking passed.` |
-| Last successful Git commit | `1ab6e29` |
-| Active blockers | `None for CAP-025. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current phase | `P3 — Capture API and reliable storage` |
+| Current task | `CAP-026 — Specify capture and article API contracts` |
+| Last verified completed task | `CAP-025` |
+| Last verification executed | `All six local and hosted migrations matched. Regenerated database types matched the repository. Hosted two-user checks verified owner isolation and signed-out rejection. TypeScript, lint, and ten unit tests passed.` |
+| Last successful Git commit | `382a520` |
+| Active blockers | `None for CAP-026. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify generated schema types and introduce authenticated owner-scoped query helpers.` |
+| Next action | `Add and verify the capture and article API contracts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1585,8 +1585,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 8/10 | In progress |
-| P3 | CAP-026–033 | 0/8 | Not started |
+| P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
+| P3 | CAP-026–033 | 0/8 | In progress |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
@@ -2189,3 +2189,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added private, non-cacheable `GET /api/me`. The dashboard and API both validate the current Supabase user, and the API scopes its profile and plan lookups to that user.
 - **Verification:** The owner’s existing signed-in Chrome profile received the expected account and plan. A disposable hosted test verified anonymous HTTP 401, stale access-cookie refresh and rotation, dashboard access, sign-out, and HTTP 401 plus dashboard redirect when replaying the revoked cookie. Seven Chromium cases, ten unit tests, TypeScript, and ESLint passed.
 - **Next action:** CAP-025 — Generate typed database access.
+
+### [2026-11-22T13:58:09+08:00] CAP-025 — Generate typed database access — STARTED
+- **Agent/session:** Codex
+- **Next action:** Match TypeScript database types to the hosted migration set and move account lookup into an authenticated owner-scoped helper.
+
+### [2026-11-22T14:02:07+08:00] CAP-025 — Generate typed database access — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Moved profile and plan reads into a typed server helper that requires a verified session and scopes both queries to its owner.
+- **Verification:** All six hosted migrations matched the repository. The Supabase CLI regenerated public schema types identical to the checked-in file after formatting. Two disposable hosted accounts with distinct names and plans each received only their own data. Direct database cross-owner reads returned no rows, and the signed-out API returned HTTP 401. Lint, TypeScript, and ten unit tests passed.
+- **Decision:** The P2 gate passes with the owner-approved CAP-023 fresh-signup deferral. CAP-023 remains unchecked.
+- **Next action:** CAP-026 — Specify capture and article API contracts.

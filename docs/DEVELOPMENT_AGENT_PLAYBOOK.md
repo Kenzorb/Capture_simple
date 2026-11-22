@@ -541,7 +541,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-028 — Implement POST /api/captures
 
-- [ ] **CAP-028 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-028 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Authenticate and validate; create article with status SAVED immediately and idempotency key; accept bounded user-initiated extracted content; support URL-only saves.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P3 — Capture API and reliable storage` |
-| Current task | `CAP-028 — Implement POST /api/captures` |
-| Last verified completed task | `CAP-027` |
-| Last verification executed | `Twenty-six unit tests passed, including URL redirect fixtures, tracking removal, query distinctions, hash routes, international domains, and invalid inputs. Shared and test TypeScript checks and lint passed.` |
-| Last successful Git commit | `e5b5ec6` |
-| Active blockers | `None for CAP-028. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-029 — Make deduplication atomic` |
+| Last verified completed task | `CAP-028` |
+| Last verification executed | `Hosted capture saved articles, content, notes, and URL-only submissions without any AI calls. Retries returned the original ID and conflicting request IDs returned HTTP 409. Eight Chromium tests, 26 unit tests, lint, and type checking passed.` |
+| Last successful Git commit | `5581cc2` |
+| Active blockers | `None for CAP-029. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement and verify authenticated durable capture storage.` |
+| Next action | `Verify atomic deduplication under concurrent requests.` |
 
 ### 11.1 Phase progress overview
 
@@ -1586,7 +1586,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
-| P3 | CAP-026–033 | 2/8 | In progress |
+| P3 | CAP-026–033 | 3/8 | In progress |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
@@ -2220,3 +2220,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added shared validation and canonicalization for absolute HTTP(S) URLs. Canonical URLs drop known tracking keys and section anchors while retaining content query values, encoding, and hash routes.
 - **Verification:** Twenty-six Vitest tests passed, including redirect targets, tracking keys, distinct queries, hash routes, international hostnames, malformed URLs, credentials, and length limits. Shared and test TypeScript checks and lint passed.
 - **Next action:** CAP-028 — Implement POST /api/captures.
+
+### [2026-11-22T14:09:31+08:00] CAP-028 — Implement POST /api/captures — STARTED
+- **Agent/session:** Codex
+- **Next action:** Save a capture and its request ID in one database transaction after authenticating and validating the request.
+
+### [2026-11-22T14:14:26+08:00] CAP-028 — Implement POST /api/captures — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added the authenticated cookie and bearer capture endpoint and transactional save function in `20261122060931_save_capture.sql`. The database derives ownership from a live session. The transaction stores the article, optional text and note, and request ID without AI processing.
+- **Verification:** Reviewed the hosted migration dry-run, applied only that migration, and regenerated schema types. A disposable hosted account saved full and URL-only captures and read back the expected records. Anonymous and invalid requests were rejected. A retry returned the original ID and reuse for another URL returned HTTP 409. Eight Chromium cases, 26 Vitest tests, TypeScript, and ESLint passed.
+- **Next action:** CAP-029 — Make deduplication atomic.

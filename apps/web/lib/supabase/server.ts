@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getSupabaseConfig } from "./config";
 import type { Database } from "./database.types";
@@ -27,11 +28,18 @@ export async function createServerSupabaseClient() {
   });
 }
 
-export async function getAuthenticatedSession() {
-  const supabase = await createServerSupabaseClient();
+export async function getAuthenticatedSession(accessToken?: string) {
+  const config = getSupabaseConfig();
+  if (!config) return null;
+  const supabase = accessToken
+    ? createClient<Database>(config.url, config.publishableKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: `Bearer ${accessToken}` } },
+      })
+    : await createServerSupabaseClient();
   if (!supabase) return null;
 
-  const { data, error } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser(accessToken);
   return error || !data.user ? null : { supabase, user: data.user };
 }
 

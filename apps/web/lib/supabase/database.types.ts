@@ -213,6 +213,32 @@ export type Database = {
         };
         Relationships: [];
       };
+      capture_requests: {
+        Row: {
+          article_id: string;
+          request_id: string;
+          user_id: string;
+        };
+        Insert: {
+          article_id: string;
+          request_id: string;
+          user_id: string;
+        };
+        Update: {
+          article_id?: string;
+          request_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capture_requests_user_id_article_id_fkey";
+            columns: ["user_id", "article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["user_id", "id"];
+          },
+        ];
+      };
       concepts: {
         Row: {
           created_at: string;
@@ -598,7 +624,23 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      capture_save_article: {
+        Args: {
+          p_canonical_url: string;
+          p_domain: string;
+          p_extracted_text?: string;
+          p_personal_note?: string;
+          p_request_id: string;
+          p_source: string;
+          p_title: string;
+          p_url: string;
+        };
+        Returns: {
+          article_id: string;
+          duplicate: boolean;
+          processing_status: Database["public"]["Enums"]["article_status"];
+        }[];
+      };
     };
     Enums: {
       article_status:

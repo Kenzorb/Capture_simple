@@ -37,6 +37,14 @@ test("the account API rejects direct signed-out requests", async ({
   expect(await response.json()).toEqual({ error: "unauthorized" });
 });
 
+test("the capture API rejects a signed-out save", async ({ request }) => {
+  const response = await request.post("/api/captures", { data: {} });
+  expect(response.status()).toBe(401);
+  expect(await response.json()).toMatchObject({
+    error: { code: "unauthenticated" },
+  });
+});
+
 test("password recovery is discoverable and requires a session to set a password", async ({
   page,
 }) => {

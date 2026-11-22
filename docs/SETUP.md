@@ -13,6 +13,8 @@ Capture can use a dedicated hosted development project. Set `NEXT_PUBLIC_SUPABAS
 
 For email confirmation, set `NEXT_PUBLIC_APP_URL` to the web origin you open in the browser and allow its `/auth/confirm` URL in the Supabase Auth redirect settings. The default hosted mail service delivers to organization members. Open the confirmation link in the browser that submitted the form so the session can use the original PKCE verifier.
 
+For a `localhost` signup, keep the web server running and open the link in that same browser on the computer running Capture. On a phone or another computer, `localhost` points to that device. Supabase can confirm the email even when the browser cannot reach Capture's callback. After email confirmation, password sign-in is available from the Capture web app.
+
 From the repository root, sign in to the Supabase CLI and dry-run the versioned migrations against the development project. Replace `DEV_PROJECT_REF` with the project reference and confirm the target before running the apply command.
 
 ```sh

@@ -43,7 +43,8 @@ export function AuthForm({
       )}
       {notice === "confirm-email" && (
         <p role="status" className="mt-4 text-emerald-950/80">
-          Check your email for a confirmation link, then sign in.
+          Open the confirmation link from your email in this same browser on
+          this device.
         </p>
       )}
 

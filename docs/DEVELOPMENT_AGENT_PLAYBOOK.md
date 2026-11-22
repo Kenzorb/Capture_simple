@@ -1568,12 +1568,12 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Hosted signup requested email confirmation and created a new unconfirmed account. Chromium waited 10 minutes without reaching the dashboard.` |
+| Last verification executed | `Hosted signup and email verification confirmed by read-only query. Safari could not reach the loopback callback. Four Vitest tests and formatting passed after clarifying the instructions.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `The connected Gmail account could not see the test confirmation. The original signup browser closed after timeout.` |
+| Active blockers | `CAP-023 needs one successful confirmation callback and repeat sign-in from a fresh signup in the same browser on the Windows host.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Arrange an accessible test inbox and fresh authorized confirmation attempt, then verify repeat sign-in and sign-out.` |
+| Next action | `Retest with an authorized test identity, keeping the Capture server and the signup browser open on the same computer.` |
 
 ### 11.1 Phase progress overview
 
@@ -2106,3 +2106,9 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Blockers/risks:** Connected Gmail was for a different inbox and no matching forwarded confirmation was found. The confirmation session has closed. The unconfirmed development test account was left in place.
 - **Git commit:** Task remains unchecked. Auth implementation is saved in the existing checkpoint; this handoff records the actual test result.
 - **Next action:** Arrange a reachable test inbox and an authorized confirmation attempt in a fresh browser session.
+
+### [2026-11-22T10:04:10+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Verification:** User reported Safari could not connect to the localhost callback. Read-only Supabase query verified one account and one confirmed email. This proves provider confirmation. The original test browser had closed and the end-to-end callback session remains unverified. Vitest passed all four tests and Prettier passed.
+- **Changes:** Clarified the signup notice and local setup instructions to keep Capture running and confirm from the same browser on the same device.
+- **Next action:** Verify a fresh authorized signup with a reachable callback and the original browser session before marking the task complete.

@@ -617,7 +617,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-035 — Build overview and empty-state onboarding
 
-- [ ] **CAP-035 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-035 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Display recent captures, status counts and prompt to save first article; do not invent topics when an account has no articles.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P4 — Web dashboard and captured-article experience` |
-| Current task | `CAP-035 — Build overview and empty-state onboarding` |
-| Last verified completed task | `CAP-034` |
-| Last verification executed | `Hosted Chromium verified layout at 1440px, 390px, and 320px, active navigation, keyboard skip, authenticated search and empty states, link saving, account menu, and sign-out. Eight Chromium auth tests, 41 unit tests, lint, and TypeScript passed.` |
-| Last successful Git commit | `8d37567` |
-| Active blockers | `None for CAP-035. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-036 — Build All Captures library` |
+| Last verified completed task | `CAP-035` |
+| Last verification executed | `Hosted Chromium verified first-capture guidance, immediate first save, exact active status counts, five newest captures, owner and archive isolation, and 320px navigation. Eight Chromium auth tests, 41 unit tests, lint, and TypeScript passed.` |
+| Last successful Git commit | `2d391bc` |
+| Active blockers | `None for CAP-036. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Add real recent captures and status counts to Overview, with first-capture guidance for empty accounts.` |
+| Next action | `Add capture times, status badges, and filters to the paginated All captures view, then verify live data and empty filters.` |
 
 ### 11.1 Phase progress overview
 
@@ -1587,7 +1587,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
-| P4 | CAP-034–039 | 1/6 | In progress |
+| P4 | CAP-034–039 | 2/6 | In progress |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
@@ -2291,3 +2291,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added protected Overview and All captures navigation, top title search, an account menu, keyboard skip navigation, a loading skeleton, and empty and no-result states. The All captures route reads the signed-in user's article titles and source links.
 - **Verification:** A disposable hosted account exercised desktop and mobile routes in Chromium at 1440px, 390px, and 320px without horizontal overflow. Long titles wrapped, keyboard skip and active navigation worked, search showed matching saved articles, the save form persisted a new link, and signing out blocked library access. Reviewed desktop and mobile screenshots. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
 - **Next action:** CAP-035 — Build overview and empty-state onboarding.
+
+### [2026-11-22T15:13:56+08:00] CAP-035 — Build overview and empty-state onboarding — STARTED
+- **Agent/session:** Codex
+- **Next action:** Show recent captures and status totals from the signed-in account, and guide empty accounts to their first save.
+
+### [2026-11-22T15:16:46+08:00] CAP-035 — Build overview and empty-state onboarding — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Overview shows up to five recent active captures, their source links and statuses, and exact counts for Saved, In progress, Ready, and Needs attention. Empty accounts receive first-capture guidance based on real data. Missing count data is shown as unavailable.
+- **Verification:** A disposable hosted Chromium account started empty, saved its first link, and immediately displayed it and the updated count. Populated fixtures verified all status groups, chronological ordering, archive and cross-account isolation, 320px rendering, and View all navigation. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
+- **Next action:** CAP-036 — Build All Captures library.

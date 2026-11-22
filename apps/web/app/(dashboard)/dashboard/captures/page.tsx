@@ -1,7 +1,4 @@
-import {
-  articleListQuerySchema,
-  canonicalizeCaptureUrl,
-} from "@capture/shared";
+import { articleListQuerySchema } from "@capture/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -11,6 +8,7 @@ import {
   listOwnArticles,
 } from "../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../lib/supabase/server";
+import { CaptureSourceTitle } from "../capture-presentation";
 
 export const metadata: Metadata = { title: "All captures" };
 
@@ -80,27 +78,15 @@ export default async function CapturesPage({
         </div>
       ) : (
         <ul className="mt-6 max-w-3xl divide-y divide-[#dde5dd] rounded-xl border border-[#dde5dd] bg-white">
-          {articles.map((article) => {
-            const source = canonicalizeCaptureUrl(article.url);
-            return (
-              <li
-                key={article.id}
-                className="px-4 py-3 break-words sm:px-5 sm:py-4"
-              >
-                {source ? (
-                  <a
-                    href={source.url}
-                    className="font-semibold text-emerald-950 underline underline-offset-2 hover:no-underline"
-                  >
-                    {article.title}
-                  </a>
-                ) : (
-                  <span className="font-semibold">{article.title}</span>
-                )}
-                <p className="mt-1 text-sm text-[#506458]">{article.domain}</p>
-              </li>
-            );
-          })}
+          {articles.map((article) => (
+            <li
+              key={article.id}
+              className="px-4 py-3 break-words sm:px-5 sm:py-4"
+            >
+              <CaptureSourceTitle url={article.url} title={article.title} />
+              <p className="mt-1 text-sm text-[#506458]">{article.domain}</p>
+            </li>
+          ))}
         </ul>
       )}
       {nextParams.has("cursor") && (

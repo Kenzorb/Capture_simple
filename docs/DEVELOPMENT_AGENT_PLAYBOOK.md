@@ -1568,12 +1568,12 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Lint, typecheck, four Vitest tests, both builds and format passed. Chromium verified signup validation, sign-in, protected dashboard, sign-out and repeat sign-in using a disposable confirmed identity. Successful signup email and confirmation await an authorized recipient.` |
+| Last verification executed | `Hosted signup requested email confirmation and created a new unconfirmed account. Chromium waited 10 minutes without reaching the dashboard.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `CAP-023 needs authorization to send one hosted signup confirmation to a Supabase organization member test address and access to open the confirmation link in the signing-up browser.` |
+| Active blockers | `The connected Gmail account could not see the test confirmation. The original signup browser closed after timeout.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Complete a real new-account signup and confirmation using an authorized test inbox, then verify sign-in again and commit CAP-023.` |
+| Next action | `Arrange an accessible test inbox and fresh authorized confirmation attempt, then verify repeat sign-in and sign-out.` |
 
 ### 11.1 Phase progress overview
 
@@ -2094,3 +2094,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Context/dependencies:** CAP-017 through CAP-022 individually verified and committed. Hosted capture-dev contains the applied schema. 22/112 tasks complete.
 - **Changes:** Uncommitted CAP-023 app routes and setup documentation are preserved in the working tree.
 - **Next action:** Use authorized hosted signup email test evidence to finish CAP-023.
+
+### [2026-11-22T09:44:52+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — RESUMED
+- **Agent/session:** Codex
+- **Context/dependencies:** The owner supplied a test recipient. The dev database preflight found no existing account at that address.
+- **Next action:** Submit one signup through Capture and verify email confirmation in the same browser session.
+
+### [2026-11-22T09:56:27+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Verification:** Playwright submitted a single signup through Capture for the authorized recipient. Capture reached the confirmation notice. A read-only query found one newly registered account with no confirmation timestamp. No confirmation callback reached the app during the 10-minute Chromium wait, and the run timed out and stopped the test server. Prettier and git diff --check passed.
+- **Blockers/risks:** Connected Gmail was for a different inbox and no matching forwarded confirmation was found. The confirmation session has closed. The unconfirmed development test account was left in place.
+- **Git commit:** Task remains unchecked. Auth implementation is saved in the existing checkpoint; this handoff records the actual test result.
+- **Next action:** Arrange a reachable test inbox and an authorized confirmation attempt in a fresh browser session.

@@ -1568,7 +1568,7 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Hosted logs confirmed a bad PKCE verifier and later email rate limits. The Supabase SDK regression verifies the original verifier after a later signup. Eight Vitest tests, four Chromium cases, TypeScript, ESLint, and Prettier passed.` |
+| Last verification executed | `Hosted Supabase preserved the browser flow ID on both callbacks. The Supabase SDK regression verifies the original recovery verifier after a later signup. Eight Vitest tests, four Chromium cases, TypeScript, ESLint, and Prettier passed.` |
 | Last successful Git commit | `1ab6e29` |
 | Active blockers | `CAP-023 still needs a successful callback from a fresh signup email. The owner’s recovery link failed and later requests hit the hosted email limit. A fresh reset email is needed after the limit clears.` |
 | MVP launch gate | `NOT READY` |
@@ -2138,3 +2138,9 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Enabled Supabase’s flow IDs and selected the verifier matching the callback. Clarified the reset notice without exposing whether an email address has an account. The hosted Site URL already matches the Capture origin.
 - **Verification:** The installed Supabase SDK selected the later signup’s verifier without a flow ID and selected the original recovery verifier with the ID. Eight Vitest tests, four Chromium cases, TypeScript, ESLint, Prettier, and the diff check passed.
 - **Next action:** Retest with an actual reset email after the limit clears, then verify fresh mailbox signup and repeat sign-in before checking off CAP-023.
+
+### [2026-11-22T11:09:19+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — VERIFIED CHECKPOINT
+- **Agent/session:** Codex
+- **Verification:** Hosted Supabase preserved `sb_flow_id` on both admin-generated redirects with the existing Site URL. The disposable account was deleted. No email was sent in this check.
+- **Git commit:** The tested fix is in `9a16861`.
+- **Next action:** Resume actual email delivery and callback verification when the hosted mail limit clears. CAP-023 remains unchecked.

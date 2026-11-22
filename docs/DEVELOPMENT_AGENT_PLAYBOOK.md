@@ -1568,12 +1568,12 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Live password recovery passed. Six Chromium tests also verified that the normal post-request screen directs users to their inbox and that a failed callback offers the optional fallback.` |
+| Last verification executed | `An approved fresh signup created an account and delivered a real Gmail confirmation. The original test browser timed out before confirmation. Ten unit tests, TypeScript, and ESLint passed.` |
 | Last successful Git commit | `1ab6e29` |
-| Active blockers | `CAP-023 still needs browser verification from an actual fresh signup email.` |
+| Active blockers | `The confirmation callback and repeat sign-in remain unverified for an actual fresh signup. Windows browser automation could not control the original test window, and the account remained unconfirmed when the test ended.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify actual signup email delivery, confirmation, repeat sign-in, protected navigation, and sign-out with an authorized fresh test account.` |
+| Next action | `Open Capture and Gmail in the same normal Chrome profile for the next authorized fresh signup, then verify the callback, repeat sign-in, and sign-out.` |
 
 ### 11.1 Phase progress overview
 
@@ -2162,3 +2162,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Removed the separate recovery verification link from the normal reset email notice. The notice directs users to their inbox, and the callback error offers the code or copied-link fallback.
 - **Verification:** Six Chromium tests passed, including the normal reset email notice with no extra link and recovery fallback access after an expired link. TypeScript passed.
 - **Next action:** Keep CAP-023 unchecked while the actual fresh signup email acceptance check is pending.
+
+### [2026-11-22T13:24:55+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — RESUMED
+- **Agent/session:** Codex
+- **Context/dependencies:** Live password recovery was verified after the owner changed the SMTP sender. The owner approved one new signup test using a Gmail alias that delivers to their existing inbox.
+- **Next action:** Submit through Capture and verify the real email callback in the same test browser, then exercise repeat sign-in, protected navigation, and sign-out.
+
+### [2026-11-22T13:34:12+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Verification:** The live signup form created the approved test account and displayed its confirmation notice. The matching confirmation arrived in Gmail. Windows browser automation could open the message but could not control the isolated Chrome for Testing window. The browser timed out after eight minutes, and the hosted account remained unconfirmed. Ten Vitest tests, TypeScript, and ESLint passed.
+- **Next action:** Repeat the actual confirmation in a normal Chrome profile that can access both Capture and Gmail. Verify repeat sign-in and sign-out before checking off CAP-023.

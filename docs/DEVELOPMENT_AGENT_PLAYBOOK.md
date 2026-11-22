@@ -637,7 +637,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-037 — Build manual URL-save form
 
-- [ ] **CAP-037 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-037 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Validate and submit a URL; show immediate saved confirmation and link to detail; expose sensible errors.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P4 — Web dashboard and captured-article experience` |
-| Current task | `CAP-037 — Build manual URL-save form` |
-| Last verified completed task | `CAP-036` |
-| Last verification executed | `Hosted Chromium verified capture metadata, filtered pagination, empty and archived views, account isolation, 320px rendering, and immediate save visibility in the library and API. Eight Chromium auth tests, 41 Vitest tests, ESLint, and TypeScript passed.` |
-| Last successful Git commit | `dba4c0d` |
-| Active blockers | `None for CAP-037. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-038 — Build article detail baseline` |
+| Last verified completed task | `CAP-037` |
+| Last verification executed | `Hosted Chromium verified malformed and non-public URL rejection, immediate library and API visibility before processing, save and duplicate links to the same capture, and signed-out and cross-account detail handling. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.` |
+| Last successful Git commit | `b0af8c1` |
+| Active blockers | `None for CAP-038. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Finish manual URL save feedback and link the successful result to its capture detail.` |
+| Next action | `Extend article detail with source metadata, personal notes, archive and delete controls, and the fallback for missing AI output.` |
 
 ### 11.1 Phase progress overview
 
@@ -1587,7 +1587,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
-| P4 | CAP-034–039 | 3/6 | In progress |
+| P4 | CAP-034–039 | 4/6 | In progress |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
@@ -2311,3 +2311,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** All captures displays source domains, UTC capture times, and processing badges. Status, source domain, collection, sorting, and title search are retained across cursor pages. Empty results have distinct messages, and reset clears the active filters.
 - **Verification:** Disposable accounts on the hosted backend verified capture metadata, filtered pagination across 21 matching results, empty filters and reset, archived results and account isolation, 320px layout, and immediate visibility of a new manual save in the library and API. Eight Chromium auth tests, 41 Vitest tests, ESLint, and TypeScript passed.
 - **Next action:** CAP-037 — Build manual URL-save form.
+
+### [2026-11-22T15:29:17+08:00] CAP-037 — Build manual URL-save form — STARTED
+- **Agent/session:** Codex
+- **Next action:** Link the manual save confirmation to the persisted capture and verify validation, duplicates, and immediate library visibility.
+
+### [2026-11-22T15:33:55+08:00] CAP-037 — Build manual URL-save form — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** The save and duplicate confirmations link to the persisted capture. The initial detail page shows the title, source, and processing status for the owner. Invalid IDs and other accounts' captures show the same unavailable view.
+- **Verification:** Hosted Chromium with disposable accounts verified invalid and non-public URLs, immediate manual-save visibility in the library and API while processing status was Saved, the original source link, canonical duplicate handling, and signed-out and cross-account access. Eight Chromium auth tests, 41 Vitest tests, ESLint, TypeScript, and Prettier passed.
+- **Next action:** CAP-038 — Build article detail baseline.

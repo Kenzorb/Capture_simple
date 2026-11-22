@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { maxCaptureUrlLength } from "@capture/shared";
+import { articleParamsSchema, maxCaptureUrlLength } from "@capture/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -27,16 +27,21 @@ const captureMessages = new Map([
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; capture?: string }>;
+  searchParams: Promise<{
+    error?: string | string[];
+    capture?: string | string[];
+    article?: string | string[];
+  }>;
 }) {
   const session = await getAuthenticatedSession();
   if (!session) redirect("/sign-in");
-  const [{ error, capture }, { recent, counts }] = await Promise.all([
+  const [{ error, capture, article }, { recent, counts }] = await Promise.all([
     searchParams,
     readOwnOverview(session),
   ]);
-  const message = capture && captureMessages.get(capture);
+  const message = typeof capture === "string" && captureMessages.get(capture);
   const saved = capture === "saved" || capture === "duplicate";
+  const detail = articleParamsSchema.safeParse({ id: article });
   const empty =
     recent?.length === 0 && counts.every(({ count }) => count === 0);
   return (
@@ -102,6 +107,17 @@ export default async function DashboardPage({
             className={saved ? "mt-4 text-emerald-900" : "mt-4 text-red-800"}
           >
             {message}
+            {saved && detail.success && (
+              <>
+                {" "}
+                <Link
+                  href={`/dashboard/captures/${detail.data.id}`}
+                  className="inline-block font-semibold underline underline-offset-2"
+                >
+                  View capture
+                </Link>
+              </>
+            )}
           </p>
         )}
       </section>

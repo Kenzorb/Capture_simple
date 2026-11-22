@@ -46,9 +46,10 @@ export async function saveManualUrl(formData: FormData) {
   if (error?.code === "23505") redirect("/dashboard?capture=conflict");
   if (error || !data) redirect("/dashboard?capture=unavailable");
   revalidatePath("/dashboard");
-  redirect(
-    data.duplicate
-      ? "/dashboard?capture=duplicate"
-      : "/dashboard?capture=saved",
-  );
+  revalidatePath("/dashboard/captures");
+  const result = new URLSearchParams({
+    capture: data.duplicate ? "duplicate" : "saved",
+    article: data.article_id,
+  });
+  redirect(`/dashboard?${result}`);
 }

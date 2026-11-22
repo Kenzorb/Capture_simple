@@ -1,3 +1,8 @@
 packages:
   - apps/*
   - packages/*
+
+overrides:
+  # Keep Inngest's OpenTelemetry SDK v2 packages on the compatible API line.
+  "@opentelemetry/api": "1.9.0"
+  "inngest>@opentelemetry/auto-instrumentations-node": "0.75.0"

@@ -769,7 +769,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-049 — Select and configure durable background jobs
 
-- [ ] **CAP-049 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-049 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Set up chosen provider, environment-specific credentials, timeouts, concurrency limits and worker deployment; avoid fire-and-forget serverless calls.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-049 — Select and configure durable background jobs` |
-| Last verified completed task | `CAP-048` |
-| Last verification executed | `Chrome MV3 manifest and CSP checks, public development ID verification, a clean nine-file credential scan, and hosted Chromium OAuth, capture, cross-origin, and isolation checks passed. All 59 unit tests passed.` |
-| Last successful Git commit | `7304f6e` |
+| Current task | `CAP-050 — Build transactional job dispatch` |
+| Last verified completed task | `CAP-049` |
+| Last verification executed | `Inngest Dev Server acknowledged an event before the worker finished. One intentional failure retried successfully. The production build enforced callback signatures and excluded the smoke job. All 59 tests passed.` |
+| Last successful Git commit | `bf79322` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Configure the durable job provider and prove a job finishes after the API response and an intentional retry.` |
+| Next action | `Atomically reserve Free quota and enqueue work on eligible captures. Verify that an outage leaves a recoverable job and recovery dispatches it once.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 0/13 | Not started |
+| P6 | CAP-049–061 | 1/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -1606,7 +1606,7 @@ Record answers here as decisions are made; record private keys only in secret st
 | Supabase project | Which dev/staging/prod project? | Hosted capture-dev verified; staging and production unconfirmed |
 | GitHub repository | Repo name, owner and CI access? | Unconfirmed |
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
-| Background jobs | Inngest, one durable provider | Default proposed; verify |
+| Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049 |
 | Payment plan | Free-only beta or paid beta? | Unconfirmed |
 | Pricing/currency | USD $7.99 monthly / $71.88 annually proposed | Unconfirmed |
 | Production launch | Deployment/account approvals | Required when reached |
@@ -2449,3 +2449,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Other checks:** All 59 tests passed, along with extension TypeScript, lint, formatting, and diff checks.
 - **P5 gate:** Passed. All nine extension tasks are verified. Fresh signup remains deferred under CAP-023.
 - **Next action:** CAP-049 — Select and configure durable background jobs.
+
+### [2026-11-23T00:05:10+08:00] CAP-049 — Select and configure durable background jobs — STARTED
+
+- **Plan:** Register Inngest in the web app, configure local and hosted worker settings, and verify a development job completes after the event acknowledgement and an intentional retry.
+
+### [2026-11-23T00:22:29+08:00] CAP-049 — Select and configure durable background jobs — COMPLETE
+
+- **Changes:** Pinned Inngest SDK 4.26.2 and compatible OpenTelemetry dependencies. Registered the Node.js `/api/inngest` handler with a 60-second request limit. The development smoke job allows one concurrent step and one retry, with a 30-second start limit and a one-minute finish limit. Documented local startup and hosted deployment and credentials in [Setup](SETUP.md).
+- **Verification:** Inngest Dev Server 1.53.0 acknowledged event `01M820V4RD2JRB63F4FV8C7CNS` with HTTP 200. The run was unfinished at acknowledgement. Run `01M820V4RS5CFS6H053CHPFFY4` recorded one failed attempt and one successful retry, then completed 35.9 seconds after acknowledgement with `{"status":"completed","attempt":1}`. The provider registered the configured retry, concurrency, and timeout limits.
+- **Production verification:** A local production Next.js build stayed in cloud mode even with `INNGEST_DEV=1`, registered no development smoke function, rejected unsigned GET and POST requests with HTTP 401, and accepted a signed inspection with a synthetic key. Frozen lockfile validation, all 59 tests, web TypeScript, lint, formatting, and diff checks passed.
+- **Environment:** No hosted Inngest deployment was made. Hosted sync requires the target environment's real credentials and a deployed hosted function.
+- **Next action:** CAP-050 — Build transactional job dispatch.

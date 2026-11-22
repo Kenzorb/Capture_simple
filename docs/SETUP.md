@@ -42,13 +42,15 @@ Use the local API URL and publishable key in `apps/web/.env.local`. Add the loca
 
 ### Background jobs
 
-After CAP-049 adds the Inngest endpoint, start the web app first. Run the dev server in a second terminal and open `http://localhost:8288` to inspect local events and function runs.
+Set `INNGEST_DEV=1` in `apps/web/.env.local` and start or restart the web app. Leave the Inngest signing and event keys empty for local development. Run the Dev Server in a second terminal.
 
 ```sh
-npx --ignore-scripts=false inngest-cli@latest dev -u http://localhost:3000/api/inngest
+npx --yes --ignore-scripts=false inngest-cli@1.53.0 dev --host 127.0.0.1 --no-discovery -u http://127.0.0.1:3000/api/inngest
 ```
 
-Local Inngest development uses the local endpoint and requires no hosted keys. Hosted event and signing keys belong in the corresponding staging or production deployment.
+Open `http://127.0.0.1:8288` and send the development event `capture/dev.durability-smoke` with an empty data object. The event request returns before the job finishes. The run waits two seconds, records one intentional failure, and completes on retry with `{"status":"completed","attempt":1}`. The smoke function runs only in local development and makes no database or AI calls.
+
+In staging and production, deploy the Node.js web app and sync its public HTTPS `/api/inngest` URL in the matching Inngest environment after deploying a hosted function. Store that environment's `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY` in the deployment's server-only secret settings. The signing key authenticates callbacks and the event key authorizes event submission. Hosted callbacks use signature verification even if `INNGEST_DEV` is present. The route's execution limit is 60 seconds per request. Configure Inngest retry, concurrency, and start and finish limits on each registered function. [Inngest keys](https://www.inngest.com/docs/platform-and-operations/keys-and-access)
 
 ## Account prerequisites
 

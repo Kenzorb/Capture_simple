@@ -26,6 +26,8 @@ Users can continue saving links after reaching the AI allowance. Failed extracti
 
 ## Environments and release policy
 
+The Chrome extension uses Supabase OAuth 2.1 with PKCE and the same identity as the website. See the [extension authentication contract](EXTENSION_AUTH.md) for the redirect, token lifecycle, and API and database boundaries.
+
 | Environment | Data and credentials                                                                                                                                                                                                       | Changes and verification                                                                                                                                                   |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Development | Local Supabase, synthetic seed accounts and content, local job runner, scoped AI development key if real calls are needed, and Stripe test mode. Keep production credentials out of developer env files and local tooling. | Test migrations from an empty local database and on representative prior schemas. Run unit, integration, and browser checks locally or on disposable CI runners.           |

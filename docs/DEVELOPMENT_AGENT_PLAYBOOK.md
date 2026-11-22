@@ -673,7 +673,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-040 — Implement extension connection/auth contract
 
-- [ ] **CAP-040 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-040 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Pick supported OAuth/PKCE or a verified one-use authorization code handoff. Document state/redirect validation, token exchange, refresh, revocation and extension origin allowlisting.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-040 — Implement extension connection/auth contract` |
-| Last verified completed task | `CAP-039` |
-| Last verification executed | `Manual Chrome tab-through and eight axe scans across four screens at 320px and 1440px passed. Hosted Chromium on the production build verified focus, account disclosure, skip link, and submitting announcements. Eight browser auth tests, 41 unit tests, build, ESLint, TypeScript, and Prettier passed.` |
-| Last successful Git commit | `c7c344c` |
-| Active blockers | `None for CAP-040. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-041 — Connect extension to signed-in user` |
+| Last verified completed task | `CAP-040` |
+| Last verification executed | `Threat-model review verified the documented one-use PKCE handoff, exact callback and origin, credential locations, restricted messaging, and revocation boundaries against Chrome and Supabase references and the current code. Installed OAuth SDK methods, PKCE known vector, formatting, and diff checks passed.` |
+| Last successful Git commit | `1b79d83` |
+| Active blockers | `Hosted OAuth discovery is not yet exposed. CAP-041 includes implementation and development setup before end-to-end verification. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Choose and document the extension authentication handoff, token lifecycle, and origin boundaries, then verify the contract against the threat model.` |
+| Next action | `Build consent, popup connection and restricted session storage, API and database authorization checks, and revocation. Verify connection and revocation using disposable accounts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 0/9 | In progress |
+| P5 | CAP-040–048 | 1/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2342,3 +2342,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification:** Manual keyboard tab-through in Chrome covered sign-in, the dashboard skip link and save form, library filters and capture links, and the detail note and management controls. Axe reported zero violations across four screens at 320px and 1440px with no horizontal overflow. Production-build Chromium verified client navigation and filter focus, skip link, Account dismissal and focus return, and the pending live announcement. Eight browser auth tests, 41 unit tests, build, lint, TypeScript, and formatting passed.
 - **Environment:** The existing port 3000 dev server failed its hot-reload WebSocket handshake and used full-page navigation. Client-side acceptance passed on the local production build connected to the hosted development backend.
 - **Next action:** P4 gate passed with all six tasks verified. Begin CAP-040 — Implement extension connection/auth contract.
+
+### [2026-11-22T16:06:11+08:00] CAP-040 — Implement extension connection/auth contract — STARTED
+- **Agent/session:** Codex
+- **Next action:** Select the provider-backed extension handoff and review the credential, redirect, storage, and revocation boundaries.
+
+### [2026-11-22T16:10:29+08:00] CAP-040 — Implement extension connection/auth contract — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Selected Supabase OAuth 2.1 authorization code with PKCE for the Chrome extension. Documented the exact registered callback, consent and token exchange, trusted extension storage and messaging, API and database boundaries, refresh, and web grant revocation.
+- **Verification:** Reviewed each handoff against the Chrome Identity and storage contracts, Supabase OAuth and session documentation, and the current Capture manifest, routes, and database permissions. The review confirmed that durable credentials and the verifier stay outside URLs and that authentication uses no page-to-extension message bridge. The installed SDK exposes the required OAuth methods. The PKCE known-vector, configuration and document checks, formatting, and Git diff checks passed.
+- **Environment:** Public OAuth discovery on the linked hosted development project returned 404. No hosted settings changed. Runtime connection, refresh, and revocation remain CAP-041 acceptance.
+- **Next action:** CAP-041 — Connect extension to signed-in user.

@@ -116,7 +116,7 @@ it("offers a retry when the save handler fails", async () => {
   note.value = "Unsaved note";
   button.click();
   await vi.waitFor(() =>
-    expect(feedback.textContent).toBe("Couldn’t save this page. Try again."),
+    expect(feedback.textContent).toBe("Couldn’t confirm the save. Try again."),
   );
   expect(button.disabled).toBe(false);
   setPreview({ ...preview, url: "https://example.com/next" });

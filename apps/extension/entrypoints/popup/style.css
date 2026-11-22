@@ -110,6 +110,17 @@ textarea {
   font-size: 13px;
 }
 
+#saved-article {
+  margin-top: 8px;
+  color: #174c38;
+  font-weight: 600;
+}
+
+#saved-article:focus-visible {
+  outline: 2px solid #17674a;
+  outline-offset: 3px;
+}
+
 button:disabled {
   opacity: 0.65;
 }

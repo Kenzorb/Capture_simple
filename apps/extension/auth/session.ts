@@ -65,15 +65,68 @@ export function extensionSession(config: ExtensionAuthConfig) {
     config.extensionId,
   ].join("|");
   let generation = 0;
+  let sessionAbort = new AbortController();
   let connecting = false;
   let disconnected = false;
   let outcome: ExtensionStatus = { state: "ready" };
   let statusRequest: Promise<ExtensionStatus> | undefined;
+  let refreshRequest:
+    { attempt: number; result: ReturnType<typeof exchange> } | undefined;
+
+  function advanceSession() {
+    generation++;
+    sessionAbort.abort();
+    sessionAbort = new AbortController();
+  }
+
+  async function readTokens(attempt: number) {
+    const stored = (await browser.storage.local.get(sessionKey))[sessionKey] as
+      { environment?: string; tokens?: unknown } | undefined;
+    if (generation !== attempt) return null;
+    if (stored?.environment === environment && validTokens(stored.tokens))
+      return stored.tokens;
+    if (stored) await browser.storage.local.remove(sessionKey);
+    return null;
+  }
+
+  async function invalidate(attempt: number) {
+    if (generation !== attempt) return;
+    advanceSession();
+    outcome = { state: "reconnect" };
+    await browser.storage.local.remove(sessionKey);
+  }
 
   async function write(tokens: Tokens, attempt: number) {
     if (generation !== attempt) return false;
     await browser.storage.local.set({ [sessionKey]: { environment, tokens } });
     return generation === attempt;
+  }
+
+  async function refresh(tokens: Tokens, attempt: number) {
+    const current = await readTokens(attempt);
+    if (!current) return { error: "reconnect" as const };
+    if (
+      current.refreshToken !== tokens.refreshToken ||
+      current.accessToken !== tokens.accessToken
+    )
+      return { tokens: current };
+    if (refreshRequest?.attempt === attempt) return refreshRequest.result;
+    const result = (async () => {
+      const updated = await exchange(config, {
+        refreshToken: tokens.refreshToken,
+      });
+      if ("error" in updated) return updated;
+      return (await write(updated.tokens, attempt))
+        ? updated
+        : { error: "reconnect" as const };
+    })();
+    const pending = { attempt, result };
+    refreshRequest = pending;
+    try {
+      return await result;
+    } finally {
+      if (refreshRequest === pending) refreshRequest = undefined;
+    }
   }
 
   async function connect(attempt: number): Promise<ExtensionStatus> {
@@ -116,14 +169,11 @@ export function extensionSession(config: ExtensionAuthConfig) {
   }
 
   async function status(attempt: number): Promise<ExtensionStatus> {
-    const stored = (await browser.storage.local.get(sessionKey))[sessionKey] as
-      { environment?: string; tokens?: unknown } | undefined;
+    const tokens = await readTokens(attempt);
     if (generation !== attempt) return { state: "disconnected" };
-    if (stored?.environment !== environment || !validTokens(stored.tokens)) {
-      if (stored) await browser.storage.local.remove(sessionKey);
+    if (!tokens) {
       return outcome.state === "connected" ? { state: "reconnect" } : outcome;
     }
-    const tokens = stored.tokens;
     const initial =
       tokens.expiresAt - Date.now() > 60000
         ? await readAccount(config, tokens)
@@ -133,31 +183,24 @@ export function extensionSession(config: ExtensionAuthConfig) {
       return typeof initial === "string"
         ? { state: initial }
         : { state: "connected", account: initial };
-    const result = await exchange(config, {
-      refreshToken: tokens.refreshToken,
-    });
+    const result = await refresh(tokens, attempt);
     if (generation !== attempt) return { state: "disconnected" };
     if ("tokens" in result) {
-      if (!(await write(result.tokens, attempt)))
-        return { state: "disconnected" };
       const account = await readAccount(config, result.tokens);
       if (generation !== attempt) return { state: "disconnected" };
       if (typeof account !== "string") return { state: "connected", account };
       if (account === "unavailable") return { state: account };
     } else if (result.error === "unavailable") return { state: result.error };
-    await browser.storage.local.remove(sessionKey);
-    outcome = { state: "reconnect" };
+    await invalidate(attempt);
     return outcome;
   }
 
-  return async function handle(
-    command: ExtensionCommand,
-  ): Promise<ExtensionStatus> {
+  async function handle(command: ExtensionCommand): Promise<ExtensionStatus> {
     await browser.storage.local.setAccessLevel({
       accessLevel: "TRUSTED_CONTEXTS",
     });
     if (command === "disconnect") {
-      generation++;
+      advanceSession();
       connecting = false;
       disconnected = true;
       outcome = { state: "disconnected" };
@@ -172,7 +215,7 @@ export function extensionSession(config: ExtensionAuthConfig) {
     }
     if (connecting) return { state: "connecting" };
     if (command === "connect") {
-      generation++;
+      advanceSession();
       const attempt = generation;
       connecting = true;
       disconnected = false;
@@ -201,5 +244,37 @@ export function extensionSession(config: ExtensionAuthConfig) {
     } finally {
       if (statusRequest === request) statusRequest = undefined;
     }
-  };
+  }
+
+  async function authorize(
+    accountId: string,
+    send: (accessToken: string, signal: AbortSignal) => Promise<Response>,
+  ): Promise<Response | "reconnect" | "unavailable"> {
+    const attempt = generation;
+    const signal = sessionAbort.signal;
+    const account = await handle("status");
+    if (signal.aborted) return "reconnect";
+    if (account.state !== "connected")
+      return account.state === "unavailable" ? "unavailable" : "reconnect";
+    if (account.account.id !== accountId) return "reconnect";
+    const tokens = await readTokens(attempt);
+    if (!tokens || signal.aborted) return "reconnect";
+    let response = await send(tokens.accessToken, signal);
+    if (signal.aborted) return "reconnect";
+    if (response.status !== 401) return response;
+
+    const refreshed = await refresh(tokens, attempt);
+    if (signal.aborted) return "reconnect";
+    if ("error" in refreshed) {
+      if (refreshed.error === "reconnect") await invalidate(attempt);
+      return refreshed.error;
+    }
+    response = await send(refreshed.tokens.accessToken, signal);
+    if (signal.aborted) return "reconnect";
+    if (response.status !== 401) return response;
+    await invalidate(attempt);
+    return "reconnect";
+  }
+
+  return { handle, authorize };
 }

@@ -1,4 +1,5 @@
 import { browser } from "wxt/browser";
+import { extensionAuthConfig } from "../../auth/config";
 import type { ExtensionCommand, ExtensionStatus } from "../../auth/message";
 import { readActivePage } from "../../capture/readable-page";
 import { bindCaptureForm } from "./capture-form";
@@ -20,9 +21,29 @@ const articlePreview =
   document.querySelector<HTMLDetailsElement>("#article-preview")!;
 const excerpt =
   document.querySelector<HTMLParagraphElement>("#article-excerpt")!;
+const config = extensionAuthConfig();
+let accountId: string | undefined;
 const setCapturePage = bindCaptureForm(
   document.querySelector<HTMLFormElement>("#capture-form")!,
   document.querySelector<HTMLElement>("#save-status")!,
+  config
+    ? async (draft) => {
+        if (!accountId)
+          return {
+            error: { code: "unauthenticated", message: "Connect Capture." },
+          };
+        return browser.runtime.sendMessage({
+          kind: "capture",
+          accountId,
+          draft,
+        });
+      }
+    : undefined,
+  config
+    ? (id) =>
+        new URL(`/dashboard/captures/${encodeURIComponent(id)}`, config.web)
+          .href
+    : undefined,
 );
 let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -42,6 +63,7 @@ function clearPreview() {
 
 function render(result: ExtensionStatus) {
   const { state } = result;
+  accountId = state === "connected" ? result.account.id : undefined;
   const message = {
     ready: "Connect your Capture account to continue.",
     unconfigured: "Extension connection is unavailable in this build.",

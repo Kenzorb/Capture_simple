@@ -723,7 +723,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-045 — Send idempotent capture requests
 
-- [ ] **CAP-045 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-045 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Call authenticated POST /api/captures, guard double click/timeouts, maintain request ID across retries and show stored article link.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-045 — Send idempotent capture requests` |
-| Last verified completed task | `CAP-044` |
-| Last verification executed | `Chromium verified keyboard capture and authoring a note, with a local preview in 49 ms. Simulated responses exercised loading, duplicate, queued, quota-limited, unsupported, and retry states. The extension build, 57 unit tests, lint, TypeScript, and formatting passed.` |
-| Last successful Git commit | `bf7dc0f` |
-| Active blockers | `None for CAP-045. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-046 — Deep-link to captured article` |
+| Last verified completed task | `CAP-045` |
+| Last verification executed | `Hosted Chromium verified real popup saving, rapid resubmission, a lost response, reopening and retrying with the same request ID through a session refresh, one stored capture with its note, the article link, and timeout recovery. The extension build, 57 unit tests, lint, TypeScript, formatting, and bundle checks passed.` |
+| Last successful Git commit | `644e6d5` |
+| Active blockers | `None for CAP-046. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Wire popup saving to the authenticated capture API, preserve the request ID across retries, and verify one durable capture after repeated attempts.` |
+| Next action | `Verify the saved article opens in a new tab, add Open library, and test correct account and missing or unauthorized article handling.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 5/9 | In progress |
+| P5 | CAP-040–048 | 6/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2393,3 +2393,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added keyboard focus from Capture to the page preview, a collapsible personal note field, the Save control and accessible feedback for pending, successful, duplicate, queued, quota-limited, unsupported, and retryable outcomes. The current build explains Save availability and keeps the control disabled until CAP-045 supplies authenticated submission.
 - **Verification:** Chromium exercised the built popup with Tab, Enter, and Shift+Tab, confirmed focus after capture, entered a note, and verified that the UI made no capture request. The fixture preview appeared in 49 ms. Unit tests used simulated save responses with the production form controller, verified that status messages reflect the result and that failed saves preserve the note. The extension build, 57 unit tests, ESLint, TypeScript, and Prettier passed.
 - **Next action:** CAP-045 — Send idempotent capture requests.
+
+### [2026-11-22T21:19:24+08:00] CAP-045 — Send idempotent capture requests — STARTED
+- **Agent/session:** Codex
+- **Next action:** Connect the popup form to the worker, retain request IDs across retries, and verify a hosted save whose first response is lost.
+
+### [2026-11-22T21:33:09+08:00] CAP-045 — Send idempotent capture requests — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Save to Capture sends an authenticated request through the worker and shows a link formed from the configured web origin and the returned article ID. The worker coalesces matching saves, reuses a stored request ID for recent matching drafts in the Chrome session, and bounds each POST. Retry metadata contains fingerprints and IDs only.
+- **Verification:** Chromium used a disposable account with real hosted OAuth and a real capture request. Rapid resubmission produced one POST. The test dropped the response after a confirmed 201, closed and reopened the popup, and forced a 401 before the retry reached the API. Refresh and retry kept the same request ID, and Supabase contained one article, one personal note, and one request record. The popup showed the stored article link. A stalled POST reached its timeout and restored Save with the note available. The extension build, 57 unit tests, ESLint, TypeScript, Prettier, and bundle checks passed.
+- **Next action:** CAP-046 — Deep-link to captured article.

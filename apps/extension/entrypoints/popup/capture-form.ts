@@ -21,24 +21,26 @@ const savedMessages: Record<ProcessingStatus, string> = {
 };
 
 const errorMessages: Partial<Record<ApiError["error"]["code"], string>> = {
-  unauthenticated: "Reconnect Capture, then try saving again.",
+  unauthenticated: "Reopen the popup and reconnect Capture to save.",
   forbidden: "Check your Capture connection, then try again.",
   invalid_input: "Capture the page again, then try saving.",
   payload_too_large:
     "This capture is too large. Try saving the URL from your library.",
   rate_limited: "Too many saves. Wait a moment and try again.",
 };
-const saveError = "Couldn’t save this page. Try again.";
+const saveError = "Couldn’t confirm the save. Try again.";
 
 export function bindCaptureForm(
   form: HTMLFormElement,
   feedback: HTMLElement,
   saveCapture?: SaveCapture,
+  articleHref?: (id: string) => string,
 ) {
   const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
   const note = form.querySelector<HTMLTextAreaElement>("textarea")!;
   const noteDisclosure = form.querySelector("details")!;
   const availability = form.querySelector<HTMLElement>("#save-availability")!;
+  const articleLink = form.querySelector<HTMLAnchorElement>("#saved-article")!;
   let page: Preview | null = null;
   let submitting = false;
 
@@ -57,6 +59,8 @@ export function bindCaptureForm(
     note.disabled = false;
     button.hidden = false;
     button.disabled = next === null || !saveCapture;
+    articleLink.hidden = true;
+    articleLink.removeAttribute("href");
     feedback.textContent = "";
   }
 
@@ -86,6 +90,10 @@ export function bindCaptureForm(
           ? "This page is already in your library."
           : savedMessages[result.processing_status];
         saved = true;
+        if (articleHref) {
+          articleLink.href = articleHref(result.article_id);
+          articleLink.hidden = false;
+        }
       }
     } catch {
       if (page === selected) feedback.textContent = saveError;
@@ -101,7 +109,8 @@ export function bindCaptureForm(
           (document.activeElement === document.body ||
             document.activeElement === button)
         ) {
-          if (saved) feedback.focus();
+          if (!articleLink.hidden) articleLink.focus();
+          else if (saved) feedback.focus();
           else button.focus();
         }
       }

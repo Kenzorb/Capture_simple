@@ -473,7 +473,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-022 — Implement Supabase client/server adapters
 
-- [ ] **CAP-022 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-022 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create typed browser/server clients, middleware or equivalent session refresh strategy, and authorization helpers; keep privileged client server-only.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-022 — Implement Supabase client/server adapters` |
-| Last verified completed task | `CAP-021` |
-| Last verification executed | `Hosted migration and db query --file supabase/tests/data_access.sql passed after correcting the FK fixture. Two authenticated roles verified own reads, note create/edit, and foreign read/edit/delete/reference denial. Anonymous reads and direct billing and article-status writes were denied.` |
-| Last successful Git commit | `edacafa` |
+| Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
+| Last verified completed task | `CAP-022` |
+| Last verification executed | `Hosted Auth smoke passed: a temporary real identity signed in, Next.js returned HTTP 401 without a session and 200 with the correct user after sign-in, and cleanup deleted the identity. The production browser probe included the publishable key and no privileged key or env reference. Final format, lint, four Vitest tests and both builds passed without the probe.` |
+| Last successful Git commit | `f9b43b2` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `CAP-022 — Implement Supabase client/server adapters` |
+| Next action | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 6/10 | In progress |
+| P2 | CAP-016–025 | 7/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **21/112** | **In progress** |
+| **Total** | **CAP-001–112** | **22/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2051,3 +2051,24 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Use service-side capture and topic mutations to support transactional quotas and hierarchy rules. RLS remains enabled on each app table.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-022 — Implement Supabase client/server adapters
+
+### [2026-11-22T09:11:10+08:00] CAP-021 — Enable and test RLS everywhere — COMMIT
+- **Git commit:** f9b43b2
+
+### [2026-11-22T09:11:35+08:00] CAP-022 — Implement Supabase client/server adapters — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** Previous task verified and committed. Use the dedicated capture-dev project.
+- **Next action:** Add typed adapters and session refresh, then verify a real authenticated request and browser build.
+
+### [2026-11-22T09:17:05+08:00] CAP-022 — Implement Supabase client/server adapters — FAILED
+- **Agent/session:** Codex
+- **Verification:** Production build and browser asset scan passed. The test identity setup failed with HTTP 401 because CLI output used a masked secret key.
+- **Next action:** Retry with the CLI’s authorized secret-key retrieval captured only into the test process environment.
+
+### [2026-11-22T09:19:38+08:00] CAP-022 — Implement Supabase client/server adapters — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added typed browser, cookie-based server and privileged Supabase clients, generated public schema types and Next.js Proxy refresh.
+- **Verification:** Hosted Auth smoke passed: a temporary real identity signed in, Next.js returned HTTP 401 without a session and 200 with the correct user after sign-in, and cleanup deleted the identity. The production browser probe included the publishable key and no privileged key or env reference. Final format, lint, four Vitest tests and both builds passed without the probe.
+- **Decisions:** Scoped Proxy to app auth/dashboard/API routes. Prefer getUser for server-verified identity and mark privileged code server-only. Test keys stayed in process memory.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-023 — Implement sign-up/sign-in/sign-out

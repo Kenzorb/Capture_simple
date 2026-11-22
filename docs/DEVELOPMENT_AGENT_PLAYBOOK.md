@@ -443,7 +443,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-019 — Create processing and usage tables
 
-- [ ] **CAP-019 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-019 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Add processing_jobs, durable-dispatch/outbox if required, usage_periods and usage_events with unique idempotency keys and reservation states.
 
@@ -1566,14 +1566,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN_PROGRESS` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
-| Current task | `CAP-019 — Create processing and usage tables` |
-| Last verified completed task | `CAP-018` |
-| Last verification executed | `Hosted Supabase migration and db query --file supabase/tests/topic_schema.sql passed. Assertions covered normalized sibling and root uniqueness, cycles, owner-scoped links, one primary topic, and delete cascades.` |
-| Last successful Git commit | `978477e` |
+| Current task | `CAP-020 — Create billing tables` |
+| Last verified completed task | `CAP-019` |
+| Last verification executed | `Hosted migration and db query --file supabase/tests/processing_schema.sql passed. Assertions covered idempotency, outbox uniqueness, owner scope, atomic conditional reservation capacity, over-cap rejection and conversion to used quota. Fixtures rolled back.` |
+| Last successful Git commit | `8d56fa9` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `CAP-019 — Create processing and usage tables` |
+| Next action | `CAP-020 — Create billing tables` |
 
 ### 11.1 Phase progress overview
 
@@ -1583,7 +1583,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 |---|---|---:|---|
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
-| P2 | CAP-016–025 | 3/10 | In progress |
+| P2 | CAP-016–025 | 4/10 | In progress |
 | P3 | CAP-026–033 | 0/8 | Not started |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
@@ -1593,7 +1593,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **18/112** | **In progress** |
+| **Total** | **CAP-001–112** | **19/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1998,3 +1998,19 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Serialize hierarchy checks per owner through a private RLS-protected revision row to prevent conflicting concurrent moves.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-019 — Create processing and usage tables
+
+### [2026-11-22T09:06:03+08:00] CAP-018 — Create topic and relationship tables — COMMIT
+- **Git commit:** 8d56fa9
+
+### [2026-11-22T09:06:58+08:00] CAP-019 — Create processing and usage tables — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** Previous task verified and committed. Use the dedicated capture-dev project.
+- **Next action:** Add job idempotency, durable dispatch and quota accounting constraints.
+
+### [2026-11-22T09:07:33+08:00] CAP-019 — Create processing and usage tables — COMPLETED
+- **Agent/session:** Codex
+- **Changes:** Added processing jobs, outbox, usage periods and per-job reservations.
+- **Verification:** Hosted migration and db query --file supabase/tests/processing_schema.sql passed. Assertions covered idempotency, outbox uniqueness, owner scope, atomic conditional reservation capacity, over-cap rejection and conversion to used quota. Fixtures rolled back.
+- **Decisions:** This task verifies schema invariants in one test session. Multi-session contention belongs to CAP-078 and CAP-095.
+- **Git commit:** Pending commit addendum.
+- **Next action:** CAP-020 — Create billing tables

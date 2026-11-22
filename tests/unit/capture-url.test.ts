@@ -1,4 +1,4 @@
-import { canonicalizeCaptureUrl } from "@capture/shared";
+import { canonicalizeCaptureUrl, canonicalizeManualUrl } from "@capture/shared";
 import { expect, test } from "vitest";
 
 test("normalizes HTTP syntax and strips known tracking from only the canonical URL", () => {
@@ -54,4 +54,27 @@ test.each([
   "https://example.com/" + "a".repeat(4096),
 ])("rejects an invalid or unsupported URL (%#)", (input) => {
   expect(canonicalizeCaptureUrl(input)).toBeNull();
+});
+
+test("manual capture accepts public domain names and retains the original URL", () => {
+  expect(
+    canonicalizeManualUrl("https://example.com:8443/unavailable")?.url,
+  ).toBe("https://example.com:8443/unavailable");
+  expect(
+    canonicalizeManualUrl("https://bücher.example.com/article")?.domain,
+  ).toBe("xn--bcher-kva.example.com");
+});
+
+test.each([
+  "http://localhost.",
+  "http://127.1/",
+  "http://2130706433/",
+  "http://169.254.169.254/",
+  "http://[::ffff:127.0.0.1]/",
+  "https://metadata.google.internal/",
+  "https://router.home.arpa/",
+  "https://localserver/",
+  "https://abc..example.com/",
+])("manual capture rejects a local or invalid target (%#)", (input) => {
+  expect(canonicalizeManualUrl(input)).toBeNull();
 });

@@ -17,7 +17,7 @@ These contracts define the capture and article endpoints. Send authenticated req
 }
 ```
 
-A manual save can contain just the request ID, URL, and source.
+A manual save can contain just the request ID, URL, and source. Use an HTTP or HTTPS URL with a public domain name. Capture saves the link immediately and does not contact the site during the save.
 
 ```json
 {

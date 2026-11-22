@@ -43,3 +43,25 @@ export function canonicalizeCaptureUrl(input: string) {
 
   return { url, canonicalUrl: target.href, domain: target.hostname };
 }
+
+export function canonicalizeManualUrl(input: string) {
+  const target = canonicalizeCaptureUrl(input);
+  if (!target) return null;
+
+  const hostname = target.domain.replace(/\.$/, "");
+  const labels = hostname.split(".");
+  if (
+    hostname.length > 253 ||
+    labels.length < 2 ||
+    labels.some(
+      (label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label),
+    ) ||
+    !/[a-z]/.test(labels.at(-1) ?? "") ||
+    /(?:^|\.)(?:localhost|local|lan|internal|home|home\.arpa|onion|test|invalid|example)$/.test(
+      hostname,
+    )
+  ) {
+    return null;
+  }
+  return target;
+}

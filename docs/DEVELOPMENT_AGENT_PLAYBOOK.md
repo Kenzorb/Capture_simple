@@ -581,7 +581,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-032 — Implement manual URL capture path
 
-- [ ] **CAP-032 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-032 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Support pasted public URLs in the web app; save even if extraction cannot run; server fetching needs SSRF defenses and strict request timeouts.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P3 — Capture API and reliable storage` |
-| Current task | `CAP-032 — Implement manual URL capture path` |
-| Last verified completed task | `CAP-031` |
-| Last verification executed | `The hosted two-user lifecycle verified edits, archive and restore, explicit deletion confirmation, and cascading cleanup. The hosted deduplication regression, 27 unit tests, lint, and TypeScript passed.` |
-| Last successful Git commit | `406e217` |
-| Active blockers | `None for CAP-032. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
+| Current task | `CAP-033 — Add rate limiting and request budgets` |
+| Last verified completed task | `CAP-032` |
+| Last verification executed | `Hosted Chromium verified the dashboard URL form, repeated and consecutive saves, local-target rejection, and durable link-only storage. Both hosted regressions, 37 unit tests, eight Chromium auth tests, lint, and type checking passed.` |
+| Last successful Git commit | `162b45a` |
+| Active blockers | `None for CAP-033. Fresh signup acceptance remains deferred by the owner under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Add a manual URL form and verify that submitted sources save without depending on extraction.` |
+| Next action | `Enforce capture request budgets and rate limits, then verify oversized payloads and request bursts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1586,7 +1586,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P0 | CAP-001–007 | 7/7 | Complete |
 | P1 | CAP-008–015 | 8/8 | Complete |
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
-| P3 | CAP-026–033 | 6/8 | In progress |
+| P3 | CAP-026–033 | 7/8 | In progress |
 | P4 | CAP-034–039 | 0/6 | Not started |
 | P5 | CAP-040–048 | 0/9 | Not started |
 | P6 | CAP-049–061 | 0/13 | Not started |
@@ -2260,3 +2260,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added owner-scoped article edit, archive, restore, and confirmed deletion APIs. Active article lists exclude archived items by default. Applied the additive `20261122063431_edit_and_delete_articles.sql` migration to capture-dev and regenerated database types.
 - **Verification:** The hosted lifecycle test used two disposable accounts and exercised create, title and note updates, note removal, archive, restore, required deletion confirmation, cross-owner denial, and cleanup of related text, notes, topic assignments, and request IDs. The hosted deduplication regression, 27 Vitest tests, TypeScript, ESLint, and Prettier passed.
 - **Next action:** CAP-032 — Implement manual URL capture path.
+
+### [2026-11-22T14:43:37+08:00] CAP-032 — Implement manual URL capture path — STARTED
+- **Agent/session:** Codex
+- **Next action:** Add the dashboard URL form and use the existing durable save transaction for link-only captures. CAP-052 owns server fetching and its network safeguards.
+
+### [2026-11-22T14:48:00+08:00] CAP-032 — Implement manual URL capture path — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added a dashboard URL form with save, duplicate, and validation feedback. The dashboard and capture API share the durable save helper. Manual capture validates public domain syntax and saves the link without fetching the site. CAP-052 owns server fetching and its SSRF and timeout protections.
+- **Verification:** A disposable hosted Chromium session saved a URL on an unavailable port, verified persisted source and canonical URLs with no extracted content, rejected an IP and reserved local domain, reported a duplicate, and saved distinct links consecutively. Signed-out access was denied. Both hosted regressions, 37 Vitest tests, eight Chromium auth tests, TypeScript, ESLint, and Prettier passed.
+- **Next action:** CAP-033 — Add rate limiting and request budgets.

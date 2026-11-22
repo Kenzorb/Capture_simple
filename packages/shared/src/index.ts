@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { maxCaptureUrlLength } from "./capture-url";
 
-export { canonicalizeCaptureUrl } from "./capture-url";
+export {
+  canonicalizeCaptureUrl,
+  canonicalizeManualUrl,
+  maxCaptureUrlLength,
+} from "./capture-url";
 
 export const processingStatusSchema = z.enum([
   "saved",

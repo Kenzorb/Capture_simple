@@ -1,9 +1,12 @@
 import {
-  canonicalizeCaptureUrl,
   captureRequestSchema,
   type ApiError,
   type CaptureResponse,
 } from "@capture/shared";
+import {
+  getCaptureTarget,
+  saveOwnCapture,
+} from "../../../lib/supabase/captures";
 import { getRequestSession } from "../../../lib/supabase/request-session";
 
 function captureError(
@@ -34,28 +37,19 @@ export async function POST(request: Request) {
   if (!parsed.success)
     return captureError(400, "invalid_input", "Enter valid capture details.");
   const capture = parsed.data;
-  const target = canonicalizeCaptureUrl(capture.url);
+  const target = getCaptureTarget(capture);
   if (!target) {
     return captureError(
       400,
       "invalid_input",
-      "Enter a valid HTTP or HTTPS URL.",
+      capture.source === "manual_url"
+        ? "Enter an HTTP or HTTPS URL with a public domain."
+        : "Enter a valid HTTP or HTTPS URL.",
       capture.request_id,
     );
   }
 
-  const { data, error } = await session.supabase
-    .rpc("capture_save_article", {
-      p_request_id: capture.request_id,
-      p_url: target.url,
-      p_canonical_url: target.canonicalUrl,
-      p_domain: target.domain,
-      p_title: capture.title ?? target.domain,
-      p_source: capture.source,
-      p_extracted_text: capture.extracted_text,
-      p_personal_note: capture.personal_note,
-    })
-    .single();
+  const { data, error } = await saveOwnCapture(session, capture, target);
   if (error?.code === "23505") {
     return captureError(
       409,

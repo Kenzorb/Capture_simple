@@ -12,7 +12,17 @@
       <p id="status" role="status">Checking connection…</p>
       <button id="connect" type="button" hidden>Connect Capture</button>
       <button id="retry" type="button" hidden>Retry</button>
+      <button id="capture" type="button" hidden>Capture page</button>
       <button id="disconnect" type="button" hidden>Disconnect</button>
+      <p id="capture-status" role="status"></p>
+      <dl id="page-details" hidden>
+        <dt>Title</dt>
+        <dd id="page-title"></dd>
+        <dt>Domain</dt>
+        <dd id="page-domain"></dd>
+        <dt>URL</dt>
+        <dd id="page-url"></dd>
+      </dl>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

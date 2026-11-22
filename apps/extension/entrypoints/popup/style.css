@@ -26,6 +26,24 @@ p {
   overflow-wrap: anywhere;
 }
 
+#capture-status:empty {
+  margin: 0;
+}
+
+dl {
+  margin: 12px 0 0;
+}
+
+dt {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+dd {
+  margin-left: 0;
+  overflow-wrap: anywhere;
+}
+
 button {
   margin-top: 14px;
   padding: 8px 12px;

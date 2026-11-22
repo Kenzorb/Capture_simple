@@ -693,7 +693,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-042 — Read active tab metadata only on click
 
-- [ ] **CAP-042 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-042 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** When user invokes capture, obtain URL/title/domain and optional metadata. Do not passively scan tab history or request all-site access without justification.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P5 — Chrome extension and secure account connection` |
-| Current task | `CAP-042 — Read active tab metadata only on click` |
-| Last verified completed task | `CAP-041` |
-| Last verification executed | `Real Chromium OAuth on capture-dev verified the correct authenticated account, capture API submission, session refresh, scoped data access, local disconnect, and remote revocation of access and refresh tokens. Eight browser auth tests, two hosted API regressions, 47 unit tests, builds, lint, TypeScript, formatting, and bundle checks passed.` |
-| Last successful Git commit | `10957e6` |
-| Active blockers | `None for CAP-042. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-043 — Extract readable page content` |
+| Last verified completed task | `CAP-042` |
+| Last verification executed | `Chromium verified the toolbar permission grant, click-only metadata preview, loss of access after cross-origin navigation, a clear restricted-page state, and no metadata upload or persistence. Manifest, extension build, 47 unit tests, ESLint, TypeScript, and formatting passed.` |
+| Last successful Git commit | `e4a61d8` |
+| Active blockers | `None for CAP-043. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Read only the active tab's URL, title, and domain after the user invokes Capture, and verify the permission boundary.` |
+| Next action | `Add on-demand readable content extraction with bounded text and a URL-only fallback, then verify it against representative article fixtures.` |
 
 ### 11.1 Phase progress overview
 
@@ -1588,7 +1588,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P2 | CAP-016–025 | 9/10 | Gate passed with CAP-023 deferred |
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
-| P5 | CAP-040–048 | 2/9 | In progress |
+| P5 | CAP-040–048 | 3/9 | In progress |
 | P6 | CAP-049–061 | 0/13 | Not started |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
@@ -2354,12 +2354,22 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Environment:** Public OAuth discovery on the linked hosted development project returned 404. No hosted settings changed. Runtime connection, refresh, and revocation remain CAP-041 acceptance.
 - **Next action:** CAP-041 — Connect extension to signed-in user.
 
+### [2026-11-22T16:11:57+08:00] CAP-041 — Connect extension to signed-in user — STARTED
+- **Agent/session:** Codex
+- **Next action:** Implement the OAuth consent, extension session, API authorization, and revocation paths before enabling a hosted test client.
+
 ### [2026-11-22T20:03:41+08:00] CAP-041 — Connect extension to signed-in user — COMPLETE
 - **Agent/session:** Codex
 - **Changes:** Added Chrome Connect Capture and Disconnect, web consent and grant revocation, and trusted extension session storage with refresh. Limited extension credentials to the account and capture APIs and their owner-scoped database operations. Applied the migration on capture-dev and registered its exact public Chrome callback using the local public build identifiers.
 - **Verification:** The built extension opened the real Chrome OAuth consent window, exchanged its code with capture-dev, and returned the disposable account's correct identity from the API. It submitted a fixture capture and refreshed its session. Direct article access was denied. Disconnect cleared extension storage, and web revocation rejected the old access token for account and capture requests and the old refresh token at Supabase. The separate web session stayed authenticated. Eight Chromium auth tests, two hosted API regression suites, 47 unit tests, web and extension builds, ESLint, TypeScript, formatting, and the bundle scan passed.
 - **Next action:** CAP-042 — Read active tab metadata only on click.
 
-### [2026-11-22T16:11:57+08:00] CAP-041 — Connect extension to signed-in user — STARTED
+### [2026-11-22T20:12:40+08:00] CAP-042 — Read active tab metadata only on click — STARTED
 - **Agent/session:** Codex
-- **Next action:** Implement the OAuth consent, extension session, API authorization, and revocation paths before enabling a hosted test client.
+- **Next action:** Add a popup Capture action with temporary active-tab permission and verify click-only collection and restricted-page handling in Chrome.
+
+### [2026-11-22T20:18:56+08:00] CAP-042 — Read active tab metadata only on click — COMPLETE
+- **Agent/session:** Codex
+- **Changes:** Added a connected popup action that queries only the active, current-window tab when clicked. It previews the URL, title, and domain using temporary `activeTab` permission and shows a clear message for restricted or unavailable pages. The metadata stays in the popup.
+- **Verification:** Chromium with an isolated synthetic account state exercised the real toolbar action on a fixture outside the configured hosts. The extension had no tab URL or title before invocation. The popup opened with an empty preview, queried once after Capture was clicked, and showed the correct fields. Access ended on cross-origin navigation, and `chrome://version/` showed the restricted-page message. The manifest contains no broad tab, history, or all-site access. The test observed no metadata in storage or network requests. The extension build, 47 unit tests, ESLint, TypeScript, and formatting passed.
+- **Next action:** CAP-043 — Extract readable page content.

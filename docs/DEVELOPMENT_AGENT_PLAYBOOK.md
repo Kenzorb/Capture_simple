@@ -1564,16 +1564,16 @@ _None at document creation._
 
 | Field | Current value |
 |---|---|
-| Overall status | `IN_PROGRESS` |
+| Overall status | `BLOCKED` |
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `Hosted Auth smoke passed: a temporary real identity signed in, Next.js returned HTTP 401 without a session and 200 with the correct user after sign-in, and cleanup deleted the identity. The production browser probe included the publishable key and no privileged key or env reference. Final format, lint, four Vitest tests and both builds passed without the probe.` |
-| Last successful Git commit | `f9b43b2` |
-| Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
+| Last verification executed | `Lint, typecheck, four Vitest tests, both builds and format passed. Chromium verified signup validation, sign-in, protected dashboard, sign-out and repeat sign-in using a disposable confirmed identity. Successful signup email and confirmation await an authorized recipient.` |
+| Last successful Git commit | `1ab6e29` |
+| Active blockers | `CAP-023 needs authorization to send one hosted signup confirmation to a Supabase organization member test address and access to open the confirmation link in the signing-up browser.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `CAP-023 — Implement sign-up/sign-in/sign-out` |
+| Next action | `Complete a real new-account signup and confirmation using an authorized test inbox, then verify sign-in again and commit CAP-023.` |
 
 ### 11.1 Phase progress overview
 
@@ -2072,3 +2072,25 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Scoped Proxy to app auth/dashboard/API routes. Prefer getUser for server-verified identity and mark privileged code server-only. Test keys stayed in process memory.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-023 — Implement sign-up/sign-in/sign-out
+
+### [2026-11-22T09:19:46+08:00] CAP-022 — Implement Supabase client/server adapters — COMMIT
+- **Git commit:** 1ab6e29
+
+### [2026-11-22T09:19:58+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — STARTED
+- **Agent/session:** Codex
+- **Context/dependencies:** Previous task verified and committed. Use the dedicated capture-dev project.
+- **Next action:** Implement email/password forms, email confirmation, dashboard sign-in and sign-out.
+
+### [2026-11-22T09:25:09+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — BLOCKED
+- **Agent/session:** Codex
+- **Changes:** Implemented email/password sign-up and sign-in forms, PKCE confirmation route, dashboard session gate, and current-session sign-out. Added hosted redirect setup notes.
+- **Verification:** pnpm lint, typecheck, test (4 passed), build (web and extension), Prettier, and git diff --check passed. Chromium against capture-dev passed server-side sign-up validation, missing confirmation code handling, invalid credentials, sign-in, protected dashboard access, sign-out, signed-out denial and repeat sign-in. Initial alert locator matched Next.js route announcer; scoped to app content and reran successfully. Disposable confirmed Auth users were removed.
+- **Blockers/risks:** Full new-account sign-up requires a real confirmation email. The default hosted sender is limited to organization member addresses. Requested the approved test recipient. Successful signup and confirmation are pending.
+- **Git commit:** CAP-023 files remain in the working tree. CAP-022 was last verified at 1ab6e29.
+- **Next action:** Complete the hosted signup and confirmation test before checking off CAP-023.
+
+### [2026-11-22T09:25:13+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — HANDOFF
+- **Agent/session:** Codex
+- **Context/dependencies:** CAP-017 through CAP-022 individually verified and committed. Hosted capture-dev contains the applied schema. 22/112 tasks complete.
+- **Changes:** Uncommitted CAP-023 app routes and setup documentation are preserved in the working tree.
+- **Next action:** Use authorized hosted signup email test evidence to finish CAP-023.

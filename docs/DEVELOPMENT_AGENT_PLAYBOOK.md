@@ -1568,7 +1568,7 @@ _None at document creation._
 | Current phase | `P2 — Build database, RLS, and sign-in` |
 | Current task | `CAP-023 — Implement sign-up/sign-in/sign-out` |
 | Last verified completed task | `CAP-022` |
-| Last verification executed | `The owner received a real reset email from the new SMTP sender. The hosted recovery request, browser code exchange, and password update all returned HTTP 200. Disposable signup and repeat sign-in checks also passed.` |
+| Last verification executed | `Live password recovery passed. Six Chromium tests also verified that the normal post-request screen directs users to their inbox and that a failed callback offers the optional fallback.` |
 | Last successful Git commit | `1ab6e29` |
 | Active blockers | `CAP-023 still needs browser verification from an actual fresh signup email.` |
 | MVP launch gate | `NOT READY` |
@@ -2156,3 +2156,9 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Agent/session:** Codex
 - **Verification:** The owner configured another Gmail SMTP sender and reported receiving the reset email and opening the Capture password form directly from the link. Supabase recorded HTTP 200 for the recovery request at 1:10:29 PM, the browser code exchange at 1:10:56 PM, and the account update at 1:11:12 PM Singapore time. The account's sign-in and update timestamps matched the last two events.
 - **Next action:** Recovery is verified with real delivery. Keep CAP-023 unchecked until actual fresh signup email confirmation and the remaining sign-in acceptance checks pass.
+
+### [2026-11-22T13:20:39+08:00] CAP-023 — Implement sign-up/sign-in/sign-out — VERIFIED CHECKPOINT
+- **Agent/session:** Codex
+- **Changes:** Removed the separate recovery verification link from the normal reset email notice. The notice directs users to their inbox, and the callback error offers the code or copied-link fallback.
+- **Verification:** Six Chromium tests passed, including the normal reset email notice with no extra link and recovery fallback access after an expired link. TypeScript passed.
+- **Next action:** Keep CAP-023 unchecked while the actual fresh signup email acceptance check is pending.

@@ -5,10 +5,10 @@ import { SubmitButton } from "../submit-button";
 const messages = new Map([
   ["invalid", "Enter a valid email address."],
   ["unavailable", "Password reset is temporarily unavailable."],
-  ["session", "Verify a new password reset email to continue."],
+  ["session", "Open the link in a new password reset email to continue."],
   [
     "callback",
-    "The reset link could not finish signing you in. Request a new reset email and verify it in Capture.",
+    "The reset link could not finish signing you in. Request a new reset email below.",
   ],
 ]);
 
@@ -33,19 +33,10 @@ export default async function ForgotPasswordPage({
         </p>
       )}
       {notice === "sent" ? (
-        <div className="mt-4 space-y-4">
-          <p role="status">
-            Check your inbox for a reset email. If it has a link, copy it
-            without opening it. If no email arrives, check spam and wait before
-            trying again.
-          </p>
-          <Link
-            className="font-semibold underline"
-            href="/verify-email?flow=recovery"
-          >
-            Verify your reset email
-          </Link>
-        </div>
+        <p role="status" className="mt-4">
+          Check your inbox and open the reset link in this browser. If the email
+          hasn’t arrived, check spam and wait before requesting another one.
+        </p>
       ) : (
         <form action={requestPasswordReset} className="mt-8 space-y-4">
           <div>
@@ -64,6 +55,14 @@ export default async function ForgotPasswordPage({
           </div>
           <SubmitButton label="Send reset email" />
         </form>
+      )}
+      {error === "callback" && (
+        <Link
+          className="mt-6 inline-block underline"
+          href="/verify-email?flow=recovery"
+        >
+          Use a code or copied link instead
+        </Link>
       )}
     </main>
   );

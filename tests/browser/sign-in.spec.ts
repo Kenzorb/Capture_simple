@@ -40,7 +40,7 @@ test("password recovery is discoverable and requires a session to set a password
   await page.goto("/reset-password");
   await expect(page).toHaveURL(/\/forgot-password\?error=session$/);
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "Verify a new password reset email",
+    "Open the link in a new password reset email",
   );
 });
 
@@ -51,17 +51,22 @@ test("an expired recovery link returns to the reset request form", async ({
     "/auth/recovery?error=access_denied&error_code=otp_expired#error=access_denied",
   );
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "verify it in Capture",
+    "Request a new reset email below",
   );
   const url = new URL(page.url());
   expect(url.pathname).toBe("/forgot-password");
   expect(url.searchParams.get("error")).toBe("callback");
   expect(url.hash).toBe("");
+  await page
+    .getByRole("link", { name: "Use a code or copied link instead" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Verify your reset email" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Email code or link")).toBeVisible();
 });
 
-test("signup and recovery provide email verification forms", async ({
-  page,
-}) => {
+test("signup provides an email verification form", async ({ page }) => {
   await page.goto("/sign-in?notice=confirm-email");
   await page
     .getByRole("link", { name: "verify your confirmation email" })
@@ -70,11 +75,16 @@ test("signup and recovery provide email verification forms", async ({
     page.getByRole("heading", { name: "Confirm your email" }),
   ).toBeVisible();
   await expect(page.getByLabel("Email code or link")).toBeVisible();
+});
 
+test("reset email confirmation directs users to their inbox without an extra step", async ({
+  page,
+}) => {
   await page.goto("/forgot-password?notice=sent");
-  await page.getByRole("link", { name: "Verify your reset email" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Check your inbox and open the reset link in this browser.",
+  );
   await expect(
-    page.getByRole("heading", { name: "Verify your reset email" }),
-  ).toBeVisible();
-  await expect(page.getByLabel("Email code or link")).toBeVisible();
+    page.locator('main a[href="/verify-email?flow=recovery"]'),
+  ).toHaveCount(0);
 });

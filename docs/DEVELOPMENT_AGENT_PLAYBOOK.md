@@ -1569,7 +1569,7 @@ _None at document creation._
 | Current task | `CAP-017 — Create users and article tables` |
 | Last verified completed task | `CAP-016` |
 | Last verification executed | `Fresh hosted capture-dev accepted baseline migration; history and schema permissions checked; second dry run is up to date.` |
-| Last successful Git commit | `a4e3c2c` |
+| Last successful Git commit | `cdcd51a` |
 | Active blockers | `Hosted capture-dev is available for P2. Local Windows container engine and other hosted provider access are unconfirmed.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
@@ -1961,3 +1961,11 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decisions:** Used a fresh hosted development project to verify code-based replay. The CLI labels this project's main branch production; the target was verified by name and exact project ref as the owner's dedicated development project.
 - **Git commit:** Pending commit addendum.
 - **Next action:** CAP-017 — Create users and article tables.
+
+### [2026-11-22T08:51:48+08:00] CAP-016 — Initialize Supabase and migrations — COMMIT
+- **Git commit:** cdcd51a
+
+### [2026-11-22T08:51:48+08:00] CAP-016 — Initialize Supabase and migrations — HANDOFF
+- **Agent/session:** Codex
+- **Verification:** Baseline migration and role permission checks passed against the fresh hosted development database. The hosted migration is current.
+- **Next action:** Start CAP-017 from the current progress pointer.

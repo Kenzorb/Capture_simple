@@ -397,6 +397,7 @@ export type Database = {
           attempts: number;
           created_at: string;
           error_code: string | null;
+          execution_id: string | null;
           finished_at: string | null;
           id: string;
           idempotency_key: string;
@@ -409,6 +410,7 @@ export type Database = {
           attempts?: number;
           created_at?: string;
           error_code?: string | null;
+          execution_id?: string | null;
           finished_at?: string | null;
           id?: string;
           idempotency_key: string;
@@ -421,6 +423,7 @@ export type Database = {
           attempts?: number;
           created_at?: string;
           error_code?: string | null;
+          execution_id?: string | null;
           finished_at?: string | null;
           id?: string;
           idempotency_key?: string;
@@ -699,6 +702,15 @@ export type Database = {
         Args: { p_dispatched: boolean; p_lease_id: string };
         Returns: number;
       };
+      capture_finish_job: {
+        Args: {
+          p_error_code?: string;
+          p_execution_id: string;
+          p_job_id: string;
+          p_status: Database["public"]["Enums"]["article_status"];
+        };
+        Returns: boolean;
+      };
       capture_save_article: {
         Args: {
           p_canonical_url: string;
@@ -715,6 +727,10 @@ export type Database = {
           duplicate: boolean;
           processing_status: Database["public"]["Enums"]["article_status"];
         }[];
+      };
+      capture_start_job: {
+        Args: { p_execution_id: string; p_job_id: string };
+        Returns: boolean;
       };
     };
     Enums: {

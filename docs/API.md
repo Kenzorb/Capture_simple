@@ -76,6 +76,8 @@ The list returns active articles by default. Use `archived=true` to list archive
 
 `GET /api/articles/:id` accepts the UUID of an article owned by the caller. It returns the article, personal note, and assigned topics. Missing articles and articles owned by someone else return HTTP 404.
 
+Use `article.status` to check processing progress. A new eligible capture transitions from `queued` to `processing`, then to `ready`, `failed`, or `unsupported`. Captures without an eligible job can be `saved`, `quota_limited`, or `unsupported`. Failed captures remain in the library. This response uses `Cache-Control: private, no-store` and contains no worker execution IDs or error details.
+
 ```json
 {
   "article": {

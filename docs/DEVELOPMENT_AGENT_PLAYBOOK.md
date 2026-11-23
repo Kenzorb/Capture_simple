@@ -789,7 +789,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-051 — Implement status state machine
 
-- [ ] **CAP-051 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-051 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Define allowed transitions and owner-scoped status API; use job IDs/generation tokens to prevent stale worker overwrites.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-051 — Implement status state machine` |
-| Last verified completed task | `CAP-050` |
-| Last verification executed | `Hosted Supabase and local Inngest verified that a provider outage retained a queued capture and reservation, concurrent retries dispatched one event, and a lost acknowledgement started one subscriber run. Quota and capture regressions and 59 tests passed.` |
-| Last successful Git commit | `c5d7bbe` |
+| Current task | `CAP-052 — Implement source preparation/chunking` |
+| Last verified completed task | `CAP-051` |
+| Last verification executed | `Hosted SQL verified processing transitions, stale execution rejection, preservation on failure, and exactly-once quota finalization. The article API exposed owner-only status through failure. All 59 tests passed.` |
+| Last successful Git commit | `484bee2` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement database-guarded job and article transitions, including safe replay and stale-worker rejection.` |
+| Next action | `Prepare captured source text or fetch public URL-only sources with DNS, redirect, deadline, and byte limits.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 2/13 | In progress |
+| P6 | CAP-049–061 | 3/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2474,3 +2474,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Regression checks:** Hosted fixtures verified UTC period boundaries, one winner for the last quota slot, unsupported links, role restrictions, expired lease fencing, deletion release, and concurrent capture deduplication without consuming quota. The processing schema test and all 59 unit tests passed, along with web TypeScript, lint, formatting, and diff checks. Disposable accounts were removed.
 - **Environment:** Hosted Inngest sync remains pending. The processing consumer and status transitions are part of CAP-051.
 - **Next action:** CAP-051 — Implement status state machine.
+
+### [2026-11-23T09:47:06+08:00] CAP-051 — Implement status state machine — STARTED
+
+- **Plan:** Add database-guarded processing transitions and verify that the existing owner-scoped article API exposes status without worker metadata.
+
+### [2026-11-23T09:50:23+08:00] CAP-051 — Implement status state machine — COMPLETE
+
+- **Changes:** Added service-only transition RPCs that bind a processing job to one execution. Terminal outcomes are applied with the reservation change in one transaction. The existing owner-scoped article API supplies status for clients.
+- **Verification:** Applied the migration to capture-dev. A rollback-only SQL fixture passed invalid transition, stale generation, replay, quota accounting, and failure retention checks. Two disposable accounts verified the API reads queued, processing, and failed states for the owner, preserves the personal note, omits worker metadata, and returns 404 to other accounts. All 59 unit tests, web TypeScript, formatting, and diff checks passed.
+- **Next action:** CAP-052 — Implement source preparation/chunking.

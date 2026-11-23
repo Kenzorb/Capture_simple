@@ -42,7 +42,7 @@ Use the local API URL and publishable key in `apps/web/.env.local`. Add the loca
 
 ### Background jobs
 
-Set `INNGEST_DEV=1` in `apps/web/.env.local` and start or restart the web app. Leave the Inngest signing and event keys empty for local development. Run the Dev Server in a second terminal.
+Set `INNGEST_DEV=1` in `apps/web/.env.local` and start or restart the web app on `127.0.0.1`. Leave the Inngest signing and event keys empty for local development. Run the Dev Server in a second terminal.
 
 ```sh
 npx --yes --ignore-scripts=false inngest-cli@1.53.0 dev --host 127.0.0.1 --no-discovery -u http://127.0.0.1:3000/api/inngest
@@ -52,7 +52,7 @@ Open `http://127.0.0.1:8288` and send the development event `capture/dev.durabil
 
 In staging and production, deploy the Node.js web app and sync its public HTTPS `/api/inngest` URL in the matching Inngest environment. Store that environment's `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`, and matching Supabase `SUPABASE_SERVICE_ROLE_KEY` in the deployment's server-only secret settings. The signing key authenticates callbacks and the event key authorizes event submission. Hosted callbacks use signature verification even if `INNGEST_DEV` is present. The route's execution limit is 60 seconds per request. Configure Inngest retry, concurrency, and start and finish limits on each registered function. [Inngest keys](https://www.inngest.com/docs/platform-and-operations/keys-and-access)
 
-The hosted dispatcher polls the capture outbox every minute. Locally, add the development project's server-only Supabase key and send the `capture/dev.dispatch-job` event with an existing job UUID as `data.jobId` to check a single job. This keeps a local Inngest instance from automatically draining a shared hosted database. A provider outage leaves committed jobs pending until their next attempt. The dispatcher reuses the job's event ID on retry. Inngest deduplicates starts within 24 hours, and consumers must use the persistent job ID to guard their state changes across redelivery. [Inngest event idempotency](https://www.inngest.com/docs/durable-execution/guides-and-advanced/idempotency)
+The hosted dispatcher polls the capture outbox every minute. For automatic local processing, set `INNGEST_DEV_OWNER_ID` to your development account's Supabase user UUID and set the development project's server-only `SUPABASE_SERVICE_ROLE_KEY`. The local scheduler checks only that account's queue, once a minute. Without an owner UUID, use the explicit `capture/dev.dispatch-job` event with an existing job UUID as `data.jobId`. A provider outage leaves committed jobs pending until their next attempt. The dispatcher reuses the job's event ID on retry. Inngest deduplicates starts within 24 hours, and consumers must use the persistent job ID to guard their state changes across redelivery. [Inngest event idempotency](https://www.inngest.com/docs/durable-execution/guides-and-advanced/idempotency)
 
 The dispatcher also checks for abandoned executions and acknowledged deliveries that did not start within 15 minutes. Recovery increments that job's delivery generation and retains its reservation. After three generations, a further abandonment marks the outbox dead and releases the reservation. A trusted operator can target a single stale job using the service-only `capture_reconcile_jobs` RPC. It checks the same age and generation limits as the scheduled worker.
 

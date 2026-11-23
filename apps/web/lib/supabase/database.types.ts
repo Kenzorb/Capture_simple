@@ -738,6 +738,10 @@ export type Database = {
         Args: { p_article_id: string; p_confirmed: boolean };
         Returns: boolean;
       };
+      capture_due_owner_jobs: {
+        Args: { p_owner_id: string };
+        Returns: { job_id: string }[];
+      };
       capture_edit_article: {
         Args: {
           p_archived?: boolean;

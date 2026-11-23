@@ -14,6 +14,8 @@ export const defaultNoteModel = "gpt-5.6-luna";
 const endpoint = "https://api.openai.com/v1/responses";
 const maxOutputTokens = 1_800;
 const maxAttempts = 3;
+const requestTimeoutMs = 30_000;
+const retryBudgetMs = 42_000;
 
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -98,8 +100,13 @@ export async function generateOpenAiNote(
   let code:
     "provider_rate_limited" | "provider_timeout" | "provider_unavailable" =
     "provider_unavailable";
+  const deadline = AbortSignal.timeout(retryBudgetMs);
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const signal = AbortSignal.timeout(12_000);
+    if (deadline.aborted) break;
+    const signal = AbortSignal.any([
+      deadline,
+      AbortSignal.timeout(requestTimeoutMs),
+    ]);
     try {
       const response = await send(endpoint, {
         method: "POST",
@@ -146,7 +153,11 @@ export async function generateOpenAiNote(
       // Network details can contain credentials or payloads. Retry without logging them.
       code = signal.aborted ? "provider_timeout" : "provider_unavailable";
     }
-    if (attempt + 1 < maxAttempts) await delay(250 * 2 ** attempt);
+    if (attempt + 1 < maxAttempts) {
+      await delay(250 * 2 ** attempt, undefined, { signal: deadline }).catch(
+        () => {},
+      );
+    }
   }
   return { status: "unavailable", code } as const;
 }

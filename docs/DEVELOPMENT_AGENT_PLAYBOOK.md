@@ -2601,3 +2601,9 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Quality and cost:** The note identified the normal distribution and its statistical characteristics, included five takeaways and five sections, and cited IDs from the three stored evidence chunks. The owner API returned the same ready note. Exactly one quota unit was used and no reservation remained. The successful response used 1,298 input tokens and 997 output tokens, estimated at USD 0.001456 at the standard uncached rate. [Pricing](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
 - **P6 gate:** Passed. All 13 tasks are verified. Hosted Inngest sync remains pending for deployment.
 - **Next action:** CAP-062 — Define hierarchy rules and topic API.
+
+### [2026-11-23T14:35:56+08:00] Local queue follow-up — VERIFIED
+
+- **Changes:** Configured loopback development workers and added an optional account-scoped local schedule. Increased the model request timeout while bounding total retry time.
+- **Verification:** The connected development database confirmed the reported article was Ready with one stored note and a successful dispatched job. Local Inngest registered the minute schedule. Hosted SQL verified account isolation and deferred work handling. All 113 local tests, web TypeScript, formatting, and diff checks passed.
+- **Next action:** CAP-062 — Define hierarchy rules and topic API.

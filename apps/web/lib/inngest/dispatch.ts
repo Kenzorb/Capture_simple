@@ -1,6 +1,6 @@
 import { articleParamsSchema } from "@capture/shared";
 import { createPrivilegedSupabaseClient } from "../supabase/admin";
-import { inngest, inngestDev } from "./client";
+import { inngest, inngestDev, localQueueOwner } from "./client";
 
 export const dispatchCaptureJobs = inngest.createFunction(
   {
@@ -17,7 +17,22 @@ export const dispatchCaptureJobs = inngest.createFunction(
       id: event.data && "jobId" in event.data ? event.data.jobId : undefined,
     });
     if (inngestDev && !target.success) return { dispatched: 0 };
-    const scope = { p_job_id: inngestDev ? target.data?.id : undefined };
+    const jobId = inngestDev ? target.data?.id : undefined;
+    const ownerId = localQueueOwner;
+    if (ownerId && jobId) {
+      const owned = await step.run("check-local-job-owner", async () => {
+        const { data, error } = await createPrivilegedSupabaseClient()
+          .from("processing_jobs")
+          .select("id")
+          .eq("id", jobId)
+          .eq("user_id", ownerId)
+          .maybeSingle();
+        if (error) throw new Error("Could not check local capture ownership.");
+        return Boolean(data);
+      });
+      if (!owned) return { dispatched: 0 };
+    }
+    const scope = { p_job_id: jobId };
 
     await step.run("reconcile-abandoned-jobs", async () => {
       const { data, error } = await createPrivilegedSupabaseClient().rpc(
@@ -68,5 +83,36 @@ export const dispatchCaptureJobs = inngest.createFunction(
       dispatched: accepted ? finalized : 0,
       deferred: accepted ? 0 : finalized,
     };
+  },
+);
+
+export const dispatchLocalCaptureJobs = inngest.createFunction(
+  {
+    id: "dispatch-local-capture-jobs",
+    triggers: [{ cron: "* * * * *" }],
+    concurrency: { limit: 1 },
+    retries: 0,
+  },
+  async ({ step }) => {
+    const ownerId = localQueueOwner;
+    if (!ownerId) return { scheduled: 0 };
+    const jobs = await step.run("find-due-local-jobs", async () => {
+      const { data, error } = await createPrivilegedSupabaseClient().rpc(
+        "capture_due_owner_jobs",
+        { p_owner_id: ownerId },
+      );
+      if (error) throw new Error("Could not find pending local capture jobs.");
+      return data;
+    });
+    if (jobs.length) {
+      await step.sendEvent(
+        "schedule-owned-captures",
+        jobs.map(({ job_id }) => ({
+          name: "capture/dev.dispatch-job",
+          data: { jobId: job_id },
+        })),
+      );
+    }
+    return { scheduled: jobs.length };
   },
 );

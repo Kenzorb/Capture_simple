@@ -6,7 +6,7 @@ import { URL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 test(
-  "capture deduplication and request budgets are enforced per owner without charging usage",
+  "capture deduplication reserves quota once per article without consuming it",
   { timeout: 120_000 },
   async (t) => {
     const url = process.env.CAPTURE_TEST_SUPABASE_URL;
@@ -147,7 +147,8 @@ test(
     assert(
       results.every(
         ({ body }) =>
-          body.capture_status === "saved" && body.processing_status === "saved",
+          body.capture_status === "saved" &&
+          body.processing_status === "queued",
       ),
     );
 
@@ -179,7 +180,7 @@ test(
     );
     assert.equal(articles.count, 1);
     assert.equal(requestKeys.count, 6);
-    assert.equal(usage.count, 0);
+    assert.equal(usage.count, 1);
 
     const burst = await Promise.all(
       Array.from({ length: 12 }, (_, index) =>
@@ -228,13 +229,18 @@ test(
         .select("id", { count: "exact", head: true })
         .eq("user_id", first.owner),
       admin
-        .from("usage_events")
-        .select("user_id", { count: "exact", head: true })
-        .eq("user_id", first.owner),
+        .from("usage_periods")
+        .select("article_limit,reserved,used")
+        .eq("user_id", first.owner)
+        .single(),
     ]);
     assert(!savedCount.error && !billedCount.error);
     assert.equal(savedCount.count, 11);
-    assert.equal(billedCount.count, 0);
+    assert.deepEqual(billedCount.data, {
+      article_limit: 20,
+      reserved: 11,
+      used: 0,
+    });
 
     const reset = await admin
       .from("capture_rate_limits")

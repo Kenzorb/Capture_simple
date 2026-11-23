@@ -322,6 +322,7 @@ export type Database = {
           dispatched_at: string | null;
           id: string;
           job_id: string;
+          lease_id: string | null;
           next_attempt_at: string;
           status: Database["public"]["Enums"]["dispatch_status"];
         };
@@ -331,6 +332,7 @@ export type Database = {
           dispatched_at?: string | null;
           id?: string;
           job_id: string;
+          lease_id?: string | null;
           next_attempt_at?: string;
           status?: Database["public"]["Enums"]["dispatch_status"];
         };
@@ -340,6 +342,7 @@ export type Database = {
           dispatched_at?: string | null;
           id?: string;
           job_id?: string;
+          lease_id?: string | null;
           next_attempt_at?: string;
           status?: Database["public"]["Enums"]["dispatch_status"];
         };
@@ -665,6 +668,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      capture_claim_dispatch: {
+        Args: { p_job_id?: string };
+        Returns: { job_id: string; lease_id: string }[];
+      };
       capture_delete_article: {
         Args: { p_article_id: string; p_confirmed: boolean };
         Returns: boolean;
@@ -687,6 +694,10 @@ export type Database = {
           display_name: string | null;
           plan: string;
         }[];
+      };
+      capture_finish_dispatch: {
+        Args: { p_dispatched: boolean; p_lease_id: string };
+        Returns: number;
       };
       capture_save_article: {
         Args: {

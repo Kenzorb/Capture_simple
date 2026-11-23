@@ -779,7 +779,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-050 — Build transactional job dispatch
 
-- [ ] **CAP-050 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-050 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create the initial Free monthly usage period and, on eligible capture, atomically create a job + quota reservation + durable outbox/work item; prevent “saved but never queued” gaps. Later quota tasks harden reset and paid entitlements.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-050 — Build transactional job dispatch` |
-| Last verified completed task | `CAP-049` |
-| Last verification executed | `Inngest Dev Server acknowledged an event before the worker finished. One intentional failure retried successfully. The production build enforced callback signatures and excluded the smoke job. All 59 tests passed.` |
-| Last successful Git commit | `bf79322` |
+| Current task | `CAP-051 — Implement status state machine` |
+| Last verified completed task | `CAP-050` |
+| Last verification executed | `Hosted Supabase and local Inngest verified that a provider outage retained a queued capture and reservation, concurrent retries dispatched one event, and a lost acknowledgement started one subscriber run. Quota and capture regressions and 59 tests passed.` |
+| Last successful Git commit | `c5d7bbe` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Atomically reserve Free quota and enqueue work on eligible captures. Verify that an outage leaves a recoverable job and recovery dispatches it once.` |
+| Next action | `Implement database-guarded job and article transitions, including safe replay and stale-worker rejection.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 1/13 | In progress |
+| P6 | CAP-049–061 | 2/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2461,3 +2461,16 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Production verification:** A local production Next.js build stayed in cloud mode even with `INNGEST_DEV=1`, registered no development smoke function, rejected unsigned GET and POST requests with HTTP 401, and accepted a signed inspection with a synthetic key. Frozen lockfile validation, all 59 tests, web TypeScript, lint, formatting, and diff checks passed.
 - **Environment:** No hosted Inngest deployment was made. Hosted sync requires the target environment's real credentials and a deployed hosted function.
 - **Next action:** CAP-050 — Build transactional job dispatch.
+
+### [2026-11-23T09:24:27+08:00] CAP-050 — Build transactional job dispatch — STARTED
+
+- **Plan:** Reserve Free quota and write jobs and outbox rows in the save transaction. Dispatch leased outbox rows through Inngest and verify recovery from lost acknowledgements and a provider outage.
+
+### [2026-11-23T09:35:30+08:00] CAP-050 — Build transactional job dispatch — COMPLETE
+
+- **Changes:** New eligible captures atomically save the article, reserve one unit in a 20-article UTC calendar month, and create one job and outbox row. Duplicates reuse the saved status. Chrome captures without readable text and captures at the quota limit still retain the link. Deleting an article releases any unused reservation.
+- **Dispatch:** A hosted minute-by-minute Inngest trigger claims due rows with expiring leases and sends fixed event IDs derived from job IDs. Provider failures back off without losing the queued work. A late acknowledgement cannot finalize an expired and reclaimed lease. Local development can dispatch a specific job without draining a shared project.
+- **Verification:** Applied `20261123092427_transactional_capture_dispatch.sql` to the connected development project after its dry run. With Inngest Dev Server 1.53.0 and a simulated HTTP 503, a capture returned HTTP 201 and retained one queued job, one reservation, and one pending outbox row. After backoff, two recovery triggers produced one provider event. A separate fixture dropped the first acknowledgement after successful provider delivery. The retry reused its event ID and one subscriber run completed.
+- **Regression checks:** Hosted fixtures verified UTC period boundaries, one winner for the last quota slot, unsupported links, role restrictions, expired lease fencing, deletion release, and concurrent capture deduplication without consuming quota. The processing schema test and all 59 unit tests passed, along with web TypeScript, lint, formatting, and diff checks. Disposable accounts were removed.
+- **Environment:** Hosted Inngest sync remains pending. The processing consumer and status transitions are part of CAP-051.
+- **Next action:** CAP-051 — Implement status state machine.

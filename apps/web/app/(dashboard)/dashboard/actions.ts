@@ -13,6 +13,20 @@ import {
 } from "../../../lib/supabase/captures";
 import { getAuthenticatedSession } from "../../../lib/supabase/server";
 
+export async function dismissOnboarding() {
+  const session = await getAuthenticatedSession();
+  if (!session) redirect("/sign-in");
+  const { data, error } = await session.supabase
+    .from("profiles")
+    .update({ onboarding_dismissed_at: new Date().toISOString() })
+    .eq("id", session.user.id)
+    .select("id")
+    .maybeSingle();
+  if (error || !data) redirect("/dashboard?onboarding=failed");
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
+}
+
 export async function saveManualUrl(formData: FormData) {
   const session = await getAuthenticatedSession();
   if (!session) redirect("/sign-in");

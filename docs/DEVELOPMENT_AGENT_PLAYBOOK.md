@@ -1101,7 +1101,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-081 — Implement first-run onboarding
 
-- [ ] **CAP-081 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-081 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Guide user through installing/connecting extension and capturing one real article; skipable, accessible, no fake example counts.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-081 — Implement first-run onboarding` |
-| Last verified completed task | `CAP-080` |
-| Last verification executed | `Chromium verified settings, private usage, profile editing, privacy links, export and mobile layout. Hosted Free and Pro usage matched accounting through admission and term expiry.` |
-| Last successful Git commit | `22179b6` |
+| Current task | `CAP-082 — Add clear incomplete/error recovery UX` |
+| Last verified completed task | `CAP-081` |
+| Last verification executed | `Chromium verified that one fresh account could skip the guide and a second could save a public article, reach Ready through local Inngest, and find its first topic in the Knowledge Tree.` |
+| Last successful Git commit | `bf13160` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Guide a new account through connecting Capture and creating its first real knowledge branch.` |
+| Next action | `Verify that incomplete and failed capture states all offer a way to recover or continue.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 8/11 | In progress |
+| P8 | CAP-073–083 | 9/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2799,3 +2799,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Added Settings under Account and linked it from quota-limited captures. The page shows effective plan, used and reserved units, monthly limit, UTC reset, and retry policy from server accounting, along with display name editing, extension access, capture deletion navigation, and exports.
 - **Verification** — Chromium on the production build verified the 390 px layout, settings values against two accounts, profile editing through reload, privacy links, and a JSON download. Hosted Free and Pro tests verified current counters, plan expiry, zero usage without a period, and that forged request fields are ignored. Anonymous requests were denied. Boundary SQL, build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in Vitest.
 - **Next action** — CAP-081 — Implement first-run onboarding.
+
+### [2026-11-23T18:52:52+08:00] CAP-081 — Implement first-run onboarding — STARTED
+
+- **Plan** — Guide new accounts from Chrome setup or manual save to their first real knowledge branch. Verify that skipping persists and that fresh accounts see real processing progress.
+
+### [2026-11-23T20:14:18+08:00] CAP-081 — Implement first-run onboarding — COMPLETE
+
+- **Changes** — Added a skippable first-capture guide with Chrome setup instructions, a manual save option, and links to processing progress and the first populated Knowledge Tree branch. The skip preference belongs to the account.
+- **Verification** — Chromium on the production build verified that one disposable account could skip and reload without seeing the guide and that a separate fresh account started with an empty tree and no example counts. The second account used the keyboard to follow the manual URL path, saved a real public article, reached Ready through local Inngest and the live note provider, and found its capture in the populated Knowledge Tree at 390 px. The run checked the Chrome setup instructions and used manual URL capture for the live path. Build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in Vitest.
+- **Next action** — CAP-082 — Add clear incomplete/error recovery UX.

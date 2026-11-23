@@ -3,12 +3,16 @@ import { articleParamsSchema, maxCaptureUrlLength } from "@capture/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { readOwnOverview } from "../../../lib/supabase/overview";
+import {
+  readOwnOnboarding,
+  readOwnOverview,
+} from "../../../lib/supabase/overview";
 import { getAuthenticatedSession } from "../../../lib/supabase/server";
 import { SubmitButton } from "../../(auth)/submit-button";
 import { DashboardHeading } from "../dashboard-focus";
 import { saveManualUrl } from "./actions";
 import { CaptureStatus, CaptureTitle } from "./capture-presentation";
+import { FirstCaptureGuide } from "./first-capture-guide";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -36,14 +40,17 @@ export default async function DashboardPage({
     error?: string | string[];
     capture?: string | string[];
     article?: string | string[];
+    onboarding?: string | string[];
   }>;
 }) {
   const session = await getAuthenticatedSession();
   if (!session) redirect("/sign-in");
-  const [{ error, capture, article }, { recent, counts }] = await Promise.all([
-    searchParams,
-    readOwnOverview(session),
-  ]);
+  const [{ error, capture, article, onboarding }, { recent, counts }, guide] =
+    await Promise.all([
+      searchParams,
+      readOwnOverview(session),
+      readOwnOnboarding(session),
+    ]);
   const message = typeof capture === "string" && captureMessages.get(capture);
   const saved =
     capture === "saved" ||
@@ -52,6 +59,10 @@ export default async function DashboardPage({
   const detail = articleParamsSchema.safeParse({ id: article });
   const empty =
     recent?.length === 0 && counts.every(({ count }) => count === 0);
+  const showGuide =
+    guide &&
+    !guide.dismissed &&
+    (guide.count === 0 || (guide.count === 1 && recent?.length === 1));
   return (
     <>
       <DashboardHeading
@@ -64,6 +75,12 @@ export default async function DashboardPage({
         <p role="alert" className="mt-4 text-red-800">
           Sign-out failed. Try again.
         </p>
+      )}
+      {showGuide && (
+        <FirstCaptureGuide
+          article={recent?.[0]}
+          failed={onboarding === "failed"}
+        />
       )}
       {!empty && (
         <dl
@@ -88,7 +105,7 @@ export default async function DashboardPage({
         className="mt-8 max-w-2xl rounded-xl border border-emerald-950/15 bg-white p-5 sm:p-6"
       >
         <h2 className="text-xl font-semibold">Save a link</h2>
-        {empty && (
+        {empty && !showGuide && (
           <p className="mt-2 text-sm text-[#506458]">
             Save your first article to start your library.
           </p>

@@ -504,18 +504,21 @@ export type Database = {
         Row: {
           created_at: string;
           display_name: string | null;
+          onboarding_dismissed_at: string | null;
           id: string;
           updated_at: string;
         };
         Insert: {
           created_at?: string;
           display_name?: string | null;
+          onboarding_dismissed_at?: string | null;
           id: string;
           updated_at?: string;
         };
         Update: {
           created_at?: string;
           display_name?: string | null;
+          onboarding_dismissed_at?: string | null;
           id?: string;
           updated_at?: string;
         };

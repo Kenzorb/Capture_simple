@@ -42,3 +42,26 @@ export async function readOwnOverview(session: Session) {
     counts,
   };
 }
+
+export async function readOwnOnboarding({ supabase, user }: Session) {
+  const [profile, articles] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("onboarding_dismissed_at")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("articles")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+  ]);
+  return !profile.data ||
+    profile.error ||
+    articles.error ||
+    articles.count === null
+    ? null
+    : {
+        dismissed: Boolean(profile.data.onboarding_dismissed_at),
+        count: articles.count,
+      };
+}

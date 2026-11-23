@@ -1031,7 +1031,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-074 — Build search UI and filters
 
-- [ ] **CAP-074 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-074 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Provide search input, result previews, status/topic filters, empty/loading/error states and accessible navigation.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-074 — Build search UI and filters` |
-| Last verified completed task | `CAP-073` |
-| Last verification executed | `Two-account HTTP tests verified search relevance, cursor pagination, term validation, and isolation. First paginated HTTP result on 1,253 captures took 231 ms.` |
-| Last successful Git commit | `0e4e2af` |
+| Current task | `CAP-075 — Implement personal note editing` |
+| Last verified completed task | `CAP-074` |
+| Last verification executed | `Chromium verified opening results by concept and remembered title, match previews, topic and status filters, empty state, keyboard focus, and a 390 px layout.` |
+| Last successful Git commit | `b00a096` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Expose keyword search with topic and status filters, result previews, and accessible navigation.` |
+| Next action | `Verify and complete the personal note editing workflow and extension-note distinction.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 1/11 | In progress |
+| P8 | CAP-073–083 | 2/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2729,3 +2729,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Added indexed, owner-scoped keyword search over titles, AI summaries and concept names, personal notes, and topic names. The search endpoint and library query share validation, filters, and stable cursor sorting.
 - **Verification** — Applied the migration to Capture development. The two-account HTTP check verified phrase, concept, summary, note and topic matches, invalid and negative-only queries, status and topic filters, archive and note changes, isolation, and paging across identical timestamps. The first timed HTTP page on a seeded library of 1,253 captures took 231 ms. Production build, lint, formatting, and 113 Vitest tests passed with three opt-in tests skipped in that run.
 - **Next action** — CAP-074 — Build search UI and filters.
+
+### [2026-11-23T17:56:14+08:00] CAP-074 — Build search UI and filters — STARTED
+
+- **Plan:** Add editable keyword search, topic filter choices, safe result previews, and accessible result feedback to the existing capture library. Verify discovery and opening by concept and title in Chromium.
+
+### [2026-11-23T18:00:56+08:00] CAP-074 — Build search UI and filters — COMPLETE
+
+- **Changes** — Added editable keywords and hierarchical topic choices to the existing library filters. Search results show short text previews drawn from the signed-in user's summaries, concepts, personal notes, and topics. Added an accessible loading status and search-specific empty feedback.
+- **Verification** — Chromium on the production build found and opened captures by concept and remembered title. It also verified concept and personal note previews, combined topic and status filters, keyboard submission and focus, no-results feedback, and a 390 px viewport without horizontal overflow. The production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in the Vitest run.
+- **Next action** — CAP-075 — Implement personal note editing.

@@ -1,15 +1,19 @@
-import { articleListQuerySchema } from "@capture/shared";
+import { articleListQuerySchema, type ArticleListQuery } from "@capture/shared";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import {
   decodeArticleCursor,
   encodeArticleCursor,
   listOwnArticles,
 } from "../../../../lib/supabase/articles";
+import { readOwnSearchPreviews } from "../../../../lib/supabase/search-previews";
 import { getAuthenticatedSession } from "../../../../lib/supabase/server";
+import { readOwnTopicTree } from "../../../../lib/supabase/topics";
 import { DashboardHeading } from "../../dashboard-focus";
+import { TopicOptions } from "../../topic-options";
 import {
   CaptureStatus,
   CaptureTime,
@@ -45,7 +49,7 @@ export default async function CapturesPage({
     q: typeof q === "string" ? q.trim() || undefined : q,
     cursor: encodedCursor,
     status: status === "" ? undefined : status,
-    topic,
+    topic: topic === "" ? undefined : topic,
     domain: typeof domain === "string" ? domain.trim() || undefined : domain,
     archived,
     sort,
@@ -55,8 +59,7 @@ export default async function CapturesPage({
   const cursor = query.cursor ? decodeArticleCursor(query.cursor) : null;
   if (query.cursor && !cursor) redirect(libraryPath);
 
-  const { data, error } = await listOwnArticles(session, query, cursor);
-  const articles = data?.slice(0, query.limit) ?? [];
+  const tree = await readOwnTopicTree(session);
   const filters = new URLSearchParams();
   if (query.q) filters.set("q", query.q);
   if (query.status) filters.set("status", query.status);
@@ -65,13 +68,6 @@ export default async function CapturesPage({
   if (query.archived) filters.set("archived", "true");
   if (query.sort === "captured_asc") filters.set("sort", query.sort);
   const firstPage = filters.size ? `${libraryPath}?${filters}` : libraryPath;
-  const hasNextPage = data !== null && data.length > query.limit;
-  if (hasNextPage) {
-    filters.set("cursor", encodeArticleCursor(articles[query.limit - 1]));
-  }
-  const isFiltered = Boolean(
-    query.q || query.domain || query.status || query.topic,
-  );
 
   return (
     <>
@@ -97,10 +93,32 @@ export default async function CapturesPage({
         aria-label="Capture filters"
         className="mt-6 grid max-w-3xl grid-cols-1 gap-3 rounded-xl border border-[#dde5dd] bg-white p-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {query.q && <input type="hidden" name="q" value={query.q} />}
-        {query.topic && (
+        <label className="grid gap-1 text-sm font-semibold sm:col-span-2 lg:col-span-3">
+          Keywords
+          <input
+            name="q"
+            type="search"
+            defaultValue={query.q}
+            maxLength={200}
+            placeholder="Search your captures"
+            className={controlClass}
+          />
+        </label>
+        {tree ? (
+          <label className="grid min-w-0 gap-1 text-sm font-semibold">
+            Topic
+            <select
+              name="topic"
+              defaultValue={query.topic ?? ""}
+              className={controlClass}
+            >
+              <option value="">Any topic</option>
+              <TopicOptions topics={tree.topics} />
+            </select>
+          </label>
+        ) : query.topic ? (
           <input type="hidden" name="topic" value={query.topic} />
-        )}
+        ) : null}
         <label className="grid gap-1 text-sm font-semibold">
           Status
           <select
@@ -153,7 +171,7 @@ export default async function CapturesPage({
             type="submit"
             className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-900"
           >
-            Apply filters
+            Search captures
           </button>
           {firstPage !== libraryPath && (
             <Link
@@ -165,6 +183,57 @@ export default async function CapturesPage({
           )}
         </div>
       </Form>
+      <Suspense
+        key={`${firstPage}|${query.cursor ?? ""}`}
+        fallback={
+          <p role="status" className="mt-6 text-[#506458]">
+            Loading captures…
+          </p>
+        }
+      >
+        <CaptureResults
+          session={session}
+          query={query}
+          cursor={cursor}
+          firstPage={firstPage}
+          filters={filters}
+        />
+      </Suspense>
+    </>
+  );
+}
+
+async function CaptureResults({
+  session,
+  query,
+  cursor,
+  firstPage,
+  filters,
+}: {
+  session: NonNullable<Awaited<ReturnType<typeof getAuthenticatedSession>>>;
+  query: ArticleListQuery;
+  cursor: ReturnType<typeof decodeArticleCursor>;
+  firstPage: string;
+  filters: URLSearchParams;
+}) {
+  const { data, error } = await listOwnArticles(session, query, cursor);
+  const articles = data?.slice(0, query.limit) ?? [];
+  const previews = query.q
+    ? await readOwnSearchPreviews(
+        session,
+        articles.map(({ id }) => id),
+        query.q,
+      )
+    : null;
+  const hasNextPage = data !== null && data.length > query.limit;
+  if (hasNextPage)
+    filters.set("cursor", encodeArticleCursor(articles[query.limit - 1]));
+  const isFiltered = Boolean(
+    query.q || query.domain || query.status || query.topic,
+  );
+
+  return (
+    <>
       {error ? (
         <p role="alert" className="mt-6 text-red-800">
           Could not load your captures. Refresh to try again.
@@ -180,6 +249,11 @@ export default async function CapturesPage({
                   ? "No archived captures"
                   : "No captures yet"}
           </h2>
+          {isFiltered && (
+            <p className="mt-2 text-sm text-[#506458]">
+              Try different keywords or filters.
+            </p>
+          )}
           {!cursor && !isFiltered && !query.archived && (
             <Link
               className="mt-3 inline-block font-semibold text-emerald-950 underline"
@@ -190,20 +264,33 @@ export default async function CapturesPage({
           )}
         </div>
       ) : (
-        <ul className="mt-6 max-w-3xl divide-y divide-[#dde5dd] rounded-xl border border-[#dde5dd] bg-white">
-          {articles.map((article) => (
-            <li
-              key={article.id}
-              className="px-4 py-3 break-words sm:px-5 sm:py-4"
-            >
-              <CaptureTitle id={article.id} title={article.title} />
-              <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#506458]">
-                <span>{article.domain}</span>
-                <CaptureTime value={article.captured_at} />
-                <CaptureStatus status={article.status} />
-              </div>
-            </li>
-          ))}
+        <ul
+          aria-label={query.q ? "Search results" : "Captures"}
+          className="mt-6 max-w-3xl divide-y divide-[#dde5dd] rounded-xl border border-[#dde5dd] bg-white"
+        >
+          {articles.map((article) => {
+            const preview = previews?.get(article.id);
+            return (
+              <li
+                key={article.id}
+                className="px-4 py-3 break-words sm:px-5 sm:py-4"
+              >
+                <CaptureTitle id={article.id} title={article.title} />
+                <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#506458]">
+                  <span>{article.domain}</span>
+                  <CaptureTime value={article.captured_at} />
+                  <CaptureStatus status={article.status} />
+                </div>
+                {preview && (
+                  <p className="mt-2 text-sm text-[#506458]">
+                    <span className="font-semibold">{preview.label}</span>
+                    {" · "}
+                    {preview.text}
+                  </p>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
       {(cursor || hasNextPage) && (

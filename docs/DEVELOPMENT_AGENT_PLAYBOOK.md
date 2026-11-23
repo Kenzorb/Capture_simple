@@ -1147,7 +1147,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-085 — Configure Stripe test-mode products/prices
 
-- [ ] **CAP-085 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-085 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create test products for monthly/yearly Pro, store IDs in server-only environment configuration, never trust price IDs from browser.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-085 — Configure Stripe test-mode products/prices` |
-| Last verified completed task | `CAP-084` |
-| Last verification executed | `Owner selected $11.99 monthly in USD for test mode. Recorded paired annual price and verified pricing and cost arithmetic.` |
-| Last successful Git commit | `c9fd942` |
-| Active blockers | `CAP-085 requires access to a Stripe sandbox. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-086 — Implement authenticated Checkout endpoint` |
+| Last verified completed task | `CAP-085` |
+| Last verification executed | `Stripe sandbox Checkout previews displayed US$11.99 per month and US$107.88 per year. Confirmed both price IDs in ignored server environment configuration.` |
+| Last successful Git commit | `90574ca` |
+| Active blockers | `Live verification of the Capture Checkout endpoint will require a server-side Stripe sandbox API key. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Configure and verify the recurring USD prices in Stripe test mode.` |
+| Next action | `Implement authenticated Checkout with server-selected monthly and annual prices.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 1/9 | In progress |
+| P9 | CAP-084–092 | 2/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **83/112** | **In progress** |
+| **Total** | **CAP-001–112** | **84/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2851,3 +2851,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decision** — The owner approved USD $11.99 monthly for test mode. The companion price is USD $107.88 yearly, equivalent to $8.99 monthly. The model retains the prior proposals for comparison and leaves live pricing subject to launch approval.
 - **Verification** — Recomputed payment fees, per-subscriber contribution and the 100-Pro/400-Free cohort under baseline and stress assumptions. The [pricing model](PRICING_MODEL.md) records inputs and excludes tax, refunds and acquisition costs from contribution. The product spec and playbook agree on the test prices.
 - **Next action** — CAP-085 — Configure Stripe test-mode products/prices.
+
+### [2026-11-23T23:26:00+08:00] CAP-085 — Configure Stripe test-mode products/prices — STARTED
+
+- **Plan** — Create one Capture Pro product with two recurring USD prices in the signed-in Stripe sandbox. Store the price IDs in the web app's ignored server environment and compare each against the Stripe Checkout preview.
+
+### [2026-11-23T23:30:14+08:00] CAP-085 — Configure Stripe test-mode products/prices — COMPLETE
+
+- **Verification** — Confirmed both active recurring prices on the Stripe sandbox product and checked the matching sandbox Checkout previews. Monthly displayed US$11.99 per month and annual displayed US$107.88 per year. No payment was submitted and no live keys were used.
+- **Configuration** — Stored the two verified sandbox Price IDs in the existing server-only variables in `apps/web/.env.local`. The authenticated endpoint will select the price server-side in CAP-086.
+- **Next action** — CAP-086 — Implement authenticated Checkout endpoint.

@@ -212,7 +212,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 - Free: 20 successfully processed articles per monthly period.
 - Pro: 300 successfully processed articles per monthly period.
-- Standard proposed Pro: USD $7.99 monthly or $71.88 yearly; alternative founding price requires a documented decision.
+- Pro test-mode prices are USD $11.99 monthly and $107.88 yearly. Live pricing requires a separate decision.
 - Unlimited **link saving** subject to fair use; AI analysis is limited and server-metered.
 - Quota reservation happens atomically on enqueue, a success consumes it, a terminal failure releases it, a retry reuses it, and duplicates do not charge.
 - Monthly processing-period reset must also happen for annual subscribers, independent of annual billing renewal.
@@ -1137,7 +1137,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-084 — Finalize pricing/currency and cost assumptions
 
-- [ ] **CAP-084 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-084 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Estimate average AI spend per successful article at 20/300 volumes, hosting/job costs, fees, support and fair-use caps; obtain owner decision on USD prices.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-084 — Finalize pricing/currency and cost assumptions` |
-| Last verified completed task | `CAP-083` |
-| Last verification executed | `The consenting tester reported successful analysis and found the same capture through both Knowledge Tree and Search.` |
-| Last successful Git commit | `ea7a083` |
-| Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-085 — Configure Stripe test-mode products/prices` |
+| Last verified completed task | `CAP-084` |
+| Last verification executed | `Owner selected $11.99 monthly in USD for test mode. Recorded paired annual price and verified pricing and cost arithmetic.` |
+| Last successful Git commit | `c9fd942` |
+| Active blockers | `CAP-085 requires access to a Stripe sandbox. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Model Free and Pro costs and margin scenarios, then obtain the owner's USD pricing decision before configuring test-mode prices.` |
+| Next action | `Configure and verify the recurring USD prices in Stripe test mode.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 0/9 | Not started |
+| P9 | CAP-084–092 | 1/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **82/112** | **In progress** |
+| **Total** | **CAP-001–112** | **83/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1608,7 +1608,7 @@ Record answers here as decisions are made; record private keys only in secret st
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
 | Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049 |
 | Payment plan | Free-only beta or paid beta? | Unconfirmed |
-| Pricing/currency | USD $7.99 monthly / $71.88 annually proposed | Unconfirmed |
+| Pricing/currency | USD $11.99 monthly / $107.88 annually | Sandbox decision recorded in CAP-084 |
 | Production launch | Deployment/account approvals | Required when reached |
 | Chrome Web Store | Publisher account/permissions | Required when reached |
 
@@ -2840,3 +2840,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Walkthrough** — One consenting tester reported that analysis worked and that they found the article again through both Knowledge Tree and Search. The record contains the workflow observations only.
 - **Triage** — The tester reported no new blockers. The previously confirmed output truncation was addressed in `e5fdeaa`. Monitor recurrence using the distinct output-limit status.
 - **P8 gate** — Passed with all 11 tasks verified. Next is CAP-084 to estimate costs and obtain a USD pricing decision.
+
+### [2026-11-23T23:00:56+08:00] CAP-084 — Finalize pricing/currency and cost assumptions — STARTED
+
+- **Prepared** — The [pricing model](PRICING_MODEL.md) uses measured AI token usage and compares baseline, stress, and adverse costs, payment fees, hosted infrastructure, and support reserves. Recommended USD $7.99 monthly and $71.88 annually for test mode.
+- **Pending** — Obtain the owner's pricing decision before completing CAP-084 or configuring the test catalog.
+
+### [2026-11-23T23:23:24+08:00] CAP-084 — Finalize pricing/currency and cost assumptions — COMPLETE
+
+- **Decision** — The owner approved USD $11.99 monthly for test mode. The companion price is USD $107.88 yearly, equivalent to $8.99 monthly. The model retains the prior proposals for comparison and leaves live pricing subject to launch approval.
+- **Verification** — Recomputed payment fees, per-subscriber contribution and the 100-Pro/400-Free cohort under baseline and stress assumptions. The [pricing model](PRICING_MODEL.md) records inputs and excludes tax, refunds and acquisition costs from contribution. The product spec and playbook agree on the test prices.
+- **Next action** — CAP-085 — Configure Stripe test-mode products/prices.

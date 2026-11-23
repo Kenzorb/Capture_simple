@@ -432,14 +432,14 @@ On smaller screens, the sidebar may be collapsible or replaced by a drawer. Keyb
 
 The freemium model should make Capture useful without payment while aligning paid plans with the variable cost of AI processing. Do not charge users merely for saving links or accessing their existing knowledge.
 
-### 10.1 Proposed standard pricing
+### 10.1 Stripe test-mode pricing
 
 | Plan | Monthly billing | Annual billing |
 |---|---:|---:|
 | Free | $0 | $0 |
-| Pro | $7.99/month | Approximately $5.99/month equivalent ($71.88/year) |
+| Pro | $11.99/month | $107.88/year ($8.99/month equivalent) |
 
-Prices are proposed in USD, before any applicable taxes. Validate willingness to pay and actual processing costs before making these public prices. Annual billing charges the full annual amount upfront.
+Prices are in USD before any applicable taxes. The owner selected $11.99 monthly for test mode, with $107.88 as the companion annual price. Validate willingness to pay and actual processing costs before approving live prices. Annual billing charges the full annual amount upfront.
 
 ### 10.2 Plan comparison
 
@@ -1042,7 +1042,7 @@ As an illustrative sensitivity analysis, not a quote for any AI provider:
 | $0.020 | $0.40 | $6.00 |
 | $0.050 | $1.00 | $15.00 |
 
-At $7.99 monthly subscription revenue, a Pro user processing 300 articles at $0.02 each leaves $1.99 before payment fees and all other costs. At the early-access price of $4.99, the same activity would already exceed revenue on AI costs alone. Annual pricing further lowers effective monthly revenue. Therefore, measure usage distribution, restrict unusually expensive inputs, budget future chat separately, and validate processing quotas before committing to long-term prices.
+At $11.99 monthly subscription revenue, a Pro user processing 300 articles at $0.02 each leaves $5.99 before payment fees and all other costs. At $4.99, the same activity would exceed revenue on AI costs alone. Annual pricing lowers effective monthly revenue. Measure usage distribution and validate processing quotas before committing to live prices. [Pricing model](PRICING_MODEL.md)
 
 ### 20.3 Distribution strategy
 
@@ -1124,7 +1124,7 @@ Start with a small cohort of real users who frequently read online. Observe capt
 - Next.js and Supabase as the core technology stack.
 - Freemium model with unlimited link saving and metered AI processing.
 - Proposed initial limits: Free 20 articles/month; Pro 300 articles/month.
-- Proposed standard Pro price: $7.99/month or $71.88/year; alternative early-access price: $4.99/month or $39.99/year.
+- Stripe test-mode Pro price is $11.99/month or $107.88/year. The early-access alternative is $4.99/month or $39.99/year.
 - Preserve existing knowledge after subscription downgrade.
 
 ### 23.2 Recommended technical decisions

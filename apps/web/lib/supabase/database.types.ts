@@ -14,6 +14,38 @@ export type Database = {
   };
   public: {
     Tables: {
+      article_ai_notes: {
+        Row: {
+          article_id: string;
+          created_at: string;
+          model: string;
+          payload: Json;
+          schema_version: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          article_id: string;
+          created_at?: string;
+          model: string;
+          payload: Json;
+          schema_version: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["article_ai_notes"]["Row"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "article_ai_notes_user_id_article_id_fkey";
+            columns: ["user_id", "article_id"];
+            isOneToOne: true;
+            referencedRelation: "articles";
+            referencedColumns: ["user_id", "id"];
+          },
+        ];
+      };
       article_source_chunks: {
         Row: {
           article_id: string;

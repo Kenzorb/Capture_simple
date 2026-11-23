@@ -819,7 +819,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-054 — Define AI structured-note schema
 
-- [ ] **CAP-054 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-054 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Use Zod for summary, takeaways, sections, evidence chunk IDs, concepts, tags, topic suggestions, language, model and schema version; separate personal notes.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-054 — Define AI structured-note schema` |
-| Last verified completed task | `CAP-053` |
-| Last verification executed | `Multibyte evidence fixtures verified deterministic IDs, heading preservation, input bounds, and source offsets. Hosted SQL rejected altered evidence and stale writes and preserved correct source hashes. All 89 tests passed.` |
-| Last successful Git commit | `950052a` |
+| Current task | `CAP-055 — Design grounded prompts and injection defenses` |
+| Last verified completed task | `CAP-054` |
+| Last verification executed | `Zod fixtures rejected malformed notes and missing metadata. Hosted SQL verified schema-version storage and preservation of personal notes. All 99 tests passed.` |
+| Last successful Git commit | `06be1ee` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Define a strict structured-note schema and store its version separately from personal notes.` |
+| Next action | `Build a grounded prompt with isolated article data, no tools, and adversarial fixture coverage.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 5/13 | In progress |
+| P6 | CAP-049–061 | 6/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2504,3 +2504,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Normalized whitespace and removed common standalone navigation labels. Retained HTML headings and split normalized text into chunks bounded to 1,800 UTF-8 bytes each and 12,000 evidence bytes total. Chunk IDs derive from the source hash and position. Stored byte ranges refer to the full normalized source.
 - **Verification:** Applied the evidence migration to capture-dev. The rollback-only SQL fixture rejected altered evidence and a stale execution ID, then verified idempotent evidence persistence and the matching source hash. Multibyte fixtures verified the input bounds and round-tripped each chunk through its byte range. All 89 tests, web and test TypeScript, lint, formatting, and diff checks passed.
 - **Next action:** CAP-054 — Define AI structured-note schema.
+
+### [2026-11-23T10:00:09+08:00] CAP-054 — Define AI structured-note schema — STARTED
+
+- **Plan:** Define the strict model output and stored note schemas, and verify versioned storage separate from personal notes.
+
+### [2026-11-23T10:02:19+08:00] CAP-054 — Define AI structured-note schema — COMPLETE
+
+- **Changes:** Added bounded Zod schemas for language, summary, takeaways, evidenced sections and concepts, tags, and suggested topic paths. A stored note adds server-assigned model and version metadata. The AI note table holds that version separately from personal notes and restricts client writes.
+- **Verification:** Applied the additive migration to capture-dev. Hosted SQL verified the stored version and model, rejected invalid metadata, and preserved the personal note. Fixtures rejected malformed, missing, oversized and unexpected fields. All 99 tests, shared/web/test TypeScript, lint and diff checks passed.
+- **Next action:** CAP-055 — Design grounded prompts and injection defenses.

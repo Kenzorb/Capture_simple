@@ -1,4 +1,4 @@
-import { articleParamsSchema } from "@capture/shared";
+import { articleParamsSchema, structuredNoteSchema } from "@capture/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -17,6 +17,9 @@ import {
   savePersonalNote,
   setCaptureArchived,
 } from "./actions";
+import { AnalysisNotes } from "./analysis-notes";
+import { CapturePolling } from "./capture-polling";
+import { PersonalNoteField } from "./personal-note-field";
 
 export const metadata: Metadata = { title: "Capture details" };
 
@@ -64,6 +67,9 @@ export default async function CaptureDetailPage({
   const message = typeof change === "string" ? feedback.get(change) : undefined;
   const archived = Boolean(article?.archived_at);
   const note = article?.personal_notes[0]?.body ?? "";
+  const aiNote = structuredNoteSchema.safeParse(
+    article?.article_ai_notes[0]?.payload,
+  ).data;
   const view = `/dashboard/captures/${parsed.success ? parsed.data.id : "missing"}`;
 
   return (
@@ -85,7 +91,10 @@ export default async function CaptureDetailPage({
             {article.title}
           </DashboardHeading>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-            <CaptureStatus status={article.status} />
+            <span role="status">
+              <CaptureStatus status={article.status} />
+            </span>
+            <CapturePolling articleId={article.id} status={article.status} />
             {archived && (
               <span className="rounded-md bg-[#edf0eb] px-2 py-1 text-xs font-semibold text-[#465349]">
                 Archived
@@ -136,9 +145,7 @@ export default async function CaptureDetailPage({
           </dl>
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">AI notes</h2>
-            <p className="mt-1 text-sm text-[#506458]">
-              No AI notes available for this capture.
-            </p>
+            <AnalysisNotes note={aiNote} status={article.status} />
             {article.status === "failed" && (
               <form
                 action={retryCapture.bind(null, article.id)}
@@ -160,15 +167,7 @@ export default async function CaptureDetailPage({
               >
                 Personal note
               </label>
-              <textarea
-                key={note}
-                id="capture-note"
-                name="note"
-                defaultValue={note}
-                maxLength={4000}
-                rows={6}
-                className="mt-1 block w-full rounded-lg border border-emerald-950/30 px-3 py-2"
-              />
+              <PersonalNoteField key={note} savedNote={note} />
               <div className="mt-3">
                 <SubmitButton label="Save note" />
               </div>

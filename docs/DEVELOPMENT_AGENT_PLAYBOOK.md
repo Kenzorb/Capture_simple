@@ -879,7 +879,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-060 — Surface processing updates in web UI
 
-- [ ] **CAP-060 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-060 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Use polling or authorized realtime feed; display saved/queued/processing/ready/failed/quota-limited, retry action and helpful explanation.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-060 — Surface processing updates in web UI` |
-| Last verified completed task | `CAP-059` |
-| Last verification executed | `Hosted SQL verified stale worker fencing, dead-lettering, and single note and quota use. Real Inngest dispatcher runs recovered an abandoned delivery at generation 2 and produced one note. All 113 local tests passed.` |
-| Last successful Git commit | `7e83c1f` |
+| Current task | `CAP-061 — Run full capture-to-notes vertical slice` |
+| Last verified completed task | `CAP-060` |
+| Last verification executed | `Chromium verified Saved → Queued → Processing → Ready and displayed notes without a document reload or loss of an unsaved personal-note edit. All 113 local tests passed.` |
+| Last successful Git commit | `e67d6de` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Show current processing status and notes in the library and verify the capture updates without a full page reload.` |
+| Next action | `Capture a real public article through the dashboard, run the full worker, and record output quality, latency, and model cost.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 11/13 | In progress |
+| P6 | CAP-049–061 | 12/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2579,3 +2579,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Dispatch generations separate legitimate recovery from duplicate delivery. Recovery requeues abandoned jobs while retaining their reservation and fences stale executions. A further abandonment after three generations dead-letters the outbox record, marks the capture failed, and releases quota. Operators can reconcile a specific stale job through the service-only RPC.
 - **Verification:** Applied the migration to capture-dev. Rollback-only SQL simulated a crashed worker, rejected obsolete deliveries and late writes, verified quota and note counts on replay, and verified dead-lettering. A real local Inngest fixture recovered an acknowledged but abandoned delivery through two overlapping dispatch triggers and published one note at generation 2 with one quota unit. All 113 local tests, web TypeScript, lint, formatting, and diff checks passed.
 - **Next action:** CAP-060 — Surface processing updates in web UI.
+
+### [2026-11-23T10:38:50+08:00] CAP-060 — Surface processing updates in web UI — STARTED
+
+- **Plan:** Poll authorized article status while work is pending, show updated outcomes and notes, and verify the page updates without reloading.
+
+### [2026-11-23T10:46:44+08:00] CAP-060 — Surface processing updates in web UI — COMPLETE
+
+- **Changes:** The open capture detail polls the owner-scoped endpoint for pending status, refreshes the existing view when it changes, and displays explanations and validated notes. The personal-note editor retains its draft during a status update.
+- **Verification:** Chromium on Windows with hosted Supabase, local Inngest, and a controlled model response observed Saved, Queued, Processing, and Ready. Notes appeared without document reload, and an unsaved personal-note edit remained in the editor. All 113 local tests, web TypeScript, lint, formatting, and diff checks passed.
+- **Next action:** CAP-061 — Run full capture-to-notes vertical slice.

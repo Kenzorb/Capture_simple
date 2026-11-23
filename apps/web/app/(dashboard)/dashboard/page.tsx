@@ -14,6 +14,10 @@ export const metadata: Metadata = { title: "Dashboard" };
 
 const captureMessages = new Map([
   ["saved", "Link saved to your library."],
+  [
+    "quota-limited",
+    "Link saved. You’ve reached your monthly analysis allowance.",
+  ],
   ["duplicate", "This link is already in your library."],
   ["invalid", "Enter an HTTP or HTTPS URL with a public domain."],
   ["too-large", "This URL is too long to save."],
@@ -41,7 +45,10 @@ export default async function DashboardPage({
     readOwnOverview(session),
   ]);
   const message = typeof capture === "string" && captureMessages.get(capture);
-  const saved = capture === "saved" || capture === "duplicate";
+  const saved =
+    capture === "saved" ||
+    capture === "duplicate" ||
+    capture === "quota-limited";
   const detail = articleParamsSchema.safeParse({ id: article });
   const empty =
     recent?.length === 0 && counts.every(({ count }) => count === 0);

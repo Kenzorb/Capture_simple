@@ -140,6 +140,8 @@ An upgrade increases the current month's allowance and retains usage. A downgrad
 
 Deleting a queued capture releases its reserved allowance. Deleting a processed capture retains the allowance already used. Its usage event retains only quota metadata after the capture and its job are deleted.
 
+At the limit, capture still succeeds with `processing_status: "quota_limited"`. Its detail page shows the reset date. The owner can use **Analyze capture** once allowance is available. Each request checks quota on the server before creating a processing job.
+
 ## Errors
 
 Use the HTTP status and machine-readable code. The error may echo a valid request ID.

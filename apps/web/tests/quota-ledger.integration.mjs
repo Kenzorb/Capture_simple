@@ -174,6 +174,21 @@ test(
         );
         await audit(limit - 1, 1);
         const article = accepted[0].article_id;
+        const waiting = concurrent.find(
+          ({ processing_status }) => processing_status === "quota_limited",
+        ).article_id;
+        const requestAnalysis = () =>
+          client.rpc("capture_retry_article", { p_article_id: waiting });
+        assert.equal(checked(await requestAnalysis()), "quota_limited");
+        assert.deepEqual(
+          checked(
+            await admin
+              .from("processing_jobs")
+              .select("id")
+              .eq("article_id", waiting),
+          ),
+          [],
+        );
         await finish(await jobFor(article), false);
         await audit(limit - 1, 0);
         assert.equal(
@@ -188,11 +203,19 @@ test(
         await remove(article);
         await audit(limit - 1, 0);
 
-        const successful = await save("successful");
-        assert.equal(successful.processing_status, "queued");
-        await finish(await jobFor(successful.article_id), true);
+        assert.deepEqual(
+          checked(
+            await admin
+              .from("processing_jobs")
+              .select("id")
+              .eq("article_id", waiting),
+          ),
+          [],
+        );
+        assert.equal(checked(await requestAnalysis()), "queued");
+        await finish(await jobFor(waiting), true);
         await audit(limit, 0);
-        await remove(successful.article_id);
+        await remove(waiting);
         await audit(limit, 0);
         const events = checked(
           await admin

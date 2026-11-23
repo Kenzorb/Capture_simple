@@ -8,7 +8,7 @@ const pendingCopy: Record<ProcessingStatus, string> = {
   failed:
     "Analysis failed. The article and your personal note are still saved.",
   quota_limited:
-    "You’ve used this month’s analysis allowance. The link is still saved.",
+    "The link is saved. Analysis is paused at the monthly quota limit.",
   unsupported: "This page could only be saved as a link.",
 };
 

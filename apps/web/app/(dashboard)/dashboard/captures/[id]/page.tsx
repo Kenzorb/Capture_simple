@@ -29,12 +29,17 @@ import { PersonalNoteField } from "./personal-note-field";
 
 export const metadata: Metadata = { title: "Capture details" };
 
+const resetDateFormat = new Intl.DateTimeFormat("en", {
+  dateStyle: "long",
+  timeZone: "UTC",
+});
+
 const feedback = new Map<string, { text: string; error?: boolean }>([
   ["topic", { text: "Primary topic saved." }],
   ["invalid-topic", { text: "Choose an available topic.", error: true }],
   ["archived", { text: "Capture archived." }],
   ["restored", { text: "Capture restored to active captures." }],
-  ["retried", { text: "Analysis queued for another attempt." }],
+  ["retried", { text: "Analysis queued." }],
   [
     "retry_limit",
     { text: "This capture has reached its analysis retry limit.", error: true },
@@ -77,6 +82,12 @@ export default async function CaptureDetailPage({
   )?.topics;
   const { change } = await searchParams;
   const message = typeof change === "string" ? feedback.get(change) : undefined;
+  const limited =
+    article?.status === "quota_limited" || change === "quota_limited";
+  const now = new Date();
+  const reset = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1),
+  );
   const archived = Boolean(article?.archived_at);
   const note = article?.personal_notes[0]?.body ?? null;
   const aiNote = structuredNoteSchema.safeParse(
@@ -206,12 +217,28 @@ export default async function CaptureDetailPage({
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">AI notes</h2>
             <AnalysisNotes note={aiNote} status={article.status} />
-            {article.status === "failed" && (
+            {limited && (
+              <p className="mt-2 text-sm text-[#506458]">
+                Monthly allowance resets{" "}
+                <time dateTime={reset.toISOString()}>
+                  {resetDateFormat.format(reset)} at 00:00 UTC
+                </time>
+                .
+              </p>
+            )}
+            {(article.status === "failed" ||
+              article.status === "quota_limited") && (
               <form
                 action={retryCapture.bind(null, article.id)}
                 className="mt-3"
               >
-                <SubmitButton label="Retry analysis" />
+                <SubmitButton
+                  label={
+                    article.status === "failed"
+                      ? "Retry analysis"
+                      : "Analyze capture"
+                  }
+                />
               </form>
             )}
           </section>

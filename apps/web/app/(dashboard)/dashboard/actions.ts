@@ -48,7 +48,11 @@ export async function saveManualUrl(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/captures");
   const result = new URLSearchParams({
-    capture: data.duplicate ? "duplicate" : "saved",
+    capture: data.duplicate
+      ? "duplicate"
+      : data.processing_status === "quota_limited"
+        ? "quota-limited"
+        : "saved",
     article: data.article_id,
   });
   redirect(`/dashboard?${result}`);

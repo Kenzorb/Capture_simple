@@ -18,14 +18,22 @@ export const processCaptureJob = inngest.createFunction(
   },
   async ({ event, runId, step, attempt }) => {
     const target = articleParamsSchema.safeParse({ id: event.data?.jobId });
-    if (!target.success) return { status: "ignored" };
+    const generation = event.data?.generation ?? 1;
+    if (
+      !target.success ||
+      typeof generation !== "number" ||
+      !Number.isInteger(generation) ||
+      generation < 1 ||
+      generation > 3
+    )
+      return { status: "ignored" };
     const jobId = target.data.id;
     const execution = { p_job_id: jobId, p_execution_id: runId };
 
     const started = await step.run("start-capture-job", async () => {
       const { data, error } = await createPrivilegedSupabaseClient().rpc(
-        "capture_start_job",
-        execution,
+        "capture_start_delivery",
+        { ...execution, p_generation: generation },
       );
       if (error) throw new Error("Could not start capture processing.");
       return data;

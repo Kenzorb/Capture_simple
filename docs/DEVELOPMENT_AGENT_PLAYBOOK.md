@@ -869,7 +869,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-059 — Implement job idempotency and recovery
 
-- [ ] **CAP-059 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-059 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Prevent duplicate worker execution from writing two note versions/usage events; add dead-letter/reconcile strategy and admin-safe retry.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-059 — Implement job idempotency and recovery` |
-| Last verified completed task | `CAP-058` |
-| Last verification executed | `Injected worker failures verified bounded retry, terminal statuses, owner-only retry, and no duplicate reservation or quota usage. All 113 local tests passed.` |
-| Last successful Git commit | `91428dc` |
+| Current task | `CAP-060 — Surface processing updates in web UI` |
+| Last verified completed task | `CAP-059` |
+| Last verification executed | `Hosted SQL verified stale worker fencing, dead-lettering, and single note and quota use. Real Inngest dispatcher runs recovered an abandoned delivery at generation 2 and produced one note. All 113 local tests passed.` |
+| Last successful Git commit | `7e83c1f` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Reconcile abandoned work and verify duplicate worker delivery and crash recovery without duplicate notes or quota use.` |
+| Next action | `Show current processing status and notes in the library and verify the capture updates without a full page reload.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 10/13 | In progress |
+| P6 | CAP-049–061 | 11/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2569,3 +2569,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Classified timeouts, rate limits, provider outages, malformed model output, and unsupported sources. Added bounded source and provider backoff and a library retry action with at most two user retries. Retry queues and reserves atomically without charging failed work.
 - **Verification:** Applied the migration to capture-dev after dry run. Local Inngest with injected failures verified three source attempts, immediate unsupported status, terminal provider failure with quota released, owner-only concurrent retry, one replacement reservation, personal-note retention, and the retry cap. All 113 local tests, web TypeScript, lint, formatting, and diff checks passed.
 - **Next action:** CAP-059 — Implement job idempotency and recovery.
+
+### [2026-11-23T10:34:30+08:00] CAP-059 — Implement job idempotency and recovery — STARTED
+
+- **Plan:** Reconcile stale jobs with durable dispatch generations, fence abandoned workers, and verify duplicate delivery and crash recovery.
+
+### [2026-11-23T10:38:07+08:00] CAP-059 — Implement job idempotency and recovery — COMPLETE
+
+- **Changes:** Dispatch generations separate legitimate recovery from duplicate delivery. Recovery requeues abandoned jobs while retaining their reservation and fences stale executions. A further abandonment after three generations dead-letters the outbox record, marks the capture failed, and releases quota. Operators can reconcile a specific stale job through the service-only RPC.
+- **Verification:** Applied the migration to capture-dev. Rollback-only SQL simulated a crashed worker, rejected obsolete deliveries and late writes, verified quota and note counts on replay, and verified dead-lettering. A real local Inngest fixture recovered an acknowledged but abandoned delivery through two overlapping dispatch triggers and published one note at generation 2 with one quota unit. All 113 local tests, web TypeScript, lint, formatting, and diff checks passed.
+- **Next action:** CAP-060 — Surface processing updates in web UI.

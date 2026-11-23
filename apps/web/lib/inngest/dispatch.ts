@@ -17,11 +17,21 @@ export const dispatchCaptureJobs = inngest.createFunction(
       id: event.data && "jobId" in event.data ? event.data.jobId : undefined,
     });
     if (inngestDev && !target.success) return { dispatched: 0 };
+    const scope = { p_job_id: inngestDev ? target.data?.id : undefined };
+
+    await step.run("reconcile-abandoned-jobs", async () => {
+      const { data, error } = await createPrivilegedSupabaseClient().rpc(
+        "capture_reconcile_jobs",
+        scope,
+      );
+      if (error) throw new Error("Could not reconcile capture jobs.");
+      return data;
+    });
 
     const rows = await step.run("claim-due-jobs", async () => {
       const { data, error } = await createPrivilegedSupabaseClient().rpc(
         "capture_claim_dispatch",
-        { p_job_id: inngestDev ? target.data?.id : undefined },
+        scope,
       );
       if (error) throw new Error("Could not claim pending capture jobs.");
       return data;
@@ -33,10 +43,13 @@ export const dispatchCaptureJobs = inngest.createFunction(
     try {
       await step.sendEvent(
         "publish-claimed-jobs",
-        rows.map(({ job_id }) => ({
-          id: `capture-job-${job_id}`,
+        rows.map(({ job_id, generation }) => ({
+          id:
+            generation === 1
+              ? `capture-job-${job_id}`
+              : `capture-job-${job_id}-${generation}`,
           name: "capture/job.requested",
-          data: { jobId: job_id },
+          data: { jobId: job_id, generation },
         })),
       );
     } catch {

@@ -54,6 +54,8 @@ In staging and production, deploy the Node.js web app and sync its public HTTPS 
 
 The hosted dispatcher polls the capture outbox every minute. Locally, add the development project's server-only Supabase key and send the `capture/dev.dispatch-job` event with an existing job UUID as `data.jobId` to check a single job. This keeps a local Inngest instance from automatically draining a shared hosted database. A provider outage leaves committed jobs pending until their next attempt. The dispatcher reuses the job's event ID on retry. Inngest deduplicates starts within 24 hours, and consumers must use the persistent job ID to guard their state changes across redelivery. [Inngest event idempotency](https://www.inngest.com/docs/durable-execution/guides-and-advanced/idempotency)
 
+The dispatcher also checks for abandoned executions and acknowledged deliveries that did not start within 15 minutes. Recovery increments that job's delivery generation and retains its reservation. After three generations, a further abandonment marks the outbox dead and releases the reservation. A trusted operator can target a single stale job using the service-only `capture_reconcile_jobs` RPC. It checks the same age and generation limits as the scheduled worker.
+
 ## Account prerequisites
 
 This workspace has local Git and no configured remote. Hosted access is unconfirmed for each service below.

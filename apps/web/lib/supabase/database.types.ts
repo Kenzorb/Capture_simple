@@ -376,6 +376,7 @@ export type Database = {
           attempts: number;
           created_at: string;
           dispatched_at: string | null;
+          generation: number;
           id: string;
           job_id: string;
           lease_id: string | null;
@@ -386,6 +387,7 @@ export type Database = {
           attempts?: number;
           created_at?: string;
           dispatched_at?: string | null;
+          generation?: number;
           id?: string;
           job_id: string;
           lease_id?: string | null;
@@ -396,6 +398,7 @@ export type Database = {
           attempts?: number;
           created_at?: string;
           dispatched_at?: string | null;
+          generation?: number;
           id?: string;
           job_id?: string;
           lease_id?: string | null;
@@ -729,7 +732,7 @@ export type Database = {
     Functions: {
       capture_claim_dispatch: {
         Args: { p_job_id?: string };
-        Returns: { job_id: string; lease_id: string }[];
+        Returns: { job_id: string; lease_id: string; generation: number }[];
       };
       capture_delete_article: {
         Args: { p_article_id: string; p_confirmed: boolean };
@@ -775,6 +778,10 @@ export type Database = {
         Args: { p_article_id: string };
         Returns: string | null;
       };
+      capture_reconcile_jobs: {
+        Args: { p_job_id?: string };
+        Returns: number;
+      };
       capture_save_article: {
         Args: {
           p_canonical_url: string;
@@ -794,6 +801,14 @@ export type Database = {
       };
       capture_start_job: {
         Args: { p_execution_id: string; p_job_id: string };
+        Returns: boolean;
+      };
+      capture_start_delivery: {
+        Args: {
+          p_execution_id: string;
+          p_generation: number;
+          p_job_id: string;
+        };
         Returns: boolean;
       };
       capture_store_source: {

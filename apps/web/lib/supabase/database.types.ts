@@ -835,6 +835,14 @@ export type Database = {
         Args: { p_article_id: string };
         Returns: { id: string; title: string; domain: string }[];
       };
+      capture_save_personal_note: {
+        Args: {
+          p_article_id: string;
+          p_expected_body?: string;
+          p_body?: string;
+        };
+        Returns: { result: string; body: string | null }[];
+      };
       capture_search_articles: {
         Args: {
           p_query: string;

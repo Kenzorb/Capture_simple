@@ -21,7 +21,6 @@ import {
   deleteCapture,
   moveCaptureToTopic,
   retryCapture,
-  savePersonalNote,
   setCaptureArchived,
 } from "./actions";
 import { AnalysisNotes } from "./analysis-notes";
@@ -31,7 +30,6 @@ import { PersonalNoteField } from "./personal-note-field";
 export const metadata: Metadata = { title: "Capture details" };
 
 const feedback = new Map<string, { text: string; error?: boolean }>([
-  ["note", { text: "Personal note saved." }],
   ["topic", { text: "Primary topic saved." }],
   ["invalid-topic", { text: "Choose an available topic.", error: true }],
   ["archived", { text: "Capture archived." }],
@@ -44,10 +42,6 @@ const feedback = new Map<string, { text: string; error?: boolean }>([
   [
     "quota_limited",
     { text: "No analysis quota is available this month.", error: true },
-  ],
-  [
-    "invalid-note",
-    { text: "Enter a note of up to 4,000 characters.", error: true },
   ],
   [
     "confirm-delete",
@@ -84,7 +78,7 @@ export default async function CaptureDetailPage({
   const { change } = await searchParams;
   const message = typeof change === "string" ? feedback.get(change) : undefined;
   const archived = Boolean(article?.archived_at);
-  const note = article?.personal_notes[0]?.body ?? "";
+  const note = article?.personal_notes[0]?.body ?? null;
   const aiNote = structuredNoteSchema.safeParse(
     article?.article_ai_notes[0]?.payload,
   ).data;
@@ -243,21 +237,11 @@ export default async function CaptureDetailPage({
           ) : null}
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">Personal notes</h2>
-            <form
-              action={savePersonalNote.bind(null, article.id)}
-              className="mt-3"
-            >
-              <label
-                htmlFor="capture-note"
-                className="block text-sm font-medium"
-              >
-                Personal note
-              </label>
-              <PersonalNoteField key={note} savedNote={note} />
-              <div className="mt-3">
-                <SubmitButton label="Save note" />
-              </div>
-            </form>
+            <PersonalNoteField
+              key={article.id}
+              articleId={article.id}
+              savedNote={note}
+            />
           </section>
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">Manage capture</h2>

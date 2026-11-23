@@ -450,6 +450,43 @@ test(
           Math.round(firstMs) +
           " ms.",
       );
+      const noteClient = (headers) =>
+        createClient(url, publicKey, { ...options, global: { headers } });
+      const ownerEditor = noteClient(one.header);
+      const writes = await Promise.all(
+        ["First draft", "Second draft"].map((draft) =>
+          ownerEditor.rpc("capture_save_personal_note", {
+            p_article_id: ids[0],
+            p_expected_body: "Coronal loop",
+            p_body: draft,
+          }),
+        ),
+      );
+      assert(writes.every(({ error }) => !error));
+      const results = writes.map(({ data }) => data[0]);
+      assert.deepEqual(results.map(({ result }) => result).sort(), [
+        "conflict",
+        "saved",
+      ]);
+      const winningNote = results.find(({ result }) => result === "saved").body;
+      assert.equal(
+        results.find(({ result }) => result === "conflict").body,
+        winningNote,
+      );
+      assert.equal(
+        (await json("/" + ids[0], one.header)).personal_note,
+        winningNote,
+      );
+      const foreignEdit = await noteClient(two.header).rpc(
+        "capture_save_personal_note",
+        {
+          p_article_id: ids[0],
+          p_expected_body: winningNote,
+          p_body: "Foreign edit",
+        },
+      );
+      assert(!foreignEdit.error);
+      assert.deepEqual(foreignEdit.data, []);
     } finally {
       for (const id of users)
         assert(

@@ -39,21 +39,49 @@ function finishMutation(
   redirect(data ? destination : capturePath);
 }
 
-export async function savePersonalNote(id: string, formData: FormData) {
+export type NoteSaveResult =
+  | { status: "saved" | "conflict"; note: string | null }
+  | { status: "error"; message: string };
+
+export async function savePersonalNote(
+  id: string,
+  expected: string | null,
+  submittedNote: FormDataEntryValue | null,
+): Promise<NoteSaveResult> {
   const { session, capturePath } = await captureTarget(id);
-  const submittedNote = formData.get("note");
-  if (typeof submittedNote !== "string")
-    redirect(`${capturePath}?change=invalid-note`);
-  const note = submittedNote.replace(/\r\n?/g, "\n");
+  const note =
+    typeof submittedNote === "string"
+      ? submittedNote.replace(/\r\n?/g, "\n")
+      : undefined;
   const edit = articleEditSchema.safeParse({
-    personal_note: note.trim() ? note : null,
+    personal_note: note?.trim() ? note : note === undefined ? undefined : null,
   });
-  if (!edit.success) redirect(`${capturePath}?change=invalid-note`);
-  finishMutation(
-    await editOwnArticle(session, id, edit.data),
-    capturePath,
-    `${capturePath}?change=note`,
+  const base = articleEditSchema.safeParse({ personal_note: expected });
+  if (!edit.success || !base.success)
+    return {
+      status: "error",
+      message: "Enter a personal note of up to 4,000 characters.",
+    };
+  const { data, error } = await session.supabase.rpc(
+    "capture_save_personal_note",
+    {
+      p_article_id: id,
+      p_expected_body: base.data.personal_note ?? undefined,
+      p_body: edit.data.personal_note ?? undefined,
+    },
   );
+  if (error?.code === "42501") redirect("/sign-in");
+  const entry = data?.[0];
+  if (entry?.result === "conflict")
+    return { status: "conflict", note: entry.body };
+  if (error || entry?.result !== "saved")
+    return {
+      status: "error",
+      message: "Could not save your note. Your draft is still here.",
+    };
+  revalidatePath(capturePath);
+  revalidatePath(libraryPath);
+  return { status: "saved", note: entry.body };
 }
 
 export async function moveCaptureToTopic(id: string, formData: FormData) {

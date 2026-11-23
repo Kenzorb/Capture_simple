@@ -1157,7 +1157,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-086 — Implement authenticated Checkout endpoint
 
-- [ ] **CAP-086 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-086 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create Stripe customer or retrieve existing, map authenticated user to server-selected Price ID, set safe success/cancel URLs.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-086 — Implement authenticated Checkout endpoint` |
-| Last verified completed task | `CAP-085` |
-| Last verification executed | `Stripe sandbox Checkout previews displayed US$11.99 per month and US$107.88 per year. Confirmed both price IDs in ignored server environment configuration.` |
-| Last successful Git commit | `90574ca` |
-| Active blockers | `Live verification of the Capture Checkout endpoint will require a server-side Stripe sandbox API key. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-087 — Implement raw-body verified Stripe webhook` |
+| Last verified completed task | `CAP-086` |
+| Last verification executed | `A disposable Free account opened both Stripe sandbox Checkout sessions with the expected USD prices. Invalid origin, client price, other-user ID, and custom redirect were rejected.` |
+| Last successful Git commit | `dc0e5ed` |
+| Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement authenticated Checkout with server-selected monthly and annual prices.` |
+| Next action | `Implement verified and deduplicated Stripe webhooks before enabling subscription state updates.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 2/9 | In progress |
+| P9 | CAP-084–092 | 3/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **84/112** | **In progress** |
+| **Total** | **CAP-001–112** | **85/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2861,3 +2861,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification** — Confirmed both active recurring prices on the Stripe sandbox product and checked the matching sandbox Checkout previews. Monthly displayed US$11.99 per month and annual displayed US$107.88 per year. No payment was submitted and no live keys were used.
 - **Configuration** — Stored the two verified sandbox Price IDs in the existing server-only variables in `apps/web/.env.local`. The authenticated endpoint will select the price server-side in CAP-086.
 - **Next action** — CAP-086 — Implement authenticated Checkout endpoint.
+
+### [2026-11-23T23:39:20+08:00] CAP-086 — Implement authenticated Checkout endpoint — STARTED
+
+- **Plan** — Use the saved Stripe sandbox key to verify the two prices, then create authenticated sessions from the server and bind each Stripe customer to its Capture account.
+
+### [2026-11-23T23:43:20+08:00] CAP-086 — Implement authenticated Checkout endpoint — COMPLETE
+
+- **Implementation** — `POST /api/billing/checkout` accepts a monthly or annual interval, resolves the Price ID on the server, creates or reuses the signed-in user's Stripe customer, and uses fixed Capture settings redirects.
+- **Verification** — An integration test with two disposable Supabase accounts verified that a Free user received open, unpaid Stripe sandbox Checkout sessions for US$11.99 monthly and US$107.88 annually under the same Stripe customer. It confirmed that anonymous, cross-origin, price override, other-user, and redirect override requests were rejected. Test sessions were expired and the disposable customer and accounts were cleaned up. Type checks, changed-file lint and format checks, and the deterministic suite passed (118 tests passed and 3 skipped).
+- **Next action** — CAP-087 — Implement raw-body verified Stripe webhook.

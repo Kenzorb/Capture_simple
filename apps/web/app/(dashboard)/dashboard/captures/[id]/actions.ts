@@ -4,6 +4,7 @@ import {
   articleDeleteSchema,
   articleEditSchema,
   articleParamsSchema,
+  topicParamsSchema,
 } from "@capture/shared";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -11,6 +12,7 @@ import {
   deleteOwnArticle,
   editOwnArticle,
   retryOwnArticle,
+  setOwnArticlePrimaryTopic,
 } from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
 
@@ -52,6 +54,17 @@ export async function savePersonalNote(id: string, formData: FormData) {
     capturePath,
     `${capturePath}?change=note`,
   );
+}
+
+export async function moveCaptureToTopic(id: string, formData: FormData) {
+  const { session, capturePath } = await captureTarget(id);
+  const topic = topicParamsSchema.safeParse({ id: formData.get("topic") });
+  if (!topic.success) redirect(`${capturePath}?change=invalid-topic`);
+  const result = await setOwnArticlePrimaryTopic(session, id, topic.data.id);
+  if (!result.error && !result.data)
+    redirect(`${capturePath}?change=invalid-topic`);
+  if (result.data) revalidatePath("/dashboard", "layout");
+  finishMutation(result, capturePath, `${capturePath}?change=topic`);
 }
 
 export async function setCaptureArchived(id: string, archived: boolean) {

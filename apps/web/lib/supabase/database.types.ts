@@ -831,6 +831,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      capture_set_primary_topic: {
+        Args: { p_article_id: string; p_topic_id: string };
+        Returns: boolean;
+      };
       capture_store_source: {
         Args: {
           p_chunks: Json;

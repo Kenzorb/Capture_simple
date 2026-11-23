@@ -975,7 +975,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-069 — Implement manual topic corrections
 
-- [ ] **CAP-069 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-069 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Allow user to move/reassign an article and rename/move topics; preserve manual decisions against automatic reprocessing.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-069 — Implement manual topic corrections` |
-| Last verified completed task | `CAP-068` |
-| Last verification executed | `Chromium verified topic details, concept and article membership updates after a correction, owner isolation, and pagination. Production build, lint, and 113 automated tests passed.` |
-| Last successful Git commit | `cf337a2` |
+| Current task | `CAP-070 — Add safe topic merge or documented alternative` |
+| Last verified completed task | `CAP-069` |
+| Last verification executed | `Chromium and hosted SQL verified manual capture and topic moves, account isolation, and stable manual placement after refresh, reprocessing, and a separate automatic capture.` |
+| Last successful Git commit | `a229667` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Add manual article reassignment and topic editing, then verify that reprocessing preserves manual choices.` |
+| Next action | `Document and verify the MVP alternative to automatic topic merging.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 7/11 | In progress |
+| P7 | CAP-062–072 | 8/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2677,3 +2677,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Linked sidebar and Knowledge Tree topics to an owner-scoped detail route. The route shows the description, immediate subtopics, direct active captures with primary or secondary membership, and up to 12 deduplicated concepts from the current page of notes.
 - **Verification:** Chromium on the production build verified navigation, a 20-capture page plus the remaining captures, membership labels, concept deduplication, and a foreign topic returning the not-found view. An article title edit and a fixture membership move were reflected in both topics, including the concept labels. Production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped.
 - **Next action:** CAP-069 — Implement manual topic corrections.
+
+### [2026-11-23T16:15:12+08:00] CAP-069 — Implement manual topic corrections — STARTED
+
+- **Plan:** Add capture reassignment and topic edit controls. Verify account isolation, refresh and reprocessing persistence, and continued automatic placement for other articles.
+
+### [2026-11-23T16:20:04+08:00] CAP-069 — Implement manual topic corrections — COMPLETE
+
+- **Changes:** Added capture reassignment and topic rename and move controls. Manual primary placement replaces the previous primary and preserves secondary links. Reprocessing refreshes notes and retains assignments once a primary topic has been chosen manually.
+- **Verification:** Chromium used disposable accounts to move an AI-assigned capture, rename and move its new topic with a descendant, and reload the capture. A second valid publication kept the manual topic without restoring its previous automatic placement. An unrelated capture still received its automatic topic. Cross-account, anonymous, and missing target checks passed. Applied the hosted migration, passed rollback-only publication and worker recovery SQL, and verified the production build, lint, formatting, and 113 Vitest tests. Three opt-in tests were skipped.
+- **Next action:** CAP-070 — Add safe topic merge or documented alternative.

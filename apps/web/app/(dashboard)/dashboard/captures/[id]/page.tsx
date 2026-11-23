@@ -4,8 +4,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { readOwnArticle } from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
+import { readOwnTopicTree } from "../../../../../lib/supabase/topics";
 import { SubmitButton } from "../../../../(auth)/submit-button";
 import { DashboardHeading } from "../../../dashboard-focus";
+import { TopicOptions } from "../../../topic-options";
 import {
   CaptureOriginalLink,
   CaptureStatus,
@@ -13,6 +15,7 @@ import {
 } from "../../capture-presentation";
 import {
   deleteCapture,
+  moveCaptureToTopic,
   retryCapture,
   savePersonalNote,
   setCaptureArchived,
@@ -25,6 +28,8 @@ export const metadata: Metadata = { title: "Capture details" };
 
 const feedback = new Map<string, { text: string; error?: boolean }>([
   ["note", { text: "Personal note saved." }],
+  ["topic", { text: "Primary topic saved." }],
+  ["invalid-topic", { text: "Choose an available topic.", error: true }],
   ["archived", { text: "Capture archived." }],
   ["restored", { text: "Capture restored to active captures." }],
   ["retried", { text: "Analysis queued for another attempt." }],
@@ -63,6 +68,10 @@ export default async function CaptureDetailPage({
   const { data: article, error } = parsed.success
     ? await readOwnArticle(session, parsed.data.id)
     : { data: null, error: null };
+  const tree = article ? await readOwnTopicTree(session) : null;
+  const primaryTopic = article?.article_topics.find(
+    (topic) => topic.is_primary,
+  )?.topics;
   const { change } = await searchParams;
   const message = typeof change === "string" ? feedback.get(change) : undefined;
   const archived = Boolean(article?.archived_at);
@@ -143,6 +152,54 @@ export default async function CaptureDetailPage({
               </div>
             )}
           </dl>
+          <section className="mt-6 border-t border-[#dde5dd] pt-5">
+            <h2 className="text-lg font-semibold">Topics</h2>
+            {primaryTopic && (
+              <p className="mt-2 text-sm">
+                Primary topic{" "}
+                <Link
+                  href={`/dashboard/topics/${primaryTopic.id}`}
+                  className="font-semibold underline"
+                >
+                  {primaryTopic.name}
+                </Link>
+              </p>
+            )}
+            {tree?.topics.length ? (
+              <form
+                action={moveCaptureToTopic.bind(null, article.id)}
+                className="mt-3 grid max-w-lg gap-2"
+              >
+                <label htmlFor="capture-topic" className="text-sm font-medium">
+                  Move to topic
+                </label>
+                <select
+                  id="capture-topic"
+                  name="topic"
+                  required
+                  defaultValue={primaryTopic?.id ?? ""}
+                  className="w-full rounded-lg border border-[#b8c8bd] bg-white px-3 py-2 text-sm"
+                >
+                  <option value="" disabled>
+                    Choose a topic
+                  </option>
+                  <TopicOptions topics={tree.topics} />
+                </select>
+                <div className="mt-1">
+                  <SubmitButton label="Save primary topic" />
+                </div>
+              </form>
+            ) : (
+              <p
+                role={tree ? undefined : "status"}
+                className="mt-2 text-sm text-[#506458]"
+              >
+                {tree
+                  ? "No topics available yet."
+                  : "Could not load topic choices."}
+              </p>
+            )}
+          </section>
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">AI notes</h2>
             <AnalysisNotes note={aiNote} status={article.status} />

@@ -88,11 +88,22 @@ export function readOwnArticle({ supabase, user }: Session, id: string) {
   return supabase
     .from("articles")
     .select(
-      `${columns}, article_ai_notes(payload), personal_notes(body), article_topics(topics(id, parent_id, name, description, created_at))`,
+      `${columns}, article_ai_notes(payload), personal_notes(body), article_topics(is_primary, topics(id, parent_id, name, description, created_at))`,
     )
     .eq("user_id", user.id)
     .eq("id", id)
     .maybeSingle();
+}
+
+export function setOwnArticlePrimaryTopic(
+  { supabase }: Session,
+  article: string,
+  topic: string,
+) {
+  return supabase.rpc("capture_set_primary_topic", {
+    p_article_id: article,
+    p_topic_id: topic,
+  });
 }
 
 export function editOwnArticle(

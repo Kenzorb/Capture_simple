@@ -9,21 +9,38 @@ import {
 } from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
 import { readOwnTopicTree } from "../../../../../lib/supabase/topics";
+import { SubmitButton } from "../../../../(auth)/submit-button";
 import { DashboardHeading } from "../../../dashboard-focus";
+import { TopicOptions } from "../../../topic-options";
 import { CaptureTime, CaptureTitle } from "../../capture-presentation";
+import { saveTopic } from "./actions";
 
 export const metadata: Metadata = { title: "Topic" };
 const pageSize = 20;
 const conceptLimit = 12;
 const link =
   "rounded font-semibold text-emerald-950 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-emerald-800";
+const input =
+  "w-full rounded-lg border border-[#b8c8bd] bg-white px-3 py-2 text-sm";
+const topicFeedback = new Map([
+  ["saved", "Topic saved."],
+  ["duplicate", "That parent already has a topic with this name."],
+  [
+    "invalid-topic",
+    "Choose a valid name and parent. Topics can be up to four levels deep.",
+  ],
+  ["failed", "Could not save this topic. Try again."],
+]);
 
 export default async function TopicPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ cursor?: string | string[] }>;
+  searchParams: Promise<{
+    cursor?: string | string[];
+    change?: string | string[];
+  }>;
 }) {
   const session = await getAuthenticatedSession();
   if (!session) redirect("/sign-in");
@@ -31,7 +48,9 @@ export default async function TopicPage({
   if (!target.success) notFound();
   const id = target.data.id;
   const path = `/dashboard/topics/${id}`;
-  const { cursor: encoded } = await searchParams;
+  const { cursor: encoded, change } = await searchParams;
+  const feedback =
+    typeof change === "string" ? topicFeedback.get(change) : undefined;
   const cursor =
     typeof encoded === "string" ? decodeArticleCursor(encoded) : null;
   if (encoded !== undefined && !cursor) redirect(path);
@@ -97,7 +116,17 @@ export default async function TopicPage({
       >
         {topic?.name ?? "Topic"}
       </DashboardHeading>
-      {!topic ? (
+      {feedback && (
+        <p
+          role={change === "saved" ? "status" : "alert"}
+          className={
+            change === "saved" ? "mt-3 text-emerald-900" : "mt-3 text-red-800"
+          }
+        >
+          {feedback}
+        </p>
+      )}
+      {!topic || !tree ? (
         <p role="status" className="mt-5 text-[#506458]">
           Could not load this topic. Refresh this page to try again.
         </p>
@@ -108,6 +137,45 @@ export default async function TopicPage({
               {topic.description}
             </p>
           )}
+          <details
+            className="mt-4"
+            open={Boolean(feedback && change !== "saved")}
+          >
+            <summary className="w-fit cursor-pointer rounded font-semibold text-emerald-950">
+              Edit topic
+            </summary>
+            <form
+              action={saveTopic.bind(null, topic.id)}
+              className="mt-3 grid max-w-lg gap-2"
+            >
+              <label htmlFor="topic-name" className="text-sm font-medium">
+                Topic name
+              </label>
+              <input
+                id="topic-name"
+                name="name"
+                className={input}
+                required
+                maxLength={120}
+                defaultValue={topic.name}
+              />
+              <label htmlFor="topic-parent" className="text-sm font-medium">
+                Parent topic
+              </label>
+              <select
+                id="topic-parent"
+                name="parent"
+                className={input}
+                defaultValue={topic.parent_id ?? ""}
+              >
+                <option value="">Top level</option>
+                <TopicOptions topics={tree.topics} exclude={topic.id} />
+              </select>
+              <div className="mt-1">
+                <SubmitButton label="Save topic" />
+              </div>
+            </form>
+          </details>
           {children && children.length > 0 && (
             <section aria-labelledby="subtopics" className="mt-7">
               <h2 id="subtopics" className="text-lg font-semibold">

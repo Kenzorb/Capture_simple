@@ -829,7 +829,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-055 — Design grounded prompts and injection defenses
 
-- [ ] **CAP-055 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-055 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Pass page text as untrusted data; tell model to summarize only source content and use available evidence; explicitly prohibit source text from overriding system instructions.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-055 — Design grounded prompts and injection defenses` |
-| Last verified completed task | `CAP-054` |
-| Last verification executed | `Zod fixtures rejected malformed notes and missing metadata. Hosted SQL verified schema-version storage and preservation of personal notes. All 99 tests passed.` |
-| Last successful Git commit | `06be1ee` |
+| Current task | `CAP-056 — Integrate real AI provider server-side` |
+| Last verified completed task | `CAP-055` |
+| Last verification executed | `Adversarial fixtures verified article instructions stay in the user payload, tools are disabled, private fields are omitted, and policy echoes and privileged output fields are rejected. All 102 tests passed.` |
+| Last successful Git commit | `a528ea2` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Build a grounded prompt with isolated article data, no tools, and adversarial fixture coverage.` |
+| Next action | `Integrate bounded OpenAI requests and verify three real articles with validated output and token cost.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 6/13 | In progress |
+| P6 | CAP-049–061 | 7/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2514,3 +2514,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added bounded Zod schemas for language, summary, takeaways, evidenced sections and concepts, tags, and suggested topic paths. A stored note adds server-assigned model and version metadata. The AI note table holds that version separately from personal notes and restricts client writes.
 - **Verification:** Applied the additive migration to capture-dev. Hosted SQL verified the stored version and model, rejected invalid metadata, and preserved the personal note. Fixtures rejected malformed, missing, oversized and unexpected fields. All 99 tests, shared/web/test TypeScript, lint and diff checks passed.
 - **Next action:** CAP-055 — Design grounded prompts and injection defenses.
+
+### [2026-11-23T10:02:55+08:00] CAP-055 — Design grounded prompts and injection defenses — STARTED
+
+- **Plan:** Put evidence in a separate user message, disable tools, and verify that malformed or echoed policy content is rejected.
+
+### [2026-11-23T10:04:54+08:00] CAP-055 — Design grounded prompts and injection defenses — COMPLETE
+
+- **Changes:** Fixed grounding rules in the system message and supplied only the evidence IDs and article text as serialized user data. Disabled tool access, enforced a serialized prompt budget, and rejected output with unexpected fields or verbatim policy lines.
+- **Verification:** Adversarial fixtures supplied forged role markers and command requests and verified that they stayed data. Fixtures confirmed no tools or private note fields in requests and rejected attempted tool invocations and prompt echoes in responses. All 102 tests, TypeScript, lint, formatting, and diff checks passed. Live provider verification belongs to CAP-056.
+- **Next action:** CAP-056 — Integrate real AI provider server-side.

@@ -134,6 +134,8 @@ Names are unique within each parent, including the root, with case and surroundi
 
 ## Monthly processing allowance
 
+`GET /api/usage` returns the signed-in account's effective `plan`, `used`, `reserved`, `article_limit`, `next_reset` timestamp, and `manual_retry_limit`. An account without a current usage row has zero used and reserved units. The read does not create a usage period.
+
 Processing allowances start at 00:00 UTC on the first day of each calendar month. The first processing request in a new month creates its usage period. Free allows 20 analyses, and an eligible Pro subscription allows 300 even when its billing term is annual. Eligibility requires an active or trialing Pro subscription with a billing end time after the request. Cancellation scheduled for the end of the term keeps Pro access until then.
 
 An upgrade increases the current month's allowance and retains usage. A downgrade retains completed analyses and pending reservations and blocks new reservations once the Free allowance is reached. Jobs that finish after the reset settle against the period that reserved them.

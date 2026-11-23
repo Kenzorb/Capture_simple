@@ -1091,7 +1091,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-080 — Build usage/settings view
 
-- [ ] **CAP-080 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-080 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Show plan, used/reserved/limit, next reset, allowed retries, profile, privacy controls and export entry point.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-080 — Build usage/settings view` |
-| Last verified completed task | `CAP-079` |
-| Last verification executed | `Chromium verified at-limit saves, UTC reset display, denied requests without jobs, and explicit queueing when capacity returned. Free and Pro integration passed.` |
-| Last successful Git commit | `4b54734` |
+| Current task | `CAP-081 — Implement first-run onboarding` |
+| Last verified completed task | `CAP-080` |
+| Last verification executed | `Chromium verified settings, private usage, profile editing, privacy links, export and mobile layout. Hosted Free and Pro usage matched accounting through admission and term expiry.` |
+| Last successful Git commit | `22179b6` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Build account settings and show trusted plan, usage, and reset information.` |
+| Next action | `Guide a new account through connecting Capture and creating its first real knowledge branch.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 7/11 | In progress |
+| P8 | CAP-073–083 | 8/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2789,3 +2789,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Confirmed quota-limited saves in the dashboard, added the next UTC reset to capture details, and let owners request analysis for a selected capture. The paid launch gate keeps checkout deferred.
 - **Verification** — Chromium saved a manual URL at quota, opened the saved link, displayed the UTC reset, and verified an analysis request was denied without creating a job. After freeing a reservation, only the explicitly selected capture queued. The Free and Pro hosted integrations, production build and TypeScript, lint, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in the Vitest run.
 - **Next action** — CAP-080 — Build usage/settings view.
+
+### [2026-11-23T18:46:06+08:00] CAP-080 — Build usage/settings view — STARTED
+
+- **Plan** — Expose the current account's quota counters, entitlement and reset, and add profile, extension access, capture deletion, and export entry points. Verify values and updates against hosted accounting.
+
+### [2026-11-23T18:51:27+08:00] CAP-080 — Build usage/settings view — COMPLETE
+
+- **Changes** — Added Settings under Account and linked it from quota-limited captures. The page shows effective plan, used and reserved units, monthly limit, UTC reset, and retry policy from server accounting, along with display name editing, extension access, capture deletion navigation, and exports.
+- **Verification** — Chromium on the production build verified the 390 px layout, settings values against two accounts, profile editing through reload, privacy links, and a JSON download. Hosted Free and Pro tests verified current counters, plan expiry, zero usage without a period, and that forged request fields are ignored. Anonymous requests were denied. Boundary SQL, build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in Vitest.
+- **Next action** — CAP-081 — Implement first-run onboarding.

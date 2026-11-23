@@ -223,7 +223,13 @@ export default async function CaptureDetailPage({
                 <time dateTime={reset.toISOString()}>
                   {resetDateFormat.format(reset)} at 00:00 UTC
                 </time>
-                .
+                .{" "}
+                <Link
+                  href="/dashboard/settings#usage"
+                  className="font-semibold underline underline-offset-2"
+                >
+                  View usage
+                </Link>
               </p>
             )}
             {(article.status === "failed" ||

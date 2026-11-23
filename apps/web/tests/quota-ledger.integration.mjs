@@ -57,6 +57,45 @@ test(
         const { session } = checked(
           await client.auth.signInWithPassword({ email, password }),
         );
+        const request = (path, method, body) =>
+          globalThis.fetch(new URL(path, origin), {
+            method,
+            headers: {
+              Authorization: "Bearer " + session.access_token,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+            signal: globalThis.AbortSignal.timeout(25000),
+          });
+        async function usage(expectedPlan, used, reserved, articleLimit) {
+          const endpoint =
+            "/api/usage?used=0&article_limit=9999&owner_id=" + randomUUID();
+          const response = await request(endpoint, "GET");
+          assert.equal(response.status, 200);
+          assert.equal(
+            response.headers.get("cache-control"),
+            "private, no-store",
+          );
+          const { next_reset, ...data } = await response.json();
+          assert.equal(new Date(next_reset).toISOString(), end.toISOString());
+          assert.deepEqual(data, {
+            plan: expectedPlan,
+            used,
+            reserved,
+            article_limit: articleLimit,
+            manual_retry_limit: 2,
+          });
+        }
+        await usage("free", 0, 0, 20);
+        assert.deepEqual(
+          checked(
+            await admin
+              .from("usage_periods")
+              .select("id")
+              .eq("user_id", user.id),
+          ),
+          [],
+        );
         if (plan === "pro") {
           checked(
             await admin.from("subscriptions").insert({
@@ -81,16 +120,7 @@ test(
           }),
         );
 
-        const request = (path, method, body) =>
-          globalThis.fetch(new URL(path, origin), {
-            method,
-            headers: {
-              Authorization: "Bearer " + session.access_token,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-            signal: globalThis.AbortSignal.timeout(25000),
-          });
+        await usage(plan, limit - 1, 0, limit);
         async function save(name) {
           const result = await request("/api/captures", "POST", {
             request_id: randomUUID(),
@@ -173,6 +203,7 @@ test(
           5,
         );
         await audit(limit - 1, 1);
+        await usage(plan, limit - 1, 1, limit);
         const article = accepted[0].article_id;
         const waiting = concurrent.find(
           ({ processing_status }) => processing_status === "quota_limited",
@@ -237,6 +268,15 @@ test(
           (await client.rpc("capture_usage_audit", { p_owner_id: user.id }))
             .error,
         );
+        if (plan === "pro") {
+          checked(
+            await admin
+              .from("subscriptions")
+              .update({ period_end: start.toISOString() })
+              .eq("user_id", user.id),
+          );
+          await usage("free", 300, 0, 20);
+        }
       });
     }
   },

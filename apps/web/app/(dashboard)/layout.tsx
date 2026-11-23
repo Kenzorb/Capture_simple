@@ -99,6 +99,12 @@ export default async function DashboardLayout({
                     {user.email}
                   </p>
                 )}
+                <Link
+                  href="/dashboard/settings"
+                  className="block rounded-md px-2 py-2 text-sm font-semibold text-emerald-950 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-emerald-800"
+                >
+                  Settings
+                </Link>
                 {getExtensionConfig() && (
                   <Link
                     href="/oauth/extension-access"

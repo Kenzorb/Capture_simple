@@ -2,17 +2,27 @@ import "server-only";
 
 import { getAuthenticatedSession } from "./server";
 
+type Session = NonNullable<Awaited<ReturnType<typeof getAuthenticatedSession>>>;
+
+export function readOwnProfile({ supabase, user }: Session) {
+  return supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .maybeSingle();
+}
+
+export function readOwnUsage({ supabase }: Session) {
+  return supabase.rpc("capture_current_usage").maybeSingle();
+}
+
 export async function readOwnAccount() {
   const session = await getAuthenticatedSession();
   if (!session) return { status: "unauthorized" } as const;
 
   const { supabase, user } = session;
   const [profile, subscription] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("id", user.id)
-      .maybeSingle(),
+    readOwnProfile(session),
     supabase
       .from("subscriptions")
       .select("plan")

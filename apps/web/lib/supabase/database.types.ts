@@ -733,6 +733,17 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      capture_current_usage: {
+        Args: never;
+        Returns: {
+          plan: Database["public"]["Enums"]["capture_plan"];
+          used: number;
+          reserved: number;
+          article_limit: number;
+          next_reset: string;
+          manual_retry_limit: number;
+        }[];
+      };
       capture_claim_dispatch: {
         Args: { p_job_id?: string };
         Returns: { job_id: string; lease_id: string; generation: number }[];

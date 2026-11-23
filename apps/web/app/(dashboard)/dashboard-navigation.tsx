@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/captures", label: "All captures" },
+  { href: "/dashboard/knowledge-tree", label: "Knowledge Tree" },
 ];
 
 export function DashboardNavigation() {

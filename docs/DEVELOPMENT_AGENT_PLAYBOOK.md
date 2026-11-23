@@ -955,7 +955,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-067 — Build Knowledge Tree view
 
-- [ ] **CAP-067 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-067 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Render nested topics and article leaves; allow expand/collapse, keyboard navigation, route to article/topic and avoid unbounded tree rendering.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-067 — Build Knowledge Tree view` |
-| Last verified completed task | `CAP-066` |
-| Last verification executed | `Chromium on the production build verified live topic discovery after fixture note publication, keyboard navigation, saved expansion, filtered articles, and counts that update after archiving. Two-account HTTP verification passed.` |
-| Last successful Git commit | `be8a882` |
+| Current task | `CAP-068 — Build topic detail pages` |
+| Last verified completed task | `CAP-067` |
+| Last verification executed | `Chromium verified four-level keyboard navigation, focus, bounded article previews, and article detail. Production build, lint, and 113 automated tests passed.` |
+| Last successful Git commit | `abeb731` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Build the full Knowledge Tree with nested topic branches and article links.` |
+| Next action | `Build a topic detail view for its direct articles, subtopics, and concepts.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 5/11 | In progress |
+| P7 | CAP-062–072 | 6/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2657,3 +2657,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added expandable topic branches, direct active article counts, loading and empty states, and account-specific expansion settings. Topic links filter the existing captures view.
 - **Verification:** Applied the count migration to capture-dev. Chromium on the production build verified that the real publication transaction with a fixture note made its topic appear without a document reload. Keyboard expansion and navigation, filtered API shape, exclusion of unrelated captures, persistence across reload, and count updates after archiving passed. The development server repeatedly reloaded during initial browser runs, so the complete check used the production build. Two-account HTTP coverage, the production build and web type check, lint, formatting, and 113 automated tests passed. Three opt-in tests were skipped in the Vitest run.
 - **Next action:** CAP-067 — Build Knowledge Tree view.
+
+### [2026-11-23T15:25:02+08:00] CAP-067 — Build Knowledge Tree view — STARTED
+
+- **Plan:** Add a dashboard tree with expandable nested topics, bounded article previews, and keyboard navigation to articles and topic results.
+
+### [2026-11-23T15:29:03+08:00] CAP-067 — Build Knowledge Tree view — COMPLETE
+
+- **Changes:** Added a Knowledge Tree dashboard view with nested disclosures, article links, bounded previews, and access to each topic's capture results. Groups start with 12 topics, and expanded article lists preview eight active captures.
+- **Verification:** Chromium on the production build used the keyboard to open a four-level topic, collapse and reopen it, and reach its article detail. It also verified focus after showing more topics, that closed branches do not fetch previews, that previews stay bounded, and the destination for the full topic capture list. Production build and TypeScript, lint, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped.
+- **Next action:** CAP-068 — Build topic detail pages.

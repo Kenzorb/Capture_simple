@@ -4,6 +4,7 @@ import {
   articleDeleteSchema,
   articleEditSchema,
   articleParamsSchema,
+  maxExtractedTextBytes,
   topicParamsSchema,
 } from "@capture/shared";
 import { revalidatePath } from "next/cache";
@@ -129,4 +130,38 @@ export async function retryCapture(id: string) {
     capturePath,
     `${capturePath}?change=retried`,
   );
+}
+
+export async function submitCaptureText(
+  id: string,
+  _previous: string | null,
+  form: FormData,
+): Promise<string | null> {
+  const { session, capturePath } = await captureTarget(id);
+  const value = form.get("source_text");
+  if (
+    typeof value !== "string" ||
+    !value.trim() ||
+    value.includes("\u0000") ||
+    Buffer.byteLength(value) > maxExtractedTextBytes
+  )
+    return "Paste article text of up to 100 KB.";
+  const { data, error } = await session.supabase.rpc(
+    "capture_submit_article_text",
+    {
+      p_article_id: id,
+      p_text: value.trim(),
+    },
+  );
+  if (error?.code === "42501") redirect("/sign-in");
+  if (data === "quota_limited")
+    return "No analysis quota is available this month. Your text is still here.";
+  if (data === "retry_limit")
+    return "This capture has reached its analysis retry limit.";
+  if (error || data !== "queued")
+    return "Could not queue this capture. Your text is still here.";
+  revalidatePath(capturePath);
+  revalidatePath("/dashboard");
+  revalidatePath(libraryPath);
+  redirect(`${capturePath}?change=retried`);
 }

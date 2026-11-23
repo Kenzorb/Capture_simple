@@ -21,7 +21,7 @@ const savedMessages: Record<ProcessingStatus, string> = {
 };
 
 const errorMessages: Partial<Record<ApiError["error"]["code"], string>> = {
-  unauthenticated: "Reopen the popup and reconnect Capture to save.",
+  unauthenticated: "Connect Capture again to save.",
   forbidden: "Check your Capture connection, then try again.",
   invalid_input: "Capture the page again, then try saving.",
   payload_too_large:
@@ -35,6 +35,7 @@ export function bindCaptureForm(
   feedback: HTMLElement,
   saveCapture?: SaveCapture,
   articleHref?: (id: string) => string | null,
+  reconnect?: () => void,
 ) {
   const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
   const note = form.querySelector<HTMLTextAreaElement>("textarea")!;
@@ -85,6 +86,7 @@ export function bindCaptureForm(
       if (page !== selected) return;
       if ("error" in result) {
         feedback.textContent = errorMessages[result.error.code] ?? saveError;
+        if (result.error.code === "unauthenticated") reconnect?.();
       } else {
         feedback.textContent = result.duplicate
           ? "This page is already in your library."
@@ -97,7 +99,10 @@ export function bindCaptureForm(
         }
       }
     } catch {
-      if (page === selected) feedback.textContent = saveError;
+      if (page === selected)
+        feedback.textContent = navigator.onLine
+          ? saveError
+          : "You’re offline. Reconnect, then try saving again.";
     } finally {
       if (page === selected) {
         submitting = false;

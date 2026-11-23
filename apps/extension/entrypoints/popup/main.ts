@@ -47,6 +47,9 @@ const setCapturePage = bindCaptureForm(
       }
     : undefined,
   links?.article,
+  () => {
+    connect.hidden = false;
+  },
 );
 let timer: ReturnType<typeof setTimeout> | undefined;
 

@@ -23,12 +23,19 @@ const preview = {
 function mount(
   save?: Parameters<typeof bindCaptureForm>[2],
   articleHref?: Parameters<typeof bindCaptureForm>[3],
+  reconnect?: Parameters<typeof bindCaptureForm>[4],
 ) {
   const form = document.querySelector<HTMLFormElement>("#capture-form")!;
   const feedback = document.querySelector<HTMLElement>("#save-status")!;
   const note = form.querySelector("textarea")!;
   const button = form.querySelector<HTMLButtonElement>("button")!;
-  const setPreview = bindCaptureForm(form, feedback, save, articleHref);
+  const setPreview = bindCaptureForm(
+    form,
+    feedback,
+    save,
+    articleHref,
+    reconnect,
+  );
   setPreview(preview);
   return { form, feedback, note, button, setPreview };
 }
@@ -126,6 +133,36 @@ it("offers a retry when the save handler fails", async () => {
   setPreview({ ...preview, url: "https://example.com/next" });
   expect(note.value).toBe("");
   expect(feedback.textContent).toBe("");
+});
+
+it("offers to reconnect a revoked session without clearing the draft", async () => {
+  const reconnect = vi.fn();
+  const { button, note, feedback } = mount(
+    vi.fn().mockResolvedValue({ error: { code: "unauthenticated" } }),
+    undefined,
+    reconnect,
+  );
+  note.value = "Draft";
+  button.click();
+  await vi.waitFor(() => expect(reconnect).toHaveBeenCalledOnce());
+  expect(feedback.textContent).toBe("Connect Capture again to save.");
+  expect(note.value).toBe("Draft");
+});
+
+it("gives offline recovery feedback and keeps the draft", async () => {
+  const offline = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+  try {
+    const { button, note, feedback } = mount(
+      vi.fn().mockRejectedValue(new Error("offline")),
+    );
+    note.value = "Draft";
+    button.click();
+    await vi.waitFor(() => expect(feedback.textContent).toMatch(/offline/i));
+    expect(note.value).toBe("Draft");
+    expect(button.disabled).toBe(false);
+  } finally {
+    offline.mockRestore();
+  }
 });
 
 it("opens the server-returned capture on the configured origin and clears the link for a new preview", async () => {

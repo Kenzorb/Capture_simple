@@ -803,6 +803,10 @@ export type Database = {
         Args: { p_execution_id: string; p_job_id: string; p_note: Json };
         Returns: boolean;
       };
+      capture_submit_article_text: {
+        Args: { p_article_id: string; p_text: string };
+        Returns: string | null;
+      };
       capture_retry_article: {
         Args: { p_article_id: string };
         Returns: string | null;

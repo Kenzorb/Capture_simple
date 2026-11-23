@@ -1111,7 +1111,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-082 — Add clear incomplete/error recovery UX
 
-- [ ] **CAP-082 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-082 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Cover unsupported content, revoked extension session, quota exhausted, worker failure, empty tree, deleted article, offline and timeout.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-082 — Add clear incomplete/error recovery UX` |
-| Last verified completed task | `CAP-081` |
-| Last verification executed | `Chromium verified that one fresh account could skip the guide and a second could save a public article, reach Ready through local Inngest, and find its first topic in the Knowledge Tree.` |
-| Last successful Git commit | `bf13160` |
-| Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-083 — Verify MVP workflow with real users/testers` |
+| Last verified completed task | `CAP-082` |
+| Last verification executed | `Chromium verified unsupported source fallback, quota-denied draft preservation, empty tree navigation, worker retry, offline, timeout, and deletion. Extension popup tests verified revoked-session recovery.` |
+| Last successful Git commit | `db6b405` |
+| Active blockers | `CAP-083 requires a consented real-user walkthrough. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify that incomplete and failed capture states all offer a way to recover or continue.` |
+| Next action | `Obtain consent for a real capture-to-revisit walkthrough and record prioritized findings without capturing private content.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 9/11 | In progress |
+| P8 | CAP-073–083 | 10/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2809,3 +2809,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Added a skippable first-capture guide with Chrome setup instructions, a manual save option, and links to processing progress and the first populated Knowledge Tree branch. The skip preference belongs to the account.
 - **Verification** — Chromium on the production build verified that one disposable account could skip and reload without seeing the guide and that a separate fresh account started with an empty tree and no example counts. The second account used the keyboard to follow the manual URL path, saved a real public article, reached Ready through local Inngest and the live note provider, and found its capture in the populated Knowledge Tree at 390 px. The run checked the Chrome setup instructions and used manual URL capture for the live path. Build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in Vitest.
 - **Next action** — CAP-082 — Add clear incomplete/error recovery UX.
+
+### [2026-11-23T20:24:21+08:00] CAP-082 — Add clear incomplete/error recovery UX — STARTED
+
+- **Plan** — Close recovery gaps for unsupported sources and interrupted status checks. Verify each listed recovery state against the web or extension workflow.
+
+### [2026-11-23T20:29:06+08:00] CAP-082 — Add clear incomplete/error recovery UX — COMPLETE
+
+- **Changes** — Added pasted-text recovery for unsupported and failed captures, with ownership, retry, and quota checks in the same transaction. The capture page offers explicit recovery for offline and failed status checks, deletion, and expired access. The extension exposes reconnect after an unauthorized save and retains the draft when offline.
+- **Verification** — Chromium found a way forward from an empty tree, recovered an unsupported capture with pasted text, retained the draft without writing text or creating a job when quota was full, and queued the same capture after capacity returned. It also verified timeout, offline and reconnect, deletion during polling, direct access to a deleted capture, and analysis retry from a failed state. Extension popup tests checked revoked-session feedback and offline draft retention. The Free and Pro hosted quota integration, production build, TypeScript, lint, formatting, diff checks, and 115 Vitest tests passed. Three opt-in tests were skipped in Vitest.
+- **Next action** — CAP-083 requires a consented real-user capture and revisit session before the P8 gate can pass.

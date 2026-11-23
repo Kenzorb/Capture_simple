@@ -25,6 +25,7 @@ import {
 } from "./actions";
 import { AnalysisNotes } from "./analysis-notes";
 import { CapturePolling } from "./capture-polling";
+import { CaptureTextForm } from "./capture-text-form";
 import { PersonalNoteField } from "./personal-note-field";
 
 export const metadata: Metadata = { title: "Capture details" };
@@ -217,6 +218,10 @@ export default async function CaptureDetailPage({
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">AI notes</h2>
             <AnalysisNotes note={aiNote} status={article.status} />
+            {(article.status === "failed" ||
+              article.status === "unsupported") && (
+              <CaptureTextForm articleId={article.id} />
+            )}
             {limited && (
               <p className="mt-2 text-sm text-[#506458]">
                 Monthly allowance resets{" "}

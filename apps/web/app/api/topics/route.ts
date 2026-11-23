@@ -1,16 +1,16 @@
-import { topicCreateSchema, topicTreeResponseSchema } from "@capture/shared";
+import { topicCreateSchema } from "@capture/shared";
 import { getRequestSession } from "../../../lib/supabase/request-session";
+import { readOwnTopicTree } from "../../../lib/supabase/topics";
 import { topicBody, topicError, topicHeaders, topicMutation } from "./response";
 
 export async function GET(request: Request) {
   const session = await getRequestSession(request);
   if (!session)
     return topicError(401, "unauthenticated", "Sign in to view topics.");
-  const { data, error } = await session.supabase.rpc("capture_topic_tree");
-  const tree = topicTreeResponseSchema.safeParse({ topics: data });
-  if (error || !tree.success)
+  const tree = await readOwnTopicTree(session);
+  if (!tree)
     return topicError(503, "unavailable", "Could not load topics. Try again.");
-  return Response.json(tree.data, { headers: topicHeaders });
+  return Response.json(tree, { headers: topicHeaders });
 }
 
 export async function POST(request: Request) {

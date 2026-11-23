@@ -945,7 +945,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-066 — Build dynamic sidebar navigation
 
-- [ ] **CAP-066 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-066 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Load user's real topic hierarchy into expandable/collapsible left nav with counts, loading and empty states.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-066 — Build dynamic sidebar navigation` |
-| Last verified completed task | `CAP-065` |
-| Last verification executed | `Hosted publication and recovery SQL verified one primary topic, deduplicated secondary topics, account isolation, manual assignments, and transaction rollback and replay. Vitest passed 113 tests.` |
-| Last successful Git commit | `94da14c` |
+| Current task | `CAP-067 — Build Knowledge Tree view` |
+| Last verified completed task | `CAP-066` |
+| Last verification executed | `Chromium on the production build verified live topic discovery after fixture note publication, keyboard navigation, saved expansion, filtered articles, and counts that update after archiving. Two-account HTTP verification passed.` |
+| Last successful Git commit | `be8a882` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Show the account's topic hierarchy in the dashboard sidebar.` |
+| Next action | `Build the full Knowledge Tree with nested topic branches and article links.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 4/11 | In progress |
+| P7 | CAP-062–072 | 5/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2647,3 +2647,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Published primary and secondary article topic assignments in the same transaction as validated AI notes. Preserved manual assignments and left AI confidence unset while suggestions carry no confidence score.
 - **Verification:** Applied the migration to capture-dev. Rollback-only publication and recovery SQL verified one primary, deduplicated secondary paths, account isolation, preserved manual links, rollback on invalid evidence, and safe replay. Vitest passed 113 tests with three opt-in tests skipped. The diff check passed.
 - **Next action:** CAP-066 — Build dynamic sidebar navigation.
+
+### [2026-11-23T14:51:00+08:00] CAP-066 — Build dynamic sidebar navigation — STARTED
+
+- **Plan:** Show owner-scoped topics and active article counts in the sidebar, remember expanded branches, and verify newly published topics appear without a page reload.
+
+### [2026-11-23T15:03:15+08:00] CAP-066 — Build dynamic sidebar navigation — COMPLETE
+
+- **Changes:** Added expandable topic branches, direct active article counts, loading and empty states, and account-specific expansion settings. Topic links filter the existing captures view.
+- **Verification:** Applied the count migration to capture-dev. Chromium on the production build verified that the real publication transaction with a fixture note made its topic appear without a document reload. Keyboard expansion and navigation, filtered API shape, exclusion of unrelated captures, persistence across reload, and count updates after archiving passed. The development server repeatedly reloaded during initial browser runs, so the complete check used the production build. Two-account HTTP coverage, the production build and web type check, lint, formatting, and 113 automated tests passed. Three opt-in tests were skipped in the Vitest run.
+- **Next action:** CAP-067 — Build Knowledge Tree view.

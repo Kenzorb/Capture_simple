@@ -47,7 +47,7 @@ Processing statuses are `saved`, `queued`, `processing`, `ready`, `failed`, `quo
 
 ## List articles
 
-`GET /api/articles` accepts `limit` from 1 to 100 and defaults to 20. Optional filters are `status`, `domain`, and full-text title search `q`. Sort by `captured_desc` (default) or `captured_asc`. To continue, send the previous `next_cursor` as `cursor` with the same filters and sort. A null cursor means the final page.
+`GET /api/articles` accepts `limit` from 1 to 100 and defaults to 20. Optional filters are `status`, `domain`, direct membership in a topic by UUID (`topic`), and full-text title search `q`. Sort by `captured_desc` (default) or `captured_asc`. To continue, send the previous `next_cursor` as `cursor` with the same filters and sort. A null cursor means the final page.
 
 For example, `GET /api/articles?limit=20&status=ready&sort=captured_desc` returns a page of ready articles.
 
@@ -118,7 +118,7 @@ The `ai_note` field contains the latest validated structured note or `null` when
 
 ## Manage the topic tree
 
-`GET /api/topics` returns `{"topics":[]}` with the complete set of topics owned by the caller. Each topic includes `id`, `parent_id`, `name`, `description`, and `created_at`. A null parent identifies a root.
+`GET /api/topics` returns `{"topics":[]}` with the complete set of topics owned by the caller. Each topic includes `id`, `parent_id`, `name`, `description`, `created_at`, and `article_count`, which counts active articles directly linked to that topic. A null parent identifies a root.
 
 `POST /api/topics` creates a topic and returns HTTP 201 with `{"topic":{...}}`. Send `name` and optionally `description` and `parent_id`. `PATCH /api/topics/:id` accepts any of the same fields and returns the updated topic. Set `parent_id` to null to move a topic to the root, or `description` to null to clear it.
 

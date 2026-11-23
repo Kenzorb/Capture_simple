@@ -108,7 +108,9 @@ export const topicEditSchema = topicFieldsSchema
   .refine((fields) => Object.keys(fields).length > 0);
 export const topicParamsSchema = z.strictObject({ id: idSchema });
 export const topicTreeResponseSchema = z.object({
-  topics: z.array(topicSchema),
+  topics: z.array(
+    topicSchema.extend({ article_count: z.number().int().nonnegative() }),
+  ),
 });
 
 const articleCursorSchema = z.string().min(1).max(512);
@@ -122,6 +124,7 @@ export const articleListQuerySchema = z.strictObject({
     .pipe(z.number().int().min(1).max(100))
     .default(20),
   status: processingStatusSchema.optional(),
+  topic: idSchema.optional(),
   domain: z.string().trim().min(1).max(253).optional(),
   q: z.string().trim().min(1).max(200).optional(),
   sort: z.enum(["captured_desc", "captured_asc"]).default("captured_desc"),
@@ -176,3 +179,4 @@ export type ArticleEdit = z.infer<typeof articleEditSchema>;
 export type ArticleListResponse = z.infer<typeof articleListResponseSchema>;
 export type ArticleDetailResponse = z.infer<typeof articleDetailResponseSchema>;
 export type Topic = z.infer<typeof topicSchema>;
+export type TopicTreeResponse = z.infer<typeof topicTreeResponseSchema>;

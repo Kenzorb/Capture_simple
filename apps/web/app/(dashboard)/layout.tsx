@@ -1,21 +1,37 @@
 import Form from "next/form";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
-import { getAuthenticatedUser } from "../../lib/supabase/server";
+import { Suspense, type ReactNode } from "react";
+import { getAuthenticatedSession } from "../../lib/supabase/server";
+import { readOwnTopicTree } from "../../lib/supabase/topics";
 import { getExtensionConfig } from "../../lib/extension-config";
 import { signOut } from "../(auth)/actions";
 import { AccountDisclosure } from "./account-disclosure";
 import { DashboardFocus } from "./dashboard-focus";
 import { DashboardNavigation } from "./dashboard-navigation";
+import { TopicNavigation } from "./topic-navigation";
+
+async function DashboardTopics({
+  session,
+}: {
+  session: NonNullable<Awaited<ReturnType<typeof getAuthenticatedSession>>>;
+}) {
+  return (
+    <TopicNavigation
+      owner={session.user.id}
+      initialTree={await readOwnTopicTree(session)}
+    />
+  );
+}
 
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const user = await getAuthenticatedUser();
-  if (!user) redirect("/sign-in");
+  const session = await getAuthenticatedSession();
+  if (!session) redirect("/sign-in");
+  const { user } = session;
 
   return (
     <div className="min-h-screen min-w-0 bg-[#f7f9f5] lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
@@ -25,14 +41,23 @@ export default async function DashboardLayout({
       >
         Skip to content
       </a>
-      <aside className="min-w-0 bg-[#1e342b] px-4 py-4 text-white sm:flex sm:items-center sm:justify-between lg:sticky lg:top-0 lg:block lg:h-dvh lg:self-start lg:px-5 lg:py-7">
-        <Link
-          href="/dashboard"
-          className="inline-block rounded-sm px-3 text-xl font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bce3ca]"
+      <aside className="min-w-0 bg-[#1e342b] px-4 py-4 text-white lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto lg:px-5 lg:py-7">
+        <div className="sm:flex sm:items-center sm:justify-between lg:block">
+          <Link
+            href="/dashboard"
+            className="inline-block rounded-sm px-3 text-xl font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bce3ca]"
+          >
+            Capture
+          </Link>
+          <DashboardNavigation />
+        </div>
+        <Suspense
+          fallback={
+            <p className="mt-5 px-3 text-sm text-[#dcecdf]">Loading topics…</p>
+          }
         >
-          Capture
-        </Link>
-        <DashboardNavigation />
+          <DashboardTopics session={session} />
+        </Suspense>
       </aside>
 
       <div className="min-w-0">

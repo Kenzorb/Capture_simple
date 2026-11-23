@@ -35,6 +35,7 @@ export default async function CapturesPage({
     q,
     cursor: encodedCursor,
     status,
+    topic,
     domain,
     archived,
     sort,
@@ -44,6 +45,7 @@ export default async function CapturesPage({
     q: typeof q === "string" ? q.trim() || undefined : q,
     cursor: encodedCursor,
     status: status === "" ? undefined : status,
+    topic,
     domain: typeof domain === "string" ? domain.trim() || undefined : domain,
     archived,
     sort,
@@ -58,6 +60,7 @@ export default async function CapturesPage({
   const filters = new URLSearchParams();
   if (query.q) filters.set("q", query.q);
   if (query.status) filters.set("status", query.status);
+  if (query.topic) filters.set("topic", query.topic);
   if (query.domain) filters.set("domain", query.domain);
   if (query.archived) filters.set("archived", "true");
   if (query.sort === "captured_asc") filters.set("sort", query.sort);
@@ -66,7 +69,9 @@ export default async function CapturesPage({
   if (hasNextPage) {
     filters.set("cursor", encodeArticleCursor(articles[query.limit - 1]));
   }
-  const isFiltered = Boolean(query.q || query.domain || query.status);
+  const isFiltered = Boolean(
+    query.q || query.domain || query.status || query.topic,
+  );
 
   return (
     <>
@@ -93,6 +98,9 @@ export default async function CapturesPage({
         className="mt-6 grid max-w-3xl grid-cols-1 gap-3 rounded-xl border border-[#dde5dd] bg-white p-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         {query.q && <input type="hidden" name="q" value={query.q} />}
+        {query.topic && (
+          <input type="hidden" name="topic" value={query.topic} />
+        )}
         <label className="grid gap-1 text-sm font-semibold">
           Status
           <select

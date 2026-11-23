@@ -1,6 +1,6 @@
 import {
   articleListQuerySchema,
-  type ArticleListResponse,
+  articleListResponseSchema,
 } from "@capture/shared";
 import {
   decodeArticleCursor,
@@ -35,13 +35,13 @@ export async function GET(request: Request) {
   const articles = data.slice(0, query.limit);
 
   return Response.json(
-    {
+    articleListResponseSchema.parse({
       articles,
       next_cursor:
         data.length > query.limit
           ? encodeArticleCursor(articles[query.limit - 1])
           : null,
-    } satisfies ArticleListResponse,
+    }),
     { headers: articleResponseHeaders },
   );
 }

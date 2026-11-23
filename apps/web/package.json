@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "2.119.2",
     "inngest": "4.26.2",
     "next": "16.4.6",
+    "parse5": "7.3.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "server-only": "0.0.1"

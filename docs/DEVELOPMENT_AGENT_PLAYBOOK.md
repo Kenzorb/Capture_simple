@@ -799,7 +799,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-052 — Implement source preparation/chunking
 
-- [ ] **CAP-052 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-052 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Prefer user-initiated extracted content; for URL-only fetch, require public hosts, deny internal/private IP and DNS rebinding, bound redirects/time/bytes, and respect access restrictions.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-052 — Implement source preparation/chunking` |
-| Last verified completed task | `CAP-051` |
-| Last verification executed | `Hosted SQL verified processing transitions, stale execution rejection, preservation on failure, and exactly-once quota finalization. The article API exposed owner-only status through failure. All 59 tests passed.` |
-| Last successful Git commit | `484bee2` |
+| Current task | `CAP-053 — Clean and segment source text` |
+| Last verified completed task | `CAP-052` |
+| Last verification executed | `Synthetic source fixtures exercised private targets, metadata IPs, DNS pinning, redirects, byte limits, timeouts, access restrictions, and inert extraction. All 87 tests passed.` |
+| Last successful Git commit | `2458c57` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Prepare captured source text or fetch public URL-only sources with DNS, redirect, deadline, and byte limits.` |
+| Next action | `Normalize sources, generate bounded evidence chunks, and persist source hashes with traceable evidence IDs.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 3/13 | In progress |
+| P6 | CAP-049–061 | 4/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2484,3 +2484,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added service-only transition RPCs that bind a processing job to one execution. Terminal outcomes are applied with the reservation change in one transaction. The existing owner-scoped article API supplies status for clients.
 - **Verification:** Applied the migration to capture-dev. A rollback-only SQL fixture passed invalid transition, stale generation, replay, quota accounting, and failure retention checks. Two disposable accounts verified the API reads queued, processing, and failed states for the owner, preserves the personal note, omits worker metadata, and returns 404 to other accounts. All 59 unit tests, web TypeScript, formatting, and diff checks passed.
 - **Next action:** CAP-052 — Implement source preparation/chunking.
+
+### [2026-11-23T09:50:43+08:00] CAP-052 — Implement source preparation/chunking — STARTED
+
+- **Plan:** Prefer provided text and implement public-only, DNS-pinned source retrieval with bounded redirects, transfer size, and elapsed time.
+
+### [2026-11-23T09:54:50+08:00] CAP-052 — Implement source preparation/chunking — COMPLETE
+
+- **Changes:** Source preparation uses supplied text before making any network request. URL-only fetches accept public domain names on the default HTTP(S) ports, reject restricted DNS answers on every hop, and pin the connection to an approved IP. Connections send no credentials, allow three redirects, and enforce 12 seconds and 512 KiB. HTML is parsed without running scripts. Access-restricted, oversized, and unsupported sources return a safe outcome.
+- **Verification:** Controlled network fixtures exercised direct localhost and metadata addresses, mixed public/private DNS answers, redirect rebinding, redirect limits, oversized declared and streaming bodies, restricted and unsupported responses, and DNS and request timeouts. All 87 tests, web and test TypeScript, lint, formatting, and diff checks passed.
+- **Next action:** CAP-053 — Clean and segment source text.

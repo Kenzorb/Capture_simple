@@ -95,6 +95,10 @@ export function readOwnArticle({ supabase, user }: Session, id: string) {
     .maybeSingle();
 }
 
+export function listOwnRelatedArticles({ supabase }: Session, id: string) {
+  return supabase.rpc("capture_related_articles", { p_article_id: id });
+}
+
 export function setOwnArticlePrimaryTopic(
   { supabase }: Session,
   article: string,

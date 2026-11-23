@@ -995,7 +995,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-071 — Implement basic related-article suggestions
 
-- [ ] **CAP-071 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-071 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Compute shared topics/concepts/tag overlap with bounded candidate queries, owner filters and no LLM-all-pairs explosion.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-071 — Implement basic related-article suggestions` |
-| Last verified completed task | `CAP-070` |
-| Last verification executed | `Chromium verified the documented rename, moving a subtree between parents and to the top level, and moving a capture's primary topic. README formatting passed.` |
-| Last successful Git commit | `cd26913` |
+| Current task | `CAP-072 — Test evolving tree with a research corpus` |
+| Last verified completed task | `CAP-071` |
+| Last verification executed | `Hosted SQL verified ranking, isolation, and a query below 750 ms against 2,500 unrelated captures. Chromium verified ranked links and their destinations.` |
+| Last successful Git commit | `0b637fa` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Show owner-scoped related captures using shared topics, concepts, and tags.` |
+| Next action | `Run the P7 acceptance test on real captures across computer science, entrepreneurship, and history.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 9/11 | In progress |
+| P7 | CAP-062–072 | 10/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2697,3 +2697,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Decision:** Bulk topic merge is deferred as allowed by product spec F10. The README documents moving and renaming branches and consolidating primary captures individually.
 - **Verification:** Chromium verified the documented controls with a disposable account. Renaming, moving under a parent, and moving back to the top level retained the descendant. Capture reassignment retained the capture and its notes, and invalid descendant placement was rejected. README formatting and the diff check passed.
 - **Next action:** CAP-071 — Implement basic related-article suggestions.
+
+### [2026-11-23T16:22:16+08:00] CAP-071 — Implement basic related-article suggestions — STARTED
+
+- **Plan:** Rank a bounded set of same-account captures by shared topic, concept, and tag signals. Verify ranking, isolation, and performance on a larger fixture library.
+
+### [2026-11-23T16:28:28+08:00] CAP-071 — Implement basic related-article suggestions — COMPLETE
+
+- **Changes:** Added up to six active related captures to article detail pages. The query considers up to 100 direct topic candidates and 200 recent captures with notes, and ranks shared topics, concepts, and tags within the account.
+- **Verification:** Hosted rollback-only SQL with 2,500 unrelated captures verified topic, concept, and tag ranking, archived and foreign exclusion, and a query under 750 ms. The initial plan exceeded that target by recalculating scores per row, so the final query computes them once. Chromium verified link order and navigation, archive exclusion, and the empty state. Production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped.
+- **Next action:** CAP-072 — Test evolving tree with a research corpus.

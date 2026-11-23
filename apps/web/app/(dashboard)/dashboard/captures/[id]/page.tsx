@@ -2,7 +2,10 @@ import { articleParamsSchema, structuredNoteSchema } from "@capture/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { readOwnArticle } from "../../../../../lib/supabase/articles";
+import {
+  listOwnRelatedArticles,
+  readOwnArticle,
+} from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
 import { readOwnTopicTree } from "../../../../../lib/supabase/topics";
 import { SubmitButton } from "../../../../(auth)/submit-button";
@@ -12,6 +15,7 @@ import {
   CaptureOriginalLink,
   CaptureStatus,
   CaptureTime,
+  CaptureTitle,
 } from "../../capture-presentation";
 import {
   deleteCapture,
@@ -68,7 +72,12 @@ export default async function CaptureDetailPage({
   const { data: article, error } = parsed.success
     ? await readOwnArticle(session, parsed.data.id)
     : { data: null, error: null };
-  const tree = article ? await readOwnTopicTree(session) : null;
+  const [tree, related] = article
+    ? await Promise.all([
+        readOwnTopicTree(session),
+        listOwnRelatedArticles(session, article.id),
+      ])
+    : [null, null];
   const primaryTopic = article?.article_topics.find(
     (topic) => topic.is_primary,
   )?.topics;
@@ -212,6 +221,26 @@ export default async function CaptureDetailPage({
               </form>
             )}
           </section>
+          {related?.data?.length ? (
+            <section
+              className="mt-6 border-t border-[#dde5dd] pt-5"
+              aria-labelledby="related-captures"
+            >
+              <h2 id="related-captures" className="text-lg font-semibold">
+                Related captures
+              </h2>
+              <ul className="mt-2 space-y-2 text-sm">
+                {related.data.map((connection) => (
+                  <li key={connection.id} className="min-w-0">
+                    <CaptureTitle id={connection.id} title={connection.title} />
+                    <p className="break-words text-[#506458]">
+                      {connection.domain}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">Personal notes</h2>
             <form

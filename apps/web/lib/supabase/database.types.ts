@@ -831,6 +831,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      capture_related_articles: {
+        Args: { p_article_id: string };
+        Returns: { id: string; title: string; domain: string }[];
+      };
       capture_set_primary_topic: {
         Args: { p_article_id: string; p_topic_id: string };
         Returns: boolean;

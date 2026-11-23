@@ -925,7 +925,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-064 — Resolve AI-suggested topic paths
 
-- [ ] **CAP-064 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-064 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Provide bounded candidate topics to model if needed; validate returned IDs against owner; create sensible new topic or Unsorted fallback transactionally.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-064 — Resolve AI-suggested topic paths` |
-| Last verified completed task | `CAP-063` |
-| Last verification executed | `Hosted SQL verified two related article paths reuse the same branch, exact names outrank aliases, and matching stays in the intended account and parent.` |
-| Last successful Git commit | `5147b86` |
+| Current task | `CAP-065 — Attach primary and secondary topics` |
+| Last verified completed task | `CAP-064` |
+| Last verification executed | `Hosted SQL verified transactional path creation and alias reuse, stable account-owned Unsorted fallback, and rejection of foreign candidate IDs.` |
+| Last successful Git commit | `c0e6888` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Resolve proposed paths transactionally and verify that foreign candidate IDs are rejected and fallback topics stay owner-scoped.` |
+| Next action | `Attach one primary and additional relevant topics when validated AI notes are published.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 2/11 | In progress |
+| P7 | CAP-062–072 | 3/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2627,3 +2627,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added sibling matching that prefers exact names, then normalized labels, then known aliases. It stays within the owner's current parent and returns the existing prefix when a path stops matching. Normalization preserves distinguishing characters such as the plus signs in C++.
 - **Verification:** Applied the migration to capture-dev. Rollback-only SQL verified two related article suggestions resolved to the same branch through Unicode, case, spacing, and alias variations. It also verified exact-name precedence, parent and account isolation, and service-only access. Web TypeScript, formatting, and diff checks passed.
 - **Next action:** CAP-064 — Resolve AI-suggested topic paths.
+
+### [2026-11-23T14:44:37+08:00] CAP-064 — Resolve AI-suggested topic paths — STARTED
+
+- **Plan:** Resolve bounded topic suggestions in one account-scoped transaction. Reject foreign candidate IDs and create or reuse Unsorted when no usable path exists.
+
+### [2026-11-23T14:46:16+08:00] CAP-064 — Resolve AI-suggested topic paths — COMPLETE
+
+- **Changes:** Added a service-only resolver that matches existing paths, creates a missing branch transactionally, and falls back to the owner's Unsorted topic for missing or unusable suggestions. Candidate IDs must belong to the owner.
+- **Verification:** Applied the migration to capture-dev. Rollback-only SQL verified alias reuse across related article paths, a stable account-specific fallback, foreground user creation with no empty topics, correct local candidates, foreign candidate rejection, and service-only access. Web TypeScript, formatting, and diff checks passed.
+- **Next action:** CAP-065 — Attach primary and secondary topics.

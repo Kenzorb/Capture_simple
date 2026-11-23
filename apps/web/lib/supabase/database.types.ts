@@ -790,6 +790,14 @@ export type Database = {
         Args: { p_article_id: string };
         Returns: string | null;
       };
+      capture_resolve_topic_path: {
+        Args: {
+          p_candidate_topic_id?: string;
+          p_labels?: string[];
+          p_owner_id: string;
+        };
+        Returns: string;
+      };
       capture_reconcile_jobs: {
         Args: { p_job_id?: string };
         Returns: number;

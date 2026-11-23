@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import {
   deleteOwnArticle,
   editOwnArticle,
+  retryOwnArticle,
 } from "../../../../../lib/supabase/articles";
 import { getAuthenticatedSession } from "../../../../../lib/supabase/server";
 
@@ -74,5 +75,17 @@ export async function deleteCapture(id: string, formData: FormData) {
     await deleteOwnArticle(session, id),
     capturePath,
     `${libraryPath}?capture=deleted`,
+  );
+}
+
+export async function retryCapture(id: string) {
+  const { session, capturePath } = await captureTarget(id);
+  const { data, error } = await retryOwnArticle(session, id);
+  if (data === "retry_limit" || data === "quota_limited")
+    redirect(`${capturePath}?change=${data}`);
+  finishMutation(
+    { data: data === "queued", error },
+    capturePath,
+    `${capturePath}?change=retried`,
   );
 }

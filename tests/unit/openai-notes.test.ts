@@ -85,6 +85,25 @@ it("does not send a request when the credential is absent", async () => {
 });
 
 it.each([
+  [429, "provider_rate_limited"],
+  [504, "provider_timeout"],
+  [503, "provider_unavailable"],
+])(
+  "backs off and stops after three attempts for provider status %s",
+  async (status, code) => {
+    vi.stubEnv("OPENAI_API_KEY", "fixture-api-key");
+    const send = vi
+      .fn<typeof fetch>()
+      .mockImplementation(async () => Response.json({}, { status }));
+    expect(await generateOpenAiNote([chunk], send)).toEqual({
+      status: "unavailable",
+      code,
+    });
+    expect(send).toHaveBeenCalledTimes(3);
+  },
+);
+
+it.each([
   { ...response, status: "incomplete" },
   {
     ...response,

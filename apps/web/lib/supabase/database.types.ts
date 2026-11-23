@@ -771,6 +771,10 @@ export type Database = {
         Args: { p_execution_id: string; p_job_id: string; p_note: Json };
         Returns: boolean;
       };
+      capture_retry_article: {
+        Args: { p_article_id: string };
+        Returns: string | null;
+      };
       capture_save_article: {
         Args: {
           p_canonical_url: string;

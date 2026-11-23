@@ -1,19 +1,22 @@
 import { articleParamsSchema } from "@capture/shared";
+import { RetryAfterError } from "inngest";
 import { generateOpenAiNote } from "../processing/openai-notes";
 import { prepareSource } from "../processing/prepare-source";
 import { segmentSource } from "../processing/segment-source";
 import { createPrivilegedSupabaseClient } from "../supabase/admin";
 import { inngest } from "./client";
 
+const sourceRetries = 2;
+
 export const processCaptureJob = inngest.createFunction(
   {
     id: "process-capture-job",
     triggers: [{ event: "capture/job.requested" }],
     concurrency: { limit: 2 },
-    retries: 0,
+    retries: sourceRetries,
     timeouts: { start: "5m", finish: "2m" },
   },
-  async ({ event, runId, step }) => {
+  async ({ event, runId, step, attempt }) => {
     const target = articleParamsSchema.safeParse({ id: event.data?.jobId });
     if (!target.success) return { status: "ignored" };
     const jobId = target.data.id;
@@ -60,7 +63,7 @@ export const processCaptureJob = inngest.createFunction(
           .maybeSingle(),
         supabase
           .from("article_contents")
-          .select("cleaned_text")
+          .select("cleaned_text,extraction_method")
           .eq("article_id", id)
           .eq("user_id", owner)
           .maybeSingle(),
@@ -75,8 +78,11 @@ export const processCaptureJob = inngest.createFunction(
       });
       if (source.status === "unsupported")
         return finish("unsupported", "source_unsupported");
-      if (source.status !== "ready")
-        return finish("failed", "source_unavailable");
+      if (source.status === "unavailable") {
+        if (attempt < sourceRetries)
+          throw new RetryAfterError(source.code, `${2 ** (attempt + 1)}s`);
+        return finish("failed", source.code);
+      }
       const { text, hash, chunks } = segmentSource(source.text);
       if (!chunks.length) return finish("unsupported", "source_empty");
 
@@ -84,13 +90,18 @@ export const processCaptureJob = inngest.createFunction(
         ...execution,
         p_text: text,
         p_hash: hash,
-        p_method: source.method,
+        p_method:
+          content.data?.extraction_method === "http" ? "http" : source.method,
         p_chunks: chunks,
       });
       if (stored.error) throw new Error("Could not persist capture evidence.");
       if (!stored.data) return { status: "ignored" };
       const result = await generateOpenAiNote(chunks);
-      if (result.status !== "ready") return finish("failed", result.status);
+      if (result.status !== "ready")
+        return finish(
+          "failed",
+          result.status === "unavailable" ? result.code : result.status,
+        );
 
       const references = new Set(chunks.map(({ chunk_id }) => chunk_id));
       if (

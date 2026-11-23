@@ -13,7 +13,11 @@ const redirectCodes = new Set([301, 302, 303, 307, 308]);
 
 type SourceResult =
   | { status: "ready"; text: string; method: "capture" | "http" }
-  | { status: "unsupported" | "unavailable" };
+  | { status: "unsupported" }
+  | {
+      status: "unavailable";
+      code: "source_timeout" | "source_rate_limited" | "source_unavailable";
+    };
 
 function publicUrl(value: string) {
   const parsed = canonicalizeManualUrl(value);
@@ -102,8 +106,12 @@ export async function prepareSource(
           target = next ? publicUrl(next.href) : null;
           continue;
         }
-        if (response.status === 429 || response.status >= 500)
-          return { status: "unavailable" };
+        if (response.status === 429)
+          return { status: "unavailable", code: "source_rate_limited" };
+        if (response.status === 408 || response.status === 504)
+          return { status: "unavailable", code: "source_timeout" };
+        if (response.status >= 500)
+          return { status: "unavailable", code: "source_unavailable" };
         if (response.status !== 200) break;
         const text = await readText(response);
         if (text?.trim()) return { status: "ready", text, method: "http" };
@@ -114,6 +122,9 @@ export async function prepareSource(
     }
     return { status: "unsupported" };
   } catch {
-    return { status: "unavailable" };
+    return {
+      status: "unavailable",
+      code: signal.aborted ? "source_timeout" : "source_unavailable",
+    };
   }
 }

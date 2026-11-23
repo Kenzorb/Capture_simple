@@ -11,7 +11,12 @@ import {
   CaptureStatus,
   CaptureTime,
 } from "../../capture-presentation";
-import { deleteCapture, savePersonalNote, setCaptureArchived } from "./actions";
+import {
+  deleteCapture,
+  retryCapture,
+  savePersonalNote,
+  setCaptureArchived,
+} from "./actions";
 
 export const metadata: Metadata = { title: "Capture details" };
 
@@ -19,6 +24,15 @@ const feedback = new Map<string, { text: string; error?: boolean }>([
   ["note", { text: "Personal note saved." }],
   ["archived", { text: "Capture archived." }],
   ["restored", { text: "Capture restored to active captures." }],
+  ["retried", { text: "Analysis queued for another attempt." }],
+  [
+    "retry_limit",
+    { text: "This capture has reached its analysis retry limit.", error: true },
+  ],
+  [
+    "quota_limited",
+    { text: "No analysis quota is available this month.", error: true },
+  ],
   [
     "invalid-note",
     { text: "Enter a note of up to 4,000 characters.", error: true },
@@ -125,6 +139,14 @@ export default async function CaptureDetailPage({
             <p className="mt-1 text-sm text-[#506458]">
               No AI notes available for this capture.
             </p>
+            {article.status === "failed" && (
+              <form
+                action={retryCapture.bind(null, article.id)}
+                className="mt-3"
+              >
+                <SubmitButton label="Retry analysis" />
+              </form>
+            )}
           </section>
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">Personal notes</h2>

@@ -136,9 +136,14 @@ it.each([
   },
 );
 
-it("marks temporary service failures as unavailable", async () => {
-  expect(await prepareSource(target, network(response(503)))).toEqual({
+it.each([
+  [429, "source_rate_limited"],
+  [504, "source_timeout"],
+  [503, "source_unavailable"],
+])("classifies temporary source failure %s", async (status, code) => {
+  expect(await prepareSource(target, network(response(status)))).toEqual({
     status: "unavailable",
+    code,
   });
 });
 
@@ -148,7 +153,10 @@ it("bounds a stalled DNS lookup and aborts an in-flight HTTP request", async () 
   const dnsAbort = new AbortController();
   const dnsResult = prepareSource(target, dns, dnsAbort.signal);
   dnsAbort.abort();
-  expect(await dnsResult).toEqual({ status: "unavailable" });
+  expect(await dnsResult).toEqual({
+    status: "unavailable",
+    code: "source_timeout",
+  });
   expect(dns.request).not.toHaveBeenCalled();
 
   const io = network();
@@ -164,5 +172,6 @@ it("bounds a stalled DNS lookup and aborts an in-flight HTTP request", async () 
   );
   expect(await prepareSource(target, io, abort.signal)).toEqual({
     status: "unavailable",
+    code: "source_timeout",
   });
 });

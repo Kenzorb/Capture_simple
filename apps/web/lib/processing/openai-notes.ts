@@ -95,7 +95,11 @@ export async function generateOpenAiNote(
     },
   });
 
+  let code:
+    "provider_rate_limited" | "provider_timeout" | "provider_unavailable" =
+    "provider_unavailable";
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const signal = AbortSignal.timeout(12_000);
     try {
       const response = await send(endpoint, {
         method: "POST",
@@ -106,7 +110,7 @@ export async function generateOpenAiNote(
           "Content-Type": "application/json",
         },
         body,
-        signal: AbortSignal.timeout(12_000),
+        signal,
       });
       if (response.ok) {
         const json: unknown = await response.json().catch((error: unknown) => {
@@ -132,10 +136,17 @@ export async function generateOpenAiNote(
         response.status < 500
       )
         return { status: "invalid_response" } as const;
+      code =
+        response.status === 429
+          ? "provider_rate_limited"
+          : response.status === 408 || response.status === 504
+            ? "provider_timeout"
+            : "provider_unavailable";
     } catch {
       // Network details can contain credentials or payloads. Retry without logging them.
+      code = signal.aborted ? "provider_timeout" : "provider_unavailable";
     }
     if (attempt + 1 < maxAttempts) await delay(250 * 2 ** attempt);
   }
-  return { status: "unavailable" } as const;
+  return { status: "unavailable", code } as const;
 }

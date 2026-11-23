@@ -90,3 +90,7 @@ export function deleteOwnArticle({ supabase }: Session, id: string) {
     p_confirmed: true,
   });
 }
+
+export function retryOwnArticle({ supabase }: Session, id: string) {
+  return supabase.rpc("capture_retry_article", { p_article_id: id });
+}

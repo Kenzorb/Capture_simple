@@ -859,7 +859,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-058 — Implement retry and terminal failure policy
 
-- [ ] **CAP-058 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-058 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Classify timeout, rate limit, parse failure, source unsupported and provider outage; backoff with max attempts; provide user retry without duplicate billing.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-058 — Implement retry and terminal failure policy` |
-| Last verified completed task | `CAP-057` |
-| Last verification executed | `Hosted SQL and the local Inngest worker rejected invented evidence and stale executions, saved one note, preserved personal notes, and exposed the note only to its owner across refresh. All 108 local tests passed.` |
-| Last successful Git commit | `85c049b` |
+| Current task | `CAP-059 — Implement job idempotency and recovery` |
+| Last verified completed task | `CAP-058` |
+| Last verification executed | `Injected worker failures verified bounded retry, terminal statuses, owner-only retry, and no duplicate reservation or quota usage. All 113 local tests passed.` |
+| Last successful Git commit | `91428dc` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Classify pipeline failures, bound retry attempts, and provide an owner-scoped retry without double billing.` |
+| Next action | `Reconcile abandoned work and verify duplicate worker delivery and crash recovery without duplicate notes or quota use.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 9/13 | In progress |
+| P6 | CAP-049–061 | 10/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2559,3 +2559,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Registered the real capture worker with Inngest. The worker prepares evidence, validates structured output and references, and publishes one note in the same transaction that marks the article ready and consumes its reservation. The owner-scoped article API returns the note separately from the personal note.
 - **Verification:** Applied the migration to capture-dev. The rollback-only SQL fixture rejected stale execution and unknown evidence, preserved quota on rejected writes, and accepted replay without changing the original note or consuming additional quota. The local Inngest worker with controlled model responses published one verified note across duplicate dispatch and HTTP refresh, marked a bad citation failed, kept both personal notes, and denied access to a second account. All 108 local tests, web TypeScript, lint, formatting, and diff checks passed.
 - **Next action:** CAP-058 — Implement retry and terminal failure policy.
+
+### [2026-11-23T10:30:14+08:00] CAP-058 — Implement retry and terminal failure policy — STARTED
+
+- **Plan:** Bound automatic source and provider retries and add an owner-scoped retry for failed analysis with a new reservation only when work is queued.
+
+### [2026-11-23T10:33:37+08:00] CAP-058 — Implement retry and terminal failure policy — COMPLETE
+
+- **Changes:** Classified timeouts, rate limits, provider outages, malformed model output, and unsupported sources. Added bounded source and provider backoff and a library retry action with at most two user retries. Retry queues and reserves atomically without charging failed work.
+- **Verification:** Applied the migration to capture-dev after dry run. Local Inngest with injected failures verified three source attempts, immediate unsupported status, terminal provider failure with quota released, owner-only concurrent retry, one replacement reservation, personal-note retention, and the retry cap. All 113 local tests, web TypeScript, lint, formatting, and diff checks passed.
+- **Next action:** CAP-059 — Implement job idempotency and recovery.

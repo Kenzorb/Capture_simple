@@ -78,7 +78,7 @@ The list returns active articles by default. Use `archived=true` to list archive
 
 Use `article.status` to check processing progress. A new eligible capture transitions from `queued` to `processing`, then to `ready`, `failed`, or `unsupported`. Captures without an eligible job can be `saved`, `quota_limited`, or `unsupported`. Failed captures remain in the library. This response uses `Cache-Control: private, no-store` and contains no worker execution IDs or error details.
 
-The `ai_note` field contains the latest validated structured note or `null` when no note is available. The `personal_note` field stays separate.
+The `ai_note` field contains the latest validated structured note or `null` when no note is available. The `personal_note` field stays separate. A new publication attaches one primary topic and can attach additional existing topics. The primary uses an existing manual choice, the first usable suggested path, or Unsorted.
 
 ```json
 {

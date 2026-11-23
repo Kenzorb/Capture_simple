@@ -1,9 +1,13 @@
 do $$
 declare
   member uuid := gen_random_uuid();
+  other uuid := gen_random_uuid();
   article uuid;
   job uuid;
   period uuid;
+  secondary uuid;
+  manual uuid;
+  foreign_topic uuid;
   execution text := gen_random_uuid()::text;
   source text := 'Leaves collect light.';
   hash text := encode(extensions.digest(source, 'sha256'), 'hex');
@@ -11,18 +15,31 @@ declare
   note jsonb := jsonb_build_object(
     'schema_version', 1, 'model', 'fixture-model', 'language', 'en', 'summary', source,
     'key_takeaways', jsonb_build_array(source), 'tags', '[]'::jsonb,
-    'concepts', '[]'::jsonb, 'suggested_topic_paths', '[]'::jsonb,
+    'concepts', '[]'::jsonb,
+    'suggested_topic_paths', '[["Web Development","API"],["Statistics"],["statistics"],["Missing secondary"]]'::jsonb,
     'sections', jsonb_build_array(jsonb_build_object('heading', 'Leaves',
       'points', jsonb_build_array(source), 'evidence_chunk_ids', jsonb_build_array(chunk)))
   );
 begin
   begin
-    insert into auth.users (id, email) values (member, member || '@example.test');
+    insert into auth.users (id, email)
+    values (member, member || '@example.test'), (other, other || '@example.test');
     insert into public.articles (user_id, url, canonical_url, title, domain, status)
     values (member, 'https://example.test/publish', 'https://example.test/publish',
       'Publication fixture', 'example.test', 'queued') returning id into article;
     insert into public.personal_notes (article_id, user_id, body)
     values (article, member, 'Keep my own notes');
+    insert into public.topics (user_id, name) values (member, 'Statistics') returning id into secondary;
+    insert into public.topics (user_id, name) values (member, 'Manual') returning id into manual;
+    insert into public.topics (user_id, name) values (other, 'Statistics') returning id into foreign_topic;
+    insert into public.article_topics (user_id, article_id, topic_id, assignment_source, confidence)
+    values (member, article, manual, 'manual', 0.85);
+    begin
+      insert into public.article_topics (user_id, article_id, topic_id, assignment_source)
+      values (member, article, foreign_topic, 'ai');
+      raise exception 'Cross-account membership accepted';
+    exception when foreign_key_violation then null;
+    end;
     insert into public.usage_periods (user_id, period_start, period_end, article_limit, reserved)
     values (member, '2026-11-01 00:00+00', '2026-12-01 00:00+00', 20, 1) returning id into period;
     insert into public.processing_jobs (user_id, article_id, idempotency_key)
@@ -43,6 +60,7 @@ begin
     exception when invalid_parameter_value then null;
     end;
     if exists (select 1 from public.article_ai_notes where article_id = article)
+      or exists (select 1 from public.article_topics where article_id = article and assignment_source = 'ai')
       or not exists (select 1 from public.usage_periods where id = period and used = 0 and reserved = 1)
     then raise exception 'Rejected publication changed the note or quota'; end if;
     if not public.capture_publish_note(job, execution, note)
@@ -56,6 +74,19 @@ begin
         and p.body = 'Keep my own notes'
     ) or not exists (select 1 from public.usage_periods where id = period and used = 1 and reserved = 0)
     then raise exception 'Expected one durable note and one consumed reservation'; end if;
+    if (select count(*) from public.article_topics where article_id = article) <> 3
+      or (select count(*) from public.article_topics where article_id = article and is_primary) <> 1
+      or not exists (
+        select 1 from public.article_topics link join public.topics t on t.id = link.topic_id
+        where link.article_id = article and link.is_primary and link.assignment_source = 'ai'
+          and t.name = 'API' and t.user_id = member and link.confidence is null
+      )
+      or not exists (select 1 from public.article_topics where article_id = article
+        and topic_id = secondary and not is_primary and assignment_source = 'ai')
+      or not exists (select 1 from public.article_topics where article_id = article
+        and topic_id = manual and assignment_source = 'manual' and confidence = 0.85)
+      or exists (select 1 from public.topics where user_id = member and name = 'Missing secondary')
+    then raise exception 'Publication did not assign one primary and preserve the distinct existing memberships'; end if;
     raise sqlstate 'Z0057';
   exception when sqlstate 'Z0057' then
     raise notice 'CAP-057 assertions passed and fixtures rolled back';

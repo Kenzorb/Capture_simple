@@ -935,7 +935,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-065 — Attach primary and secondary topics
 
-- [ ] **CAP-065 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-065 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Enforce one primary topic per article, support additional relevant topics and track AI vs manual source/confidence.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-065 — Attach primary and secondary topics` |
-| Last verified completed task | `CAP-064` |
-| Last verification executed | `Hosted SQL verified transactional path creation and alias reuse, stable account-owned Unsorted fallback, and rejection of foreign candidate IDs.` |
-| Last successful Git commit | `c0e6888` |
+| Current task | `CAP-066 — Build dynamic sidebar navigation` |
+| Last verified completed task | `CAP-065` |
+| Last verification executed | `Hosted publication and recovery SQL verified one primary topic, deduplicated secondary topics, account isolation, manual assignments, and transaction rollback and replay. Vitest passed 113 tests.` |
+| Last successful Git commit | `94da14c` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Attach one primary and additional relevant topics when validated AI notes are published.` |
+| Next action | `Show the account's topic hierarchy in the dashboard sidebar.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 3/11 | In progress |
+| P7 | CAP-062–072 | 4/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2637,3 +2637,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added a service-only resolver that matches existing paths, creates a missing branch transactionally, and falls back to the owner's Unsorted topic for missing or unusable suggestions. Candidate IDs must belong to the owner.
 - **Verification:** Applied the migration to capture-dev. Rollback-only SQL verified alias reuse across related article paths, a stable account-specific fallback, foreground user creation with no empty topics, correct local candidates, foreign candidate rejection, and service-only access. Web TypeScript, formatting, and diff checks passed.
 - **Next action:** CAP-065 — Attach primary and secondary topics.
+
+### [2026-11-23T14:46:58+08:00] CAP-065 — Attach primary and secondary topics — STARTED
+
+- **Plan:** Assign topics in the note publication transaction. Verify one primary, deduplicated secondary links, account isolation, and replay protection.
+
+### [2026-11-23T14:50:36+08:00] CAP-065 — Attach primary and secondary topics — COMPLETE
+
+- **Changes:** Published primary and secondary article topic assignments in the same transaction as validated AI notes. Preserved manual assignments and left AI confidence unset while suggestions carry no confidence score.
+- **Verification:** Applied the migration to capture-dev. Rollback-only publication and recovery SQL verified one primary, deduplicated secondary paths, account isolation, preserved manual links, rollback on invalid evidence, and safe replay. Vitest passed 113 tests with three opt-in tests skipped. The diff check passed.
+- **Next action:** CAP-066 — Build dynamic sidebar navigation.

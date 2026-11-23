@@ -107,6 +107,18 @@ export default async function DashboardLayout({
                     Manage extension access
                   </Link>
                 )}
+                <a
+                  href="/api/export?format=json"
+                  className="block rounded-md px-2 py-2 text-sm font-semibold text-emerald-950 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-emerald-800"
+                >
+                  Download library (JSON)
+                </a>
+                <a
+                  href="/api/export?format=markdown"
+                  className="block rounded-md px-2 py-2 text-sm font-semibold text-emerald-950 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-emerald-800"
+                >
+                  Download library (Markdown)
+                </a>
                 <form action={signOut}>
                   <button
                     type="submit"

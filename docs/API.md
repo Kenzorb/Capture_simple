@@ -128,6 +128,10 @@ Names are unique within each parent, including the root, with case and surroundi
 
 `DELETE /api/topics/:id` removes a leaf and returns HTTP 204. Articles assigned to the deleted topic stay in the library. Move child topics before deleting their parent. Unknown or foreign topic IDs return HTTP 404.
 
+## Export the library
+
+`GET /api/export?format=json` downloads the authenticated user's library. Use `format=markdown` to download Markdown. JSON is the default and contains versioned `topics` and `articles` collections. Both formats include active and archived captures, source URLs, AI notes, personal notes, topic assignments, and capture timestamps. The server streams the download in pages.
+
 ## Errors
 
 Use the HTTP status and machine-readable code. The error may echo a valid request ID.

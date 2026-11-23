@@ -372,8 +372,25 @@ test(
         payload: {
           schema_version: 1,
           model: "fixture",
+          language: "en",
           summary: "Thermohaline circulation transports heat.",
-          concepts: [{ name: "Pycnocline" }],
+          key_takeaways: ["Ocean circulation transports heat."],
+          sections: [
+            {
+              heading: "Circulation",
+              points: ["Denser water sinks."],
+              evidence_chunk_ids: ["ch_0000000000000000_1"],
+            },
+          ],
+          concepts: [
+            {
+              name: "Pycnocline",
+              definition: "A layer with a density gradient.",
+              evidence_chunk_ids: ["ch_0000000000000000_1"],
+            },
+          ],
+          tags: [],
+          suggested_topic_paths: [],
         },
       });
       assert(!seededNotes.error, seededNotes.error?.code);
@@ -487,6 +504,66 @@ test(
       );
       assert(!foreignEdit.error);
       assert.deepEqual(foreignEdit.data, []);
+      const additionalTopics = await admin.from("topics").insert(
+        Array.from({ length: 52 }, (_, index) => ({
+          user_id: one.owner,
+          name: "Export topic " + index,
+        })),
+      );
+      assert(!additionalTopics.error, additionalTopics.error?.code);
+      await mutate(
+        "PATCH",
+        "/api/articles/" + ids[0],
+        one.header,
+        { personal_note: "<script>private note</script>" },
+        204,
+      );
+      assert.equal((await read("", {}, "/api/export")).status, 401);
+      assert.equal(
+        (await read("?format=csv", one.header, "/api/export")).status,
+        400,
+      );
+      const exported = await read("?format=json", one.header, "/api/export");
+      assert.equal(exported.status, 200);
+      assert.match(
+        exported.headers.get("content-disposition"),
+        /attachment; filename="capture-\d{4}-\d{2}-\d{2}\.json"/,
+      );
+      assert.equal(exported.headers.get("cache-control"), "private, no-store");
+      const libraryExport = await exported.json();
+      assert.equal(libraryExport.schema_version, 1);
+      assert.equal(libraryExport.topics.length, 53);
+      assert.equal(libraryExport.articles.length, 1253);
+      assert.equal(new Set(hitIds(libraryExport)).size, 1253);
+      assert(!hitIds(libraryExport).includes(id));
+      assert(!hitIds(libraryExport).includes(ids[3]));
+      const archivedExport = libraryExport.articles.find(
+        (article) => article.id === ids[0],
+      );
+      assert.equal(
+        archivedExport.personal_note,
+        "<script>private note</script>",
+      );
+      assert(archivedExport.archived_at);
+      assert.equal(archivedExport.topics[0].id, topic);
+      const notesExport = libraryExport.articles.find(
+        (article) => article.id === ids[1],
+      );
+      assert.equal(notesExport.ai_note.concepts[0].name, "Pycnocline");
+      assert.equal(notesExport.url, rows[1].url);
+      const markdown = await read(
+        "?format=markdown",
+        one.cookie,
+        "/api/export",
+      );
+      assert.equal(markdown.status, 200);
+      assert.match(markdown.headers.get("content-disposition"), /\.md"$/);
+      const text = await markdown.text();
+      assert.match(text, /# Capture library/);
+      assert.match(text, /### AI notes/);
+      assert.match(text, /&lt;script&gt;private note&lt;\/script&gt;/);
+      assert(!text.includes("Private second owner"));
+      assert(!text.includes("/lifecycle"));
     } finally {
       for (const id of users)
         assert(

@@ -1051,7 +1051,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-076 — Implement Markdown/JSON export
 
-- [ ] **CAP-076 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-076 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Export only authorized articles, source links, AI notes, personal notes, topics and timestamps in a portable format; handle large libraries safely.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-076 — Implement Markdown/JSON export` |
-| Last verified completed task | `CAP-075` |
-| Last verification executed | `Chromium and two-account integration verified stale drafts, concurrent saves, both conflict choices, ownership, note clearing, topic moves, and worker retry publication.` |
-| Last successful Git commit | `446d653` |
+| Current task | `CAP-077 — Implement usage-period creation/reset` |
+| Last verified completed task | `CAP-076` |
+| Last verification executed | `Chromium opened both exports from Account. A two-account HTTP test verified paged export of 1,253 captures and 53 topics, notes and source links, deletion, private headers, and isolation.` |
+| Last successful Git commit | `fb5cf28` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Add private, paged Markdown and JSON exports for captures, notes, and topics.` |
+| Next action | `Define UTC monthly quota periods and test calendar and renewal boundaries for Free and Pro.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 3/11 | In progress |
+| P8 | CAP-073–083 | 4/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2749,3 +2749,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Added an atomic compare-and-save operation. A stale editor keeps its draft and shows the latest saved note with an explicit choice. Personal notes remain separate from generated notes.
 - **Verification** — Chromium saved and edited a note sent through the extension capture API, verified both conflict choices in two tabs, moved the capture, retried a failed worker, and published a fixture AI note without changing the user's note. Clearing and reload worked. The hosted integration verified simultaneous saves produce one success and one conflict and that foreign accounts cannot edit. The publication SQL, production build and TypeScript, lint, formatting, and 113 Vitest tests passed. Three opt-in tests were skipped in the Vitest run.
 - **Next action** — CAP-076 — Implement Markdown/JSON export.
+
+### [2026-11-23T18:09:15+08:00] CAP-076 — Implement Markdown/JSON export — STARTED
+
+- **Plan:** Provide private downloads of saved captures, notes and topics in both portable formats. Verify browser downloads, account isolation, deletion, and delivery across multiple pages.
+
+### [2026-11-23T18:13:56+08:00] CAP-076 — Implement Markdown/JSON export — COMPLETE
+
+- **Changes** — Added downloads to the Account menu and a private export route. Both formats include active and archived captures, source links, personal and AI notes, topic assignments, and timestamps. The exporter reads and streams stable pages of up to 50 rows.
+- **Verification** — Chromium downloaded and opened both formats. Two-account HTTP coverage verified a 1,253-capture and 53-topic export, topic and capture page boundaries, distinct records, structured notes, archived articles, escaped Markdown, private attachment headers, and the absence of deleted and foreign captures. The production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in Vitest.
+- **Next action** — CAP-077 — Implement usage-period creation/reset.

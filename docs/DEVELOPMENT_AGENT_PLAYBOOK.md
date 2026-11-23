@@ -809,7 +809,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-053 — Clean and segment source text
 
-- [ ] **CAP-053 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-053 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Normalize whitespace, remove noise, preserve meaningful headings, store content hash and evidence chunk IDs; enforce maximum input and token budget.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-053 — Clean and segment source text` |
-| Last verified completed task | `CAP-052` |
-| Last verification executed | `Synthetic source fixtures exercised private targets, metadata IPs, DNS pinning, redirects, byte limits, timeouts, access restrictions, and inert extraction. All 87 tests passed.` |
-| Last successful Git commit | `2458c57` |
+| Current task | `CAP-054 — Define AI structured-note schema` |
+| Last verified completed task | `CAP-053` |
+| Last verification executed | `Multibyte evidence fixtures verified deterministic IDs, heading preservation, input bounds, and source offsets. Hosted SQL rejected altered evidence and stale writes and preserved correct source hashes. All 89 tests passed.` |
+| Last successful Git commit | `950052a` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Normalize sources, generate bounded evidence chunks, and persist source hashes with traceable evidence IDs.` |
+| Next action | `Define a strict structured-note schema and store its version separately from personal notes.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 4/13 | In progress |
+| P6 | CAP-049–061 | 5/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2494,3 +2494,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Source preparation uses supplied text before making any network request. URL-only fetches accept public domain names on the default HTTP(S) ports, reject restricted DNS answers on every hop, and pin the connection to an approved IP. Connections send no credentials, allow three redirects, and enforce 12 seconds and 512 KiB. HTML is parsed without running scripts. Access-restricted, oversized, and unsupported sources return a safe outcome.
 - **Verification:** Controlled network fixtures exercised direct localhost and metadata addresses, mixed public/private DNS answers, redirect rebinding, redirect limits, oversized declared and streaming bodies, restricted and unsupported responses, and DNS and request timeouts. All 87 tests, web and test TypeScript, lint, formatting, and diff checks passed.
 - **Next action:** CAP-053 — Clean and segment source text.
+
+### [2026-11-23T09:55:40+08:00] CAP-053 — Clean and segment source text — STARTED
+
+- **Plan:** Normalize source text and headings, enforce a conservative input budget, and persist evidence with stable IDs and verifiable byte offsets.
+
+### [2026-11-23T09:59:32+08:00] CAP-053 — Clean and segment source text — COMPLETE
+
+- **Changes:** Normalized whitespace and removed common standalone navigation labels. Retained HTML headings and split normalized text into chunks bounded to 1,800 UTF-8 bytes each and 12,000 evidence bytes total. Chunk IDs derive from the source hash and position. Stored byte ranges refer to the full normalized source.
+- **Verification:** Applied the evidence migration to capture-dev. The rollback-only SQL fixture rejected altered evidence and a stale execution ID, then verified idempotent evidence persistence and the matching source hash. Multibyte fixtures verified the input bounds and round-tripped each chunk through its byte range. All 89 tests, web and test TypeScript, lint, formatting, and diff checks passed.
+- **Next action:** CAP-054 — Define AI structured-note schema.

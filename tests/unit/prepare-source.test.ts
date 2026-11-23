@@ -111,7 +111,7 @@ it("extracts text and block boundaries without including inactive HTML", async (
   expect(result).toEqual({
     status: "ready",
     method: "http",
-    text: "\nHeading\n\nRead & revise.\n",
+    text: "\n# Heading\n\nRead & revise.\n",
   });
   expect(reply.close).toHaveBeenCalledOnce();
 });

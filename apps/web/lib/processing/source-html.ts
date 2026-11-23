@@ -64,6 +64,8 @@ export function readableHtml(html: string) {
       const separates = element && blocks.has(element.tagName);
       if (separates) {
         fragments.push("\n");
+        if (/^h[1-6]$/.test(element.tagName))
+          fragments.push("#".repeat(Number(element.tagName[1])) + " ");
         pending.push("\n");
       }
       for (let i = node.childNodes.length - 1; i >= 0; i--)

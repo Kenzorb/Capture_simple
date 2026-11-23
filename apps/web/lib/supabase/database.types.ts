@@ -14,6 +14,30 @@ export type Database = {
   };
   public: {
     Tables: {
+      article_source_chunks: {
+        Row: {
+          article_id: string;
+          chunk_id: string;
+          end_byte: number;
+          position: number;
+          start_byte: number;
+          text: string;
+          user_id: string;
+        };
+        Insert: Database["public"]["Tables"]["article_source_chunks"]["Row"];
+        Update: Partial<
+          Database["public"]["Tables"]["article_source_chunks"]["Row"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "article_source_chunks_user_id_article_id_fkey";
+            columns: ["user_id", "article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["user_id", "id"];
+          },
+        ];
+      };
       article_concepts: {
         Row: {
           article_id: string;
@@ -730,6 +754,17 @@ export type Database = {
       };
       capture_start_job: {
         Args: { p_execution_id: string; p_job_id: string };
+        Returns: boolean;
+      };
+      capture_store_source: {
+        Args: {
+          p_chunks: Json;
+          p_execution_id: string;
+          p_hash: string;
+          p_job_id: string;
+          p_method: string;
+          p_text: string;
+        };
         Returns: boolean;
       };
     };

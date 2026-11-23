@@ -2825,3 +2825,8 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Finding** — Three recent attempts on the same capture recorded the legacy `invalid_response` code. That code did not distinguish a rejected request from an incomplete, refused, or invalid note. A live synthetic article returned valid notes. The original cause remains unconfirmed because the stored source was excluded from the replay.
 - **Changes** — New failures distinguish provider rejection, refusal, incomplete output, and output-token exhaustion. Token exhaustion triggers one shorter-note attempt within the existing request and time budgets. The worker records the bounded failure code and continues to validate notes before publishing.
 - **Verification** — Provider metadata from the live synthetic check showed a completed, validated response. Automated tests covered the fallback, its attempt limit, and distinct terminal outcomes. The CAP-083 walkthrough remains pending.
+
+### [2026-11-23T22:40:32+08:00] Analysis failure investigation — authorized replay
+
+- **Result** — One read-only replay of the affected capture returned HTTP 200 with an incomplete response at exactly 1,800 output tokens. The provider reported `max_output_tokens`, and the truncated output did not parse as JSON. This reproduced a failure covered by the shorter-note fallback in `e5fdeaa`. The earlier jobs still carry only the older generic error code.
+- **Scope** — The replay sent one provider request, logged metadata only, and left the saved capture, job history, and quota unchanged. The shorter fallback on this capture remains unverified because it requires a second provider request.

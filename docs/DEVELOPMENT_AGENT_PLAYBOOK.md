@@ -1121,7 +1121,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-083 — Verify MVP workflow with real users/testers
 
-- [ ] **CAP-083 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-083 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Recruit a small consented beta sample, observe one capture/revisit session, record feedback separately from private page contents, and triage defects.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-083 — Verify MVP workflow with real users/testers` |
-| Last verified completed task | `CAP-082` |
-| Last verification executed | `Chromium verified unsupported source fallback, quota-denied draft preservation, empty tree navigation, worker retry, offline, timeout, and deletion. Extension popup tests verified revoked-session recovery.` |
-| Last successful Git commit | `db6b405` |
-| Active blockers | `CAP-083 requires a consented real-user walkthrough. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current phase | `P9 — Stripe monetization and entitlement integrity` |
+| Current task | `CAP-084 — Finalize pricing/currency and cost assumptions` |
+| Last verified completed task | `CAP-083` |
+| Last verification executed | `The consenting tester reported successful analysis and found the same capture through both Knowledge Tree and Search.` |
+| Last successful Git commit | `ea7a083` |
+| Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Obtain consent for a real capture-to-revisit walkthrough and record prioritized findings without capturing private content.` |
+| Next action | `Model Free and Pro costs and margin scenarios, then obtain the owner's USD pricing decision before configuring test-mode prices.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,11 +1591,11 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 10/11 | In progress |
+| P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **22/112** | **In progress** |
+| **Total** | **CAP-001–112** | **82/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2830,3 +2830,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 
 - **Result** — One read-only replay of the affected capture returned HTTP 200 with an incomplete response at exactly 1,800 output tokens. The provider reported `max_output_tokens`, and the truncated output did not parse as JSON. This reproduced a failure covered by the shorter-note fallback in `e5fdeaa`. The earlier jobs still carry only the older generic error code.
 - **Scope** — The replay sent one provider request, logged metadata only, and left the saved capture, job history, and quota unchanged. The shorter fallback on this capture remains unverified because it requires a second provider request.
+
+### [2026-11-23T22:49:26+08:00] CAP-083 — Verify MVP workflow with real users/testers — STARTED
+
+- **Plan** — The tester consented to a capture and revisit walkthrough using a public article. Record observed steps and friction separately from article text. Wait for actual observations before marking acceptance.
+
+### [2026-11-23T22:57:23+08:00] CAP-083 — Verify MVP workflow with real users/testers — COMPLETE
+
+- **Walkthrough** — One consenting tester reported that analysis worked and that they found the article again through both Knowledge Tree and Search. The record contains the workflow observations only.
+- **Triage** — The tester reported no new blockers. The previously confirmed output truncation was addressed in `e5fdeaa`. Monitor recurrence using the distinct output-limit status.
+- **P8 gate** — Passed with all 11 tasks verified. Next is CAP-084 to estimate costs and obtain a USD pricing decision.

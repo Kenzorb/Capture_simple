@@ -889,7 +889,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-061 — Run full capture-to-notes vertical slice
 
-- [ ] **CAP-061 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-061 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Use a real article (not only mock content) from extension or manual save through API, queue, provider, database and dashboard.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-061 — Run full capture-to-notes vertical slice` |
-| Last verified completed task | `CAP-060` |
-| Last verification executed | `Chromium verified Saved → Queued → Processing → Ready and displayed notes without a document reload or loss of an unsaved personal-note edit. All 113 local tests passed.` |
-| Last successful Git commit | `e67d6de` |
+| Current phase | `P7 — Topic organization and dynamic knowledge tree` |
+| Current task | `CAP-062 — Define hierarchy rules and topic API` |
+| Last verified completed task | `CAP-061` |
+| Last verification executed | `Chromium captured a real public NIST article, and local Inngest, hosted Supabase, and OpenAI produced validated notes visible without reload. Dispatch to visible notes took 15.8 seconds. Measured generation cost was about USD 0.001456.` |
+| Last successful Git commit | `4de9187` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Capture a real public article through the dashboard, run the full worker, and record output quality, latency, and model cost.` |
+| Next action | `Implement the owner-scoped topic tree API and verify its hierarchy constraints.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 12/13 | In progress |
+| P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2589,3 +2589,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** The open capture detail polls the owner-scoped endpoint for pending status, refreshes the existing view when it changes, and displays explanations and validated notes. The personal-note editor retains its draft during a status update.
 - **Verification:** Chromium on Windows with hosted Supabase, local Inngest, and a controlled model response observed Saved, Queued, Processing, and Ready. Notes appeared without document reload, and an unsaved personal-note edit remained in the editor. All 113 local tests, web TypeScript, lint, formatting, and diff checks passed.
 - **Next action:** CAP-061 — Run full capture-to-notes vertical slice.
+
+### [2026-11-23T10:47:05+08:00] CAP-061 — Run full capture-to-notes vertical slice — STARTED
+
+- **Plan:** Save a public article in Chromium, dispatch its real job, and verify grounded notes appear without reload. Record latency, evidence, and provider token usage.
+
+### [2026-11-23T10:49:28+08:00] CAP-061 — Run full capture-to-notes vertical slice — COMPLETE
+
+- **Demo:** In Chromium 156.0.8078.4 on Windows, a disposable user saved [NIST's Normal Distribution article](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm) through the dashboard form. Capture saved it on hosted Supabase and created a durable job. A targeted local Inngest trigger ran public-source retrieval, evidence preparation, GPT-5.6 Luna, and transactional note publication. Notes appeared in the existing browser document.
+- **Timing:** The save acknowledgement appeared in 1.92 seconds. Notes were visible 15.79 seconds after dispatch and 31.69 seconds after clicking Save, including opening the detail page in the development build.
+- **Quality and cost:** The note identified the normal distribution and its statistical characteristics, included five takeaways and five sections, and cited IDs from the three stored evidence chunks. The owner API returned the same ready note. Exactly one quota unit was used and no reservation remained. The successful response used 1,298 input tokens and 997 output tokens, estimated at USD 0.001456 at the standard uncached rate. [Pricing](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+- **P6 gate:** Passed. All 13 tasks are verified. Hosted Inngest sync remains pending for deployment.
+- **Next action:** CAP-062 — Define hierarchy rules and topic API.

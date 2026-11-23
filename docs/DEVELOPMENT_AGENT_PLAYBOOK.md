@@ -1005,7 +1005,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-072 — Test evolving tree with a research corpus
 
-- [ ] **CAP-072 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-072 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Capture multiple real pages across CS, entrepreneurship and history, including multi-disciplinary and duplicate-topic examples.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-072 — Test evolving tree with a research corpus` |
-| Last verified completed task | `CAP-071` |
-| Last verification executed | `Hosted SQL verified ranking, isolation, and a query below 750 ms against 2,500 unrelated captures. Chromium verified ranked links and their destinations.` |
-| Last successful Git commit | `0b637fa` |
+| Current phase | `P8 — Search, quotas, export, onboarding and usability` |
+| Current task | `CAP-073 — Add keyword search query/indexes` |
+| Last verified completed task | `CAP-072` |
+| Last verification executed | `Seven real pages published through local Inngest and the configured model. Chromium verified keyboard navigation, persisted manual placement, and the destination topic page. Canonical duplicate capture enqueued no additional job.` |
+| Last successful Git commit | `ab29407` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Run the P7 acceptance test on real captures across computer science, entrepreneurship, and history.` |
+| Next action | `Implement account-scoped keyword search across titles, summaries, notes, and topic names.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 10/11 | In progress |
+| P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2707,3 +2707,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added up to six active related captures to article detail pages. The query considers up to 100 direct topic candidates and 200 recent captures with notes, and ranks shared topics, concepts, and tags within the account.
 - **Verification:** Hosted rollback-only SQL with 2,500 unrelated captures verified topic, concept, and tag ranking, archived and foreign exclusion, and a query under 750 ms. The initial plan exceeded that target by recalculating scores per row, so the final query computes them once. Chromium verified link order and navigation, archive exclusion, and the empty state. Production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped.
 - **Next action:** CAP-072 — Test evolving tree with a research corpus.
+
+### [2026-11-23T17:25:51+08:00] CAP-072 — Test evolving tree with a research corpus — STARTED
+
+- **Plan:** Capture public pages in a disposable account and run their jobs through local Inngest and the configured note provider. Verify duplicate capture handling, tree stability, browser navigation, and manual topic corrections. Record the source list and taxonomy observations.
+
+### [2026-11-23T17:33:17+08:00] CAP-072 — Test evolving tree with a research corpus — COMPLETE
+
+- **Corpus** — PostgreSQL's [index introduction](https://www.postgresql.org/docs/current/indexes-intro.html) and [index types](https://www.postgresql.org/docs/current/indexes-types.html), Paul Graham's [early growth essay](https://www.paulgraham.com/ds.html) and [startup ideas essay](https://www.paulgraham.com/startupideas.html), NASA's [Apollo 11 overview](https://www.nasa.gov/history/apollo-11-mission-overview/) and [Apollo 8 history](https://www.nasa.gov/mission/apollo-8/), and the Computer History Museum's [1976 timeline](https://www.computerhistory.org/timeline/1976/).
+- **Verification** — All seven URL captures reached Ready through local Inngest and the configured model, with saved notes and one primary topic each. The tree used 17 topics with no duplicate sibling names or cycles and stayed within four levels. Both PostgreSQL pages reused Databases / PostgreSQL / Indexes. Recapturing the introduction with a tracking parameter returned the same capture and enqueued no extra job.
+- **Browser check** — Chromium opened a real timeline capture from the nested tree using the keyboard, reassigned it, confirmed the choice survived reload, and found the capture on the destination topic page. The first browser run's final locator matched both a topic and a related article named Apollo 8. A repeat URL run hit source timeouts for PostgreSQL, so the completed two-page browser follow-up targeted the exact topic link and supplied extracted text from the public pages while keeping Inngest and note generation live. All disposable accounts were removed.
+- **Taxonomy observations** — Both entrepreneurship pages began under Business but divided between Startups and Entrepreneurship / Startups. Apollo pages split between Space / Human Spaceflight / Apollo Program and Humans In Space / Apollo Program / Apollo 8. The timeline received the narrower CP/M topic on direct extraction and the broader Computer history label when the follow-up supplied extracted text. These are examples to use when improving cross-branch reuse and reviewing how much of a long source reaches analysis.
+- **P7 gate** — Passed with all 11 tasks verified. Resume at CAP-073 in P8.

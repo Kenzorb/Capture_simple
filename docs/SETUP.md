@@ -58,6 +58,14 @@ The hosted dispatcher polls the capture outbox every minute. Locally, add the de
 
 This workspace has local Git and no configured remote. Hosted access is unconfirmed for each service below.
 
+For the OpenAI acceptance check, place a development project's `OPENAI_API_KEY` in `apps/web/.env.local`. Leave `OPENAI_MODEL` empty to use GPT-5.6 Luna. The live check makes billable requests for three public articles and prints only usage and approximate cost. Run it from the repository root in PowerShell after authorizing those requests. [Model pricing](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+
+```powershell
+$env:CAPTURE_TEST_AI_LIVE = '1'
+node --env-file=apps/web/.env.local node_modules/vitest/vitest.mjs run --reporter=default --silent=false tests/unit/openai-notes-live.test.ts
+Remove-Item Env:CAPTURE_TEST_AI_LIVE
+```
+
 | Provider         | Needed for                                                                       | Configuration names                                                                                              |
 | ---------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | GitHub           | Remote source control and hosted CI                                              | Repository access through the owner-approved GitHub identity. CI uses `GITHUB_TOKEN` where needed.               |

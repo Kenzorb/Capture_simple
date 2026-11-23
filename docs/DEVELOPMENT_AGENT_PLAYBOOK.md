@@ -839,7 +839,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-056 — Integrate real AI provider server-side
 
-- [ ] **CAP-056 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-056 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Make bounded model request with runtime/cost limits, retries for transient errors, structured outputs and server-held API keys only.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-056 — Integrate real AI provider server-side` |
-| Last verified completed task | `CAP-055` |
-| Last verification executed | `Adversarial fixtures verified article instructions stay in the user payload, tools are disabled, private fields are omitted, and policy echoes and privileged output fields are rejected. All 102 tests passed.` |
-| Last successful Git commit | `a528ea2` |
+| Current task | `CAP-057 — Validate and persist AI results` |
+| Last verified completed task | `CAP-056` |
+| Last verification executed | `GPT-5.6 Luna returned valid structured notes and references for all three live articles. The measured successful outputs cost an estimated USD 0.005428. All 108 local tests passed.` |
+| Last successful Git commit | `7c0243e` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Integrate bounded OpenAI requests and verify three real articles with validated output and token cost.` |
+| Next action | `Verify evidence and ownership and persist generated notes atomically with the processing outcome.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 7/13 | In progress |
+| P6 | CAP-049–061 | 8/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2524,3 +2524,28 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Fixed grounding rules in the system message and supplied only the evidence IDs and article text as serialized user data. Disabled tool access, enforced a serialized prompt budget, and rejected output with unexpected fields or verbatim policy lines.
 - **Verification:** Adversarial fixtures supplied forged role markers and command requests and verified that they stayed data. Fixtures confirmed no tools or private note fields in requests and rejected attempted tool invocations and prompt echoes in responses. All 102 tests, TypeScript, lint, formatting, and diff checks passed. Live provider verification belongs to CAP-056.
 - **Next action:** CAP-056 — Integrate real AI provider server-side.
+
+### [2026-11-23T10:05:41+08:00] CAP-056 — Integrate real AI provider server-side — STARTED
+
+- **Plan:** Implement bounded structured Responses API requests and measure usage on three public articles once a development API key is available.
+
+### [2026-11-23T10:08:14+08:00] CAP-056 — Integrate real AI provider server-side — AWAITING LIVE VERIFICATION
+
+- **Progress:** Implemented the server-side Responses API client with a fixed provider destination, disabled tools and storage, bounded input and output, timeout, transient retries, structured validation, and usage reporting. GPT-6.1 Terra is the default. Added a three-article acceptance check.
+- **Verification so far:** Mocked provider tests and regressions passed. The three live cases are gated because no development API key is configured. No model requests were made, and the task remains unchecked and uncommitted.
+- **Next action:** Configure the development key and run the three live checks before continuing to CAP-057.
+
+### [2026-11-23T10:23:11+08:00] CAP-056 — Integrate real AI provider server-side — COMPLETE
+
+- **Changes:** Integrated bounded server-only Responses calls with structured validation, transient retries, no tools and no response storage. The configured project could authenticate but the originally selected Terra model was unavailable. Selected GPT-5.6 Luna from the project's listed models.
+- **Verification:** All three public articles returned validated notes with existing evidence IDs in two successful runs. The second run enabled the console reporter because the first suppressed usage output. The defaults and live command are documented in [Setup](SETUP.md). All 108 local tests, web TypeScript, formatting, and diff checks passed.
+
+| Article | Input tokens | Output tokens | Estimated USD |
+|---|---:|---:|---:|
+| Robots Exclusion Protocol | 3,742 | 1,273 | 0.002276 |
+| Normal distribution | 1,298 | 1,181 | 0.001677 |
+| What is a black hole? | 1,573 | 967 | 0.001475 |
+| Measured total | 6,613 | 3,421 | 0.005428 |
+
+- **Cost basis:** Standard uncached GPT-5.6 Luna token rates. The total covers the three measured successful responses. [Pricing](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+- **Next action:** CAP-057 — Validate and persist AI results.

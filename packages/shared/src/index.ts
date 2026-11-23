@@ -2,6 +2,7 @@ import { z } from "zod";
 import { maxCaptureUrlLength } from "./capture-url";
 
 export {
+  structuredNoteJsonSchema,
   structuredNoteOutputSchema,
   structuredNoteSchema,
   structuredNoteVersion,

@@ -49,3 +49,11 @@ export const structuredNoteSchema = structuredNoteOutputSchema.extend({
 });
 
 export type StructuredNote = z.infer<typeof structuredNoteSchema>;
+
+export function structuredNoteJsonSchema() {
+  const schema = z.toJSONSchema(structuredNoteOutputSchema, {
+    target: "draft-7",
+  });
+  delete schema.$schema;
+  return schema;
+}

@@ -30,6 +30,12 @@ export function encodeArticleCursor({ captured_at, id }: Cursor) {
   return Buffer.from(JSON.stringify({ captured_at, id })).toString("base64url");
 }
 
+function articleCursorCondition(cursor: Cursor, ascending: boolean) {
+  const op = ascending ? "gt" : "lt";
+  // Values come from the UUID and ISO timestamp validators before interpolation.
+  return `captured_at.${op}.${cursor.captured_at},and(captured_at.eq.${cursor.captured_at},id.${op}.${cursor.id})`;
+}
+
 export function listOwnArticles(
   { supabase, user }: Session,
   { limit, status, topic, domain, q, sort, archived }: ArticleListQuery,
@@ -53,13 +59,28 @@ export function listOwnArticles(
   else query.is("archived_at", null);
   if (domain) query.eq("domain", domain.toLowerCase());
   if (q) query.textSearch("title", q, { config: "simple", type: "websearch" });
-  if (cursor) {
-    const op = ascending ? "gt" : "lt";
-    // Values come from the UUID and ISO timestamp validators before interpolation.
-    query.or(
-      `captured_at.${op}.${cursor.captured_at},and(captured_at.eq.${cursor.captured_at},id.${op}.${cursor.id})`,
-    );
-  }
+  if (cursor) query.or(articleCursorCondition(cursor, ascending));
+  return query;
+}
+
+export function listOwnTopicArticles(
+  { supabase, user }: Session,
+  topic: string,
+  limit: number,
+  cursor: Cursor | null,
+) {
+  const query = supabase
+    .from("articles")
+    .select(
+      "id, title, domain, captured_at, article_topics!inner(is_primary), article_ai_notes(payload)",
+    )
+    .eq("user_id", user.id)
+    .eq("article_topics.topic_id", topic)
+    .is("archived_at", null)
+    .order("captured_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit + 1);
+  if (cursor) query.or(articleCursorCondition(cursor, false));
   return query;
 }
 

@@ -24,7 +24,11 @@ export function TopicNavigation({
   const storageKey = `capture.topic-navigation.${owner}`;
   const pathname = usePathname();
   const search = useSearchParams();
-  const selected = pathname === libraryPath ? search?.get("topic") : null;
+  const selected = pathname.startsWith("/dashboard/topics/")
+    ? pathname.slice("/dashboard/topics/".length)
+    : pathname === libraryPath
+      ? search?.get("topic")
+      : null;
 
   useEffect(() => {
     const restore = window.setTimeout(() => {
@@ -117,7 +121,7 @@ export function TopicNavigation({
                   <span className="w-6 shrink-0" />
                 )}
                 <Link
-                  href={`${libraryPath}?topic=${topic.id}`}
+                  href={`/dashboard/topics/${topic.id}`}
                   prefetch={false}
                   aria-current={selected === topic.id ? "page" : undefined}
                   className="flex min-w-0 flex-1 items-start justify-between gap-1 rounded-md px-1.5 py-1.5 text-sm text-[#e2eee5] hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-[#bce3ca] aria-[current=page]:bg-[#dcecdf] aria-[current=page]:font-semibold aria-[current=page]:text-[#172e24]"

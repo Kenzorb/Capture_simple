@@ -965,7 +965,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-068 — Build topic detail pages
 
-- [ ] **CAP-068 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-068 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Show topic description, child topics, article list, primary/secondary membership and relevant concept labels.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-068 — Build topic detail pages` |
-| Last verified completed task | `CAP-067` |
-| Last verification executed | `Chromium verified four-level keyboard navigation, focus, bounded article previews, and article detail. Production build, lint, and 113 automated tests passed.` |
-| Last successful Git commit | `abeb731` |
+| Current task | `CAP-069 — Implement manual topic corrections` |
+| Last verified completed task | `CAP-068` |
+| Last verification executed | `Chromium verified topic details, concept and article membership updates after a correction, owner isolation, and pagination. Production build, lint, and 113 automated tests passed.` |
+| Last successful Git commit | `cf337a2` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Build a topic detail view for its direct articles, subtopics, and concepts.` |
+| Next action | `Add manual article reassignment and topic editing, then verify that reprocessing preserves manual choices.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 6/11 | In progress |
+| P7 | CAP-062–072 | 7/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2667,3 +2667,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added a Knowledge Tree dashboard view with nested disclosures, article links, bounded previews, and access to each topic's capture results. Groups start with 12 topics, and expanded article lists preview eight active captures.
 - **Verification:** Chromium on the production build used the keyboard to open a four-level topic, collapse and reopen it, and reach its article detail. It also verified focus after showing more topics, that closed branches do not fetch previews, that previews stay bounded, and the destination for the full topic capture list. Production build and TypeScript, lint, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped.
 - **Next action:** CAP-068 — Build topic detail pages.
+
+### [2026-11-23T15:30:16+08:00] CAP-068 — Build topic detail pages — STARTED
+
+- **Plan:** Add owner-scoped topic pages with descriptions, subtopics, membership labels, and concepts from the displayed captures. Verify the page follows changes to article memberships.
+
+### [2026-11-23T15:35:05+08:00] CAP-068 — Build topic detail pages — COMPLETE
+
+- **Changes:** Linked sidebar and Knowledge Tree topics to an owner-scoped detail route. The route shows the description, immediate subtopics, direct active captures with primary or secondary membership, and up to 12 deduplicated concepts from the current page of notes.
+- **Verification:** Chromium on the production build verified navigation, a 20-capture page plus the remaining captures, membership labels, concept deduplication, and a foreign topic returning the not-found view. An article title edit and a fixture membership move were reflected in both topics, including the concept labels. Production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped.
+- **Next action:** CAP-069 — Implement manual topic corrections.

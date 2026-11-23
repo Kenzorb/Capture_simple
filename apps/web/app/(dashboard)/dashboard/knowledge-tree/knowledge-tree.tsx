@@ -81,7 +81,7 @@ function TopicBranch({
   const [open, setOpen] = useState(false);
   const group = `tree-branch-${topic.id}`;
   const expandable = childrenByParent.has(topic.id) || topic.article_count > 0;
-  const href = `/dashboard/captures?topic=${topic.id}`;
+  const href = `/dashboard/topics/${topic.id}`;
 
   return (
     <li className="min-w-0">

@@ -104,17 +104,6 @@ it.each([
 );
 
 it.each([
-  { ...response, status: "incomplete" },
-  {
-    ...response,
-    output: [
-      {
-        type: "message",
-        role: "assistant",
-        content: [{ type: "refusal", refusal: "Refused" }],
-      },
-    ],
-  },
   { ...response, output: [{ type: "function_call" }] },
   { ...response, usage: undefined },
 ])("rejects unvalidated provider responses", async (value) => {
@@ -125,3 +114,71 @@ it.each([
   });
   expect(send).toHaveBeenCalledOnce();
 });
+
+it("tries a shorter note once when the response reaches the output ceiling", async () => {
+  vi.stubEnv("OPENAI_API_KEY", "fixture-api-key");
+  const truncated = {
+    ...response,
+    status: "incomplete",
+    incomplete_details: { reason: "max_output_tokens" },
+  };
+  const send = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(Response.json(truncated))
+    .mockResolvedValueOnce(Response.json(response));
+  expect((await generateOpenAiNote([chunk], send)).status).toBe("ready");
+  expect(send).toHaveBeenCalledTimes(2);
+  const first = JSON.parse(String(send.mock.calls[0][1]?.body));
+  const second = JSON.parse(String(send.mock.calls[1][1]?.body));
+  expect(second.input[0].content).toContain("Keep the output concise");
+  expect(second.input[1]).toEqual(first.input[1]);
+  expect(second.max_output_tokens).toBe(first.max_output_tokens);
+
+  const alwaysTruncated = vi
+    .fn<typeof fetch>()
+    .mockImplementation(async () => Response.json(truncated));
+  expect(await generateOpenAiNote([chunk], alwaysTruncated)).toEqual({
+    status: "provider_output_limit",
+  });
+  expect(alwaysTruncated).toHaveBeenCalledTimes(2);
+});
+
+it.each([
+  [{ ...response, status: "incomplete" }, 200, "provider_incomplete"],
+  [
+    {
+      ...response,
+      status: "incomplete",
+      incomplete_details: { reason: "content_filter" },
+    },
+    200,
+    "provider_refused",
+  ],
+  [
+    {
+      ...response,
+      output: [
+        { type: "message", role: "assistant", content: [{ type: "refusal" }] },
+      ],
+    },
+    200,
+    "provider_refused",
+  ],
+  [
+    { error: { message: "Provider-specific details" } },
+    400,
+    "provider_rejected",
+  ],
+])(
+  "distinguishes provider failures without sending another request",
+  async (body, status, expected) => {
+    vi.stubEnv("OPENAI_API_KEY", "fixture-api-key");
+    const send = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json(body, { status }));
+    expect(await generateOpenAiNote([chunk], send)).toEqual({
+      status: expected,
+    });
+    expect(send).toHaveBeenCalledOnce();
+  },
+);

@@ -16,6 +16,8 @@ const maxOutputTokens = 1_800;
 const maxAttempts = 3;
 const requestTimeoutMs = 30_000;
 const retryBudgetMs = 42_000;
+const compactInstruction =
+  "Keep the output concise. Use at most three takeaways, three sections with at most two points each, three concepts, and one topic path.";
 
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -81,7 +83,7 @@ export async function generateOpenAiNote(
   if (!prompt) return { status: "invalid_input" } as const;
 
   const model = process.env.OPENAI_MODEL?.trim() || defaultNoteModel;
-  const body = JSON.stringify({
+  const request = {
     ...prompt,
     model,
     store: false,
@@ -95,8 +97,9 @@ export async function generateOpenAiNote(
         schema: structuredNoteJsonSchema(),
       },
     },
-  });
+  };
 
+  let compact = false;
   let code:
     "provider_rate_limited" | "provider_timeout" | "provider_unavailable" =
     "provider_unavailable";
@@ -116,7 +119,20 @@ export async function generateOpenAiNote(
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body,
+        body: JSON.stringify(
+          compact
+            ? {
+                ...request,
+                input: [
+                  {
+                    ...prompt.input[0],
+                    content: `${prompt.input[0].content}\n${compactInstruction}`,
+                  },
+                  prompt.input[1],
+                ],
+              }
+            : request,
+        ),
         signal,
       });
       if (response.ok) {
@@ -124,6 +140,34 @@ export async function generateOpenAiNote(
           if (error instanceof SyntaxError) return null;
           throw error;
         });
+        const envelope = record(json);
+        const incomplete = record(envelope?.incomplete_details);
+        if (envelope?.status === "incomplete") {
+          if (incomplete?.reason === "max_output_tokens") {
+            if (!compact && attempt + 1 < maxAttempts && !deadline.aborted) {
+              compact = true;
+              continue;
+            }
+            return { status: "provider_output_limit" } as const;
+          }
+          if (incomplete?.reason === "content_filter")
+            return { status: "provider_refused" } as const;
+          return { status: "provider_incomplete" } as const;
+        }
+        if (
+          Array.isArray(envelope?.output) &&
+          envelope.output.some((item: unknown) => {
+            const message = record(item);
+            return (
+              message?.type === "message" &&
+              Array.isArray(message.content) &&
+              message.content.some(
+                (part: unknown) => record(part)?.type === "refusal",
+              )
+            );
+          })
+        )
+          return { status: "provider_refused" } as const;
         let data: ReturnType<typeof readResponse>;
         try {
           data = readResponse(json);
@@ -142,7 +186,7 @@ export async function generateOpenAiNote(
         response.status !== 429 &&
         response.status < 500
       )
-        return { status: "invalid_response" } as const;
+        return { status: "provider_rejected" } as const;
       code =
         response.status === 429
           ? "provider_rate_limited"

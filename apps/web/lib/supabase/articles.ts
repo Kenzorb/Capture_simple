@@ -42,6 +42,19 @@ export function listOwnArticles(
   cursor: Cursor | null,
 ) {
   const ascending = sort === "captured_asc";
+  if (q) {
+    return supabase.rpc("capture_search_articles", {
+      p_query: q,
+      p_limit: limit,
+      p_status: status,
+      p_topic: topic,
+      p_domain: domain,
+      p_archived: archived,
+      p_ascending: ascending,
+      p_cursor_at: cursor?.captured_at,
+      p_cursor_id: cursor?.id,
+    });
+  }
   const articles = supabase.from("articles");
   const query = (
     topic
@@ -58,7 +71,6 @@ export function listOwnArticles(
   if (archived) query.not("archived_at", "is", null);
   else query.is("archived_at", null);
   if (domain) query.eq("domain", domain.toLowerCase());
-  if (q) query.textSearch("title", q, { config: "simple", type: "websearch" });
   if (cursor) query.or(articleCursorCondition(cursor, ascending));
   return query;
 }

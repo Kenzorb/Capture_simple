@@ -47,9 +47,11 @@ Processing statuses are `saved`, `queued`, `processing`, `ready`, `failed`, `quo
 
 ## List articles
 
-`GET /api/articles` accepts `limit` from 1 to 100 and defaults to 20. Optional filters are `status`, `domain`, direct membership in a topic by UUID (`topic`), and full-text title search `q`. Sort by `captured_desc` (default) or `captured_asc`. To continue, send the previous `next_cursor` as `cursor` with the same filters and sort. A null cursor means the final page.
+`GET /api/articles` accepts `limit` from 1 to 100 and defaults to 20. Optional filters are `status`, `domain`, direct membership in a topic by UUID (`topic`), and keyword search `q`. Sort by `captured_desc` (default) or `captured_asc`. To continue, send the previous `next_cursor` as `cursor` with the same filters and sort. A null cursor means the final page.
 
 For example, `GET /api/articles?limit=20&status=ready&sort=captured_desc` returns a page of ready articles.
+
+`GET /api/search?q=...` uses the same response, filters, and cursor. The query is required and accepts up to 200 characters. It matches the user's capture titles, AI summaries and concept names, personal notes, and assigned topic names. Matching is case-insensitive. Quoted phrases and `OR` are supported, and at least one positive term is required to return results.
 
 The list returns active articles by default. Use `archived=true` to list archived articles. Archived articles remain accessible by ID.
 

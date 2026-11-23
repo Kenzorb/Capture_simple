@@ -126,7 +126,13 @@ export const articleListQuerySchema = z.strictObject({
   status: processingStatusSchema.optional(),
   topic: idSchema.optional(),
   domain: z.string().trim().min(1).max(253).optional(),
-  q: z.string().trim().min(1).max(200).optional(),
+  q: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .refine((value) => !/\p{Cc}/u.test(value))
+    .optional(),
   sort: z.enum(["captured_desc", "captured_asc"]).default("captured_desc"),
   archived: z
     .enum(["true", "false"])

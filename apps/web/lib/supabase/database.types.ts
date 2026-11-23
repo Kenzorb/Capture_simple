@@ -835,6 +835,31 @@ export type Database = {
         Args: { p_article_id: string };
         Returns: { id: string; title: string; domain: string }[];
       };
+      capture_search_articles: {
+        Args: {
+          p_query: string;
+          p_limit?: number;
+          p_status?: Database["public"]["Enums"]["article_status"];
+          p_topic?: string;
+          p_domain?: string;
+          p_archived?: boolean;
+          p_ascending?: boolean;
+          p_cursor_at?: string;
+          p_cursor_id?: string;
+        };
+        Returns: Pick<
+          Database["public"]["Tables"]["articles"]["Row"],
+          | "id"
+          | "url"
+          | "title"
+          | "domain"
+          | "author"
+          | "published_at"
+          | "captured_at"
+          | "archived_at"
+          | "status"
+        >[];
+      };
       capture_set_primary_topic: {
         Args: { p_article_id: string; p_topic_id: string };
         Returns: boolean;

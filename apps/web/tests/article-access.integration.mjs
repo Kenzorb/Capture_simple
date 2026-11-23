@@ -3,13 +3,13 @@ import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 import test from "node:test";
-import { URL } from "node:url";
+import { URL, URLSearchParams } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 test(
   "hosted article reads and lifecycle mutations are scoped to the authenticated owner",
   { timeout: 120_000 },
-  async () => {
+  async (t) => {
     const url = process.env.CAPTURE_TEST_SUPABASE_URL;
     const publicKey = process.env.CAPTURE_TEST_SUPABASE_PUBLIC;
     const secret = process.env.CAPTURE_TEST_SUPABASE_SECRET;
@@ -57,13 +57,18 @@ test(
         cookie: { Cookie: cookie },
       };
     }
-    const read = (path, headers = {}) =>
-      globalThis.fetch(origin + "/api/articles" + path, {
+    const read = (path, headers = {}, endpoint = "/api/articles") =>
+      globalThis.fetch(origin + endpoint + path, {
         headers,
         signal: globalThis.AbortSignal.timeout(25000),
       });
-    async function json(path, headers, status = 200) {
-      const response = await read(path, headers);
+    async function json(
+      path,
+      headers,
+      status = 200,
+      endpoint = "/api/articles",
+    ) {
+      const response = await read(path, headers, endpoint);
       assert.equal(
         response.status,
         status,
@@ -340,6 +345,110 @@ test(
       assert.equal(
         (await json("/" + ids[3], two.header)).article.title,
         "Private second owner",
+      );
+
+      function search(params, headers = one.header, status = 200) {
+        const query = new URLSearchParams(params);
+        return json("?" + query, headers, status, "/api/search");
+      }
+      const hitIds = (result) => result.articles.map((article) => article.id);
+      assert.equal(
+        (await search({ q: "lunar" }, {}, 401)).error.code,
+        "unauthenticated",
+      );
+      assert.equal(
+        (await search({}, one.header, 400)).error.code,
+        "invalid_input",
+      );
+      assert.equal(
+        (await search({ q: "bad\u0000input" }, one.header, 400)).error.code,
+        "invalid_input",
+      );
+      const seededNotes = await admin.from("article_ai_notes").insert({
+        user_id: one.owner,
+        article_id: ids[1],
+        schema_version: 1,
+        model: "fixture",
+        payload: {
+          schema_version: 1,
+          model: "fixture",
+          summary: "Thermohaline circulation transports heat.",
+          concepts: [{ name: "Pycnocline" }],
+        },
+      });
+      assert(!seededNotes.error, seededNotes.error?.code);
+      const library = await admin.from("articles").insert(
+        Array.from({ length: 1250 }, (_, index) => {
+          const address = "https://example.test/search/" + index;
+          return {
+            user_id: one.owner,
+            url: address,
+            canonical_url: address,
+            title: "Unrelated capture " + index,
+            domain: "example.test",
+          };
+        }),
+      );
+      assert(!library.error, library.error?.code);
+      const verification = [
+        [{ q: '"lunar atlas"' }, [ids[0]]],
+        [{ q: "thermohaline" }, [ids[1]]],
+        [{ q: "PYCNOCLINE" }, [ids[1]]],
+        [{ q: '"owner note"' }, [ids[0]]],
+        [{ q: "astronomy", status: "ready", topic }, [ids[0]]],
+        [{ q: "astronomy", topic: randomUUID() }, []],
+        [{ q: "private" }, []],
+        [{ q: "-lunar" }, []],
+        [{ q: "..." }, []],
+      ];
+      for (const [query, expected] of verification)
+        assert.deepEqual(hitIds(await search(query)), expected, query.q);
+      assert.deepEqual(
+        hitIds(await search({ q: "astronomy" }, two.header)),
+        [],
+      );
+      assert.deepEqual(hitIds(await search({ q: "private" }, two.header)), [
+        ids[3],
+      ]);
+      const searchStart = globalThis.performance.now();
+      const first = await search({
+        q: "lunar OR ocean",
+        limit: "1",
+        sort: "captured_asc",
+      });
+      const firstMs = globalThis.performance.now() - searchStart;
+      assert(first.next_cursor);
+      const second = await search({
+        q: "lunar OR ocean",
+        limit: "1",
+        sort: "captured_asc",
+        cursor: first.next_cursor,
+      });
+      assert.deepEqual(
+        [...hitIds(first), ...hitIds(second)],
+        ids.slice(0, 2).sort(),
+      );
+      assert.equal(second.next_cursor, null);
+      await mutate(
+        "PATCH",
+        "/api/articles/" + ids[0],
+        one.header,
+        { personal_note: "Coronal loop", archived: true },
+        204,
+      );
+      assert.deepEqual(
+        hitIds(await search({ q: "owner note", archived: "true" })),
+        [],
+      );
+      assert.deepEqual(hitIds(await search({ q: "coronal" })), []);
+      assert.deepEqual(
+        hitIds(await search({ q: "coronal", archived: "true" })),
+        [ids[0]],
+      );
+      t.diagnostic(
+        "Keyword search on a library of 1,253 captures returned the first HTTP page in " +
+          Math.round(firstMs) +
+          " ms.",
       );
     } finally {
       for (const id of users)

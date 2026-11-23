@@ -1021,7 +1021,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-073 — Add keyword search query/indexes
 
-- [ ] **CAP-073 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-073 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Implement server-scoped full-text/keyword search over titles, summaries, notes and topic names, with pagination and safe search input.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-073 — Add keyword search query/indexes` |
-| Last verified completed task | `CAP-072` |
-| Last verification executed | `Seven real pages published through local Inngest and the configured model. Chromium verified keyboard navigation, persisted manual placement, and the destination topic page. Canonical duplicate capture enqueued no additional job.` |
-| Last successful Git commit | `ab29407` |
+| Current task | `CAP-074 — Build search UI and filters` |
+| Last verified completed task | `CAP-073` |
+| Last verification executed | `Two-account HTTP tests verified search relevance, cursor pagination, term validation, and isolation. First paginated HTTP result on 1,253 captures took 231 ms.` |
+| Last successful Git commit | `0e4e2af` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement account-scoped keyword search across titles, summaries, notes, and topic names.` |
+| Next action | `Expose keyword search with topic and status filters, result previews, and accessible navigation.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 0/11 | Not started |
+| P8 | CAP-073–083 | 1/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2719,3 +2719,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Browser check** — Chromium opened a real timeline capture from the nested tree using the keyboard, reassigned it, confirmed the choice survived reload, and found the capture on the destination topic page. The first browser run's final locator matched both a topic and a related article named Apollo 8. A repeat URL run hit source timeouts for PostgreSQL, so the completed two-page browser follow-up targeted the exact topic link and supplied extracted text from the public pages while keeping Inngest and note generation live. All disposable accounts were removed.
 - **Taxonomy observations** — Both entrepreneurship pages began under Business but divided between Startups and Entrepreneurship / Startups. Apollo pages split between Space / Human Spaceflight / Apollo Program and Humans In Space / Apollo Program / Apollo 8. The timeline received the narrower CP/M topic on direct extraction and the broader Computer history label when the follow-up supplied extracted text. These are examples to use when improving cross-branch reuse and reviewing how much of a long source reaches analysis.
 - **P7 gate** — Passed with all 11 tasks verified. Resume at CAP-073 in P8.
+
+### [2026-11-23T17:51:30+08:00] CAP-073 — Add keyword search query/indexes — STARTED
+
+- **Plan:** Index capture titles, summaries and concepts, personal notes, and topic names. Verify owner-scoped results, filter composition, cursor pagination, and measured search latency.
+
+### [2026-11-23T17:55:40+08:00] CAP-073 — Add keyword search query/indexes — COMPLETE
+
+- **Changes** — Added indexed, owner-scoped keyword search over titles, AI summaries and concept names, personal notes, and topic names. The search endpoint and library query share validation, filters, and stable cursor sorting.
+- **Verification** — Applied the migration to Capture development. The two-account HTTP check verified phrase, concept, summary, note and topic matches, invalid and negative-only queries, status and topic filters, archive and note changes, isolation, and paging across identical timestamps. The first timed HTTP page on a seeded library of 1,253 captures took 231 ms. Production build, lint, formatting, and 113 Vitest tests passed with three opt-in tests skipped in that run.
+- **Next action** — CAP-074 — Build search UI and filters.

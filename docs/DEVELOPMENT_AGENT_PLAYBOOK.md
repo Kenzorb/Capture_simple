@@ -985,7 +985,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-070 — Add safe topic merge or documented alternative
 
-- [ ] **CAP-070 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-070 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** If merge is in MVP scope, move article links and children transactionally with conflict resolution; otherwise defer explicitly and offer rename/move as baseline.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-070 — Add safe topic merge or documented alternative` |
-| Last verified completed task | `CAP-069` |
-| Last verification executed | `Chromium and hosted SQL verified manual capture and topic moves, account isolation, and stable manual placement after refresh, reprocessing, and a separate automatic capture.` |
-| Last successful Git commit | `a229667` |
+| Current task | `CAP-071 — Implement basic related-article suggestions` |
+| Last verified completed task | `CAP-070` |
+| Last verification executed | `Chromium verified the documented rename, moving a subtree between parents and to the top level, and moving a capture's primary topic. README formatting passed.` |
+| Last successful Git commit | `cd26913` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Document and verify the MVP alternative to automatic topic merging.` |
+| Next action | `Show owner-scoped related captures using shared topics, concepts, and tags.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 8/11 | In progress |
+| P7 | CAP-062–072 | 9/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2687,3 +2687,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added capture reassignment and topic rename and move controls. Manual primary placement replaces the previous primary and preserves secondary links. Reprocessing refreshes notes and retains assignments once a primary topic has been chosen manually.
 - **Verification:** Chromium used disposable accounts to move an AI-assigned capture, rename and move its new topic with a descendant, and reload the capture. A second valid publication kept the manual topic without restoring its previous automatic placement. An unrelated capture still received its automatic topic. Cross-account, anonymous, and missing target checks passed. Applied the hosted migration, passed rollback-only publication and worker recovery SQL, and verified the production build, lint, formatting, and 113 Vitest tests. Three opt-in tests were skipped.
 - **Next action:** CAP-070 — Add safe topic merge or documented alternative.
+
+### [2026-11-23T16:20:25+08:00] CAP-070 — Add safe topic merge or documented alternative — STARTED
+
+- **Plan:** Defer bulk merge as allowed by the product spec. Document the rename, move, and individual capture reassignment workflow and verify it against the dashboard.
+
+### [2026-11-23T16:21:29+08:00] CAP-070 — Add safe topic merge or documented alternative — COMPLETE
+
+- **Decision:** Bulk topic merge is deferred as allowed by product spec F10. The README documents moving and renaming branches and consolidating primary captures individually.
+- **Verification:** Chromium verified the documented controls with a disposable account. Renaming, moving under a parent, and moving back to the top level retained the descendant. Capture reassignment retained the capture and its notes, and invalid descendant placement was rejected. README formatting and the diff check passed.
+- **Next action:** CAP-071 — Implement basic related-article suggestions.

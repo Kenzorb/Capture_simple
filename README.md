@@ -13,6 +13,12 @@ pnpm dev --hostname 127.0.0.1
 
 Open `http://127.0.0.1:3000`. The web and extension can start without provider credentials. For environment setup, local services, and Chrome installation, see [Setup](docs/SETUP.md#local-startup).
 
+## Organize topics
+
+Open **Knowledge Tree** and select a topic. Use **Edit topic** to rename it or change its **Parent topic**. Choose **Top level** to move the topic and its subtopics to the top of the tree. Topic names must be unique within the same parent, and trees can be up to four levels deep.
+
+To consolidate captures under one topic, open each capture, choose the destination under **Move to topic**, and select **Save primary topic**. This replaces the capture's primary topic and keeps its other topic links. Your primary choice survives AI reprocessing. Bulk topic merging is deferred until after the MVP.
+
 ## Development commands
 
 | Command                       | Purpose                                                           |

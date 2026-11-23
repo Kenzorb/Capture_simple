@@ -1061,7 +1061,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-077 — Implement usage-period creation/reset
 
-- [ ] **CAP-077 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-077 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create a documented UTC monthly quota anchor for Free and paid users, including monthly periods during annual Pro billing.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-077 — Implement usage-period creation/reset` |
-| Last verified completed task | `CAP-076` |
-| Last verification executed | `Chromium opened both exports from Account. A two-account HTTP test verified paged export of 1,253 captures and 53 topics, notes and source links, deletion, private headers, and isolation.` |
-| Last successful Git commit | `fb5cf28` |
+| Current task | `CAP-078 — Harden and audit atomic reserve/use/release` |
+| Last verified completed task | `CAP-077` |
+| Last verification executed | `Hosted SQL verified leap and non-leap month boundaries across timezones, annual Pro monthly allowances, term expiry and renewal, and prior usage retention. Capture deduplication and worker regressions passed.` |
+| Last successful Git commit | `80a8748` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Define UTC monthly quota periods and test calendar and renewal boundaries for Free and Pro.` |
+| Next action | `Verify parallel quota admission and reconcile reservations and charges with the usage ledger.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 4/11 | In progress |
+| P8 | CAP-073–083 | 5/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2759,3 +2759,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Added downloads to the Account menu and a private export route. Both formats include active and archived captures, source links, personal and AI notes, topic assignments, and timestamps. The exporter reads and streams stable pages of up to 50 rows.
 - **Verification** — Chromium downloaded and opened both formats. Two-account HTTP coverage verified a 1,253-capture and 53-topic export, topic and capture page boundaries, distinct records, structured notes, archived articles, escaped Markdown, private attachment headers, and the absence of deleted and foreign captures. The production build and TypeScript, lint, formatting, diff checks, and 113 Vitest tests passed. Three opt-in tests were skipped in Vitest.
 - **Next action** — CAP-077 — Implement usage-period creation/reset.
+
+### [2026-11-23T18:23:11+08:00] CAP-077 — Implement usage-period creation/reset — STARTED
+
+- **Plan** — Share UTC calendar-month period creation between initial captures and retries. Verify Free and annual Pro allowances, boundaries, and plan changes while retaining prior usage.
+
+### [2026-11-23T18:25:52+08:00] CAP-077 — Implement usage-period creation/reset — COMPLETE
+
+- **Changes** — Initial capture and manual retry use the same lazily created UTC calendar-month period. Free receives 20 analyses and an active or trialing Pro term receives 300 per month, including during annual billing. Plan changes preserve existing usage and reservations, and late completions settle against the original period.
+- **Verification** — Applied the hosted migration. Rollback SQL verified leap and non-leap February, 30- and 31-day months, Los Angeles and Singapore timezone settings, separate monthly periods within an annual Pro term, scheduled cancellation, term expiry, and renewal. Processing schema, recovery, publication, and live capture deduplication checks passed. Documentation formatting and diff checks passed.
+- **Next action** — CAP-078 — Harden and audit atomic reserve/use/release.

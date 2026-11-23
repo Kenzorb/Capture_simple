@@ -132,6 +132,12 @@ Names are unique within each parent, including the root, with case and surroundi
 
 `GET /api/export?format=json` downloads the authenticated user's library. Use `format=markdown` to download Markdown. JSON is the default and contains versioned `topics` and `articles` collections. Both formats include active and archived captures, source URLs, AI notes, personal notes, topic assignments, and capture timestamps. The server streams the download in pages.
 
+## Monthly processing allowance
+
+Processing allowances start at 00:00 UTC on the first day of each calendar month. The first processing request in a new month creates its usage period. Free allows 20 analyses, and an eligible Pro subscription allows 300 even when its billing term is annual. Eligibility requires an active or trialing Pro subscription with a billing end time after the request. Cancellation scheduled for the end of the term keeps Pro access until then.
+
+An upgrade increases the current month's allowance and retains usage. A downgrade retains completed analyses and pending reservations and blocks new reservations once the Free allowance is reached. Jobs that finish after the reset settle against the period that reserved them.
+
 ## Errors
 
 Use the HTTP status and machine-readable code. The error may echo a valid request ID.

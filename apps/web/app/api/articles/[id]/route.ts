@@ -2,6 +2,7 @@ import {
   articleDeleteSchema,
   articleEditSchema,
   articleParamsSchema,
+  structuredNoteSchema,
   type ArticleDetailResponse,
 } from "@capture/shared";
 import {
@@ -45,10 +46,13 @@ export async function GET(
     );
   if (!data) return articleError(404, "not_found", "Article not found.");
 
-  const { personal_notes, article_topics, ...article } = data;
+  const { article_ai_notes, personal_notes, article_topics, ...article } = data;
   return Response.json(
     {
       article,
+      ai_note:
+        structuredNoteSchema.safeParse(article_ai_notes[0]?.payload).data ??
+        null,
       personal_note: personal_notes[0]?.body ?? null,
       topics: article_topics.flatMap(({ topics }) => (topics ? [topics] : [])),
     } satisfies ArticleDetailResponse,

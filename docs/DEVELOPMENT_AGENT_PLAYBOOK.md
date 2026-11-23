@@ -849,7 +849,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-057 — Validate and persist AI results
 
-- [ ] **CAP-057 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-057 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Validate schema, referenced evidence IDs, output length and ownership; save notes transactionally; never overwrite personal notes.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P6 — Background extraction and AI note generation` |
-| Current task | `CAP-057 — Validate and persist AI results` |
-| Last verified completed task | `CAP-056` |
-| Last verification executed | `GPT-5.6 Luna returned valid structured notes and references for all three live articles. The measured successful outputs cost an estimated USD 0.005428. All 108 local tests passed.` |
-| Last successful Git commit | `7c0243e` |
+| Current task | `CAP-058 — Implement retry and terminal failure policy` |
+| Last verified completed task | `CAP-057` |
+| Last verification executed | `Hosted SQL and the local Inngest worker rejected invented evidence and stale executions, saved one note, preserved personal notes, and exposed the note only to its owner across refresh. All 108 local tests passed.` |
+| Last successful Git commit | `85c049b` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify evidence and ownership and persist generated notes atomically with the processing outcome.` |
+| Next action | `Classify pipeline failures, bound retry attempts, and provide an owner-scoped retry without double billing.` |
 
 ### 11.1 Phase progress overview
 
@@ -1589,7 +1589,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P3 | CAP-026–033 | 8/8 | Complete |
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
-| P6 | CAP-049–061 | 8/13 | In progress |
+| P6 | CAP-049–061 | 9/13 | In progress |
 | P7 | CAP-062–072 | 0/11 | Not started |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
@@ -2549,3 +2549,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 
 - **Cost basis:** Standard uncached GPT-5.6 Luna token rates. The total covers the three measured successful responses. [Pricing](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
 - **Next action:** CAP-057 — Validate and persist AI results.
+
+### [2026-11-23T10:23:45+08:00] CAP-057 — Validate and persist AI results — STARTED
+
+- **Plan:** Validate output schema and evidence before writing, publish notes and finalize quota together, and verify owner reads and replay.
+
+### [2026-11-23T10:28:51+08:00] CAP-057 — Validate and persist AI results — COMPLETE
+
+- **Changes:** Registered the real capture worker with Inngest. The worker prepares evidence, validates structured output and references, and publishes one note in the same transaction that marks the article ready and consumes its reservation. The owner-scoped article API returns the note separately from the personal note.
+- **Verification:** Applied the migration to capture-dev. The rollback-only SQL fixture rejected stale execution and unknown evidence, preserved quota on rejected writes, and accepted replay without changing the original note or consuming additional quota. The local Inngest worker with controlled model responses published one verified note across duplicate dispatch and HTTP refresh, marked a bad citation failed, kept both personal notes, and denied access to a second account. All 108 local tests, web TypeScript, lint, formatting, and diff checks passed.
+- **Next action:** CAP-058 — Implement retry and terminal failure policy.

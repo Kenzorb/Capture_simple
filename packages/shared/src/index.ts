@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { maxCaptureUrlLength } from "./capture-url";
+import { structuredNoteSchema } from "./structured-note";
 
 export {
   structuredNoteJsonSchema,
@@ -145,6 +146,7 @@ export const articleCursorPayloadSchema = articleSchema.pick({
 
 export const articleDetailResponseSchema = z.object({
   article: articleSchema,
+  ai_note: structuredNoteSchema.nullable().optional(),
   personal_note: z.string().nullable(),
   topics: z.array(topicSchema),
 });

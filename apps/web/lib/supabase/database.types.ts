@@ -40,7 +40,7 @@ export type Database = {
           {
             foreignKeyName: "article_ai_notes_user_id_article_id_fkey";
             columns: ["user_id", "article_id"];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: "articles";
             referencedColumns: ["user_id", "id"];
           },
@@ -765,6 +765,10 @@ export type Database = {
           p_job_id: string;
           p_status: Database["public"]["Enums"]["article_status"];
         };
+        Returns: boolean;
+      };
+      capture_publish_note: {
+        Args: { p_execution_id: string; p_job_id: string; p_note: Json };
         Returns: boolean;
       };
       capture_save_article: {

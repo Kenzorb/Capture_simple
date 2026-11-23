@@ -1,0 +1,64 @@
+do $$
+declare
+  member uuid := gen_random_uuid();
+  article uuid;
+  job uuid;
+  period uuid;
+  execution text := gen_random_uuid()::text;
+  source text := 'Leaves collect light.';
+  hash text := encode(extensions.digest(source, 'sha256'), 'hex');
+  chunk text := 'ch_' || left(hash, 16) || '_1';
+  note jsonb := jsonb_build_object(
+    'schema_version', 1, 'model', 'fixture-model', 'language', 'en', 'summary', source,
+    'key_takeaways', jsonb_build_array(source), 'tags', '[]'::jsonb,
+    'concepts', '[]'::jsonb, 'suggested_topic_paths', '[]'::jsonb,
+    'sections', jsonb_build_array(jsonb_build_object('heading', 'Leaves',
+      'points', jsonb_build_array(source), 'evidence_chunk_ids', jsonb_build_array(chunk)))
+  );
+begin
+  begin
+    insert into auth.users (id, email) values (member, member || '@example.test');
+    insert into public.articles (user_id, url, canonical_url, title, domain, status)
+    values (member, 'https://example.test/publish', 'https://example.test/publish',
+      'Publication fixture', 'example.test', 'queued') returning id into article;
+    insert into public.personal_notes (article_id, user_id, body)
+    values (article, member, 'Keep my own notes');
+    insert into public.usage_periods (user_id, period_start, period_end, article_limit, reserved)
+    values (member, '2026-11-01 00:00+00', '2026-12-01 00:00+00', 20, 1) returning id into period;
+    insert into public.processing_jobs (user_id, article_id, idempotency_key)
+    values (member, article, 'publish-fixture') returning id into job;
+    insert into public.usage_events (user_id, usage_period_id, job_id) values (member, period, job);
+    if not public.capture_start_job(job, execution) then raise exception 'Fixture start failed'; end if;
+    if not public.capture_store_source(job, execution, source, hash, 'capture',
+      jsonb_build_array(jsonb_build_object('chunk_id', chunk, 'position', 0,
+        'start_byte', 0, 'end_byte', octet_length(source), 'text', source)))
+    then raise exception 'Fixture evidence store failed'; end if;
+    if public.capture_publish_note(job, gen_random_uuid()::text, note) then
+      raise exception 'Stale execution published a note';
+    end if;
+    begin
+      perform public.capture_publish_note(job, execution, jsonb_set(note,
+        '{sections,0,evidence_chunk_ids}', '["ch_0000000000000000_1"]'::jsonb));
+      raise exception 'Invented evidence accepted';
+    exception when invalid_parameter_value then null;
+    end;
+    if exists (select 1 from public.article_ai_notes where article_id = article)
+      or not exists (select 1 from public.usage_periods where id = period and used = 0 and reserved = 1)
+    then raise exception 'Rejected publication changed the note or quota'; end if;
+    if not public.capture_publish_note(job, execution, note)
+      or not public.capture_publish_note(job, execution, note)
+      or public.capture_publish_note(job, execution, jsonb_set(note, '{summary}', '"Different output"'))
+    then raise exception 'Publication replay was incorrect'; end if;
+    if not exists (
+      select 1 from public.article_ai_notes a join public.personal_notes p on p.article_id = a.article_id
+      join public.articles c on c.id = a.article_id
+      where a.article_id = article and a.payload = note and c.status = 'ready'
+        and p.body = 'Keep my own notes'
+    ) or not exists (select 1 from public.usage_periods where id = period and used = 1 and reserved = 0)
+    then raise exception 'Expected one durable note and one consumed reservation'; end if;
+    raise sqlstate 'Z0057';
+  exception when sqlstate 'Z0057' then
+    raise notice 'CAP-057 assertions passed and fixtures rolled back';
+  end;
+end;
+$$;

@@ -116,6 +116,16 @@ The `ai_note` field contains the latest validated structured note or `null` when
 { "confirmed": true }
 ```
 
+## Manage the topic tree
+
+`GET /api/topics` returns `{"topics":[]}` with the complete set of topics owned by the caller. Each topic includes `id`, `parent_id`, `name`, `description`, and `created_at`. A null parent identifies a root.
+
+`POST /api/topics` creates a topic and returns HTTP 201 with `{"topic":{...}}`. Send `name` and optionally `description` and `parent_id`. `PATCH /api/topics/:id` accepts any of the same fields and returns the updated topic. Set `parent_id` to null to move a topic to the root, or `description` to null to clear it.
+
+Names are unique within each parent, including the root, with case and surrounding whitespace ignored. Roots count as level one and the maximum depth is four. A move must keep the whole subtree within the depth limit. A topic cannot move under itself, one of its descendants, or another account's topic.
+
+`DELETE /api/topics/:id` removes a leaf and returns HTTP 204. Articles assigned to the deleted topic stay in the library. Move child topics before deleting their parent. Unknown or foreign topic IDs return HTTP 404.
+
 ## Errors
 
 Use the HTTP status and machine-readable code. The error may echo a valid request ID.

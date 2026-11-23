@@ -774,6 +774,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      capture_mutate_topic: {
+        Args: { p_fields: Json; p_operation: string; p_topic_id?: string };
+        Returns: Json;
+      };
       capture_publish_note: {
         Args: { p_execution_id: string; p_job_id: string; p_note: Json };
         Returns: boolean;
@@ -825,6 +829,10 @@ export type Database = {
           p_text: string;
         };
         Returns: boolean;
+      };
+      capture_topic_tree: {
+        Args: never;
+        Returns: Json;
       };
     };
     Enums: {

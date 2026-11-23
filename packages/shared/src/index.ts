@@ -97,6 +97,20 @@ export const topicSchema = z.object({
   created_at: dateTimeSchema,
 });
 
+const topicFieldsSchema = z.strictObject({
+  name: topicSchema.shape.name,
+  parent_id: topicSchema.shape.parent_id.optional(),
+  description: topicSchema.shape.description.optional(),
+});
+export const topicCreateSchema = topicFieldsSchema;
+export const topicEditSchema = topicFieldsSchema
+  .partial()
+  .refine((fields) => Object.keys(fields).length > 0);
+export const topicParamsSchema = z.strictObject({ id: idSchema });
+export const topicTreeResponseSchema = z.object({
+  topics: z.array(topicSchema),
+});
+
 const articleCursorSchema = z.string().min(1).max(512);
 
 export const articleListQuerySchema = z.strictObject({

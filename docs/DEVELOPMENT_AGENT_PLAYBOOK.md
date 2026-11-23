@@ -905,7 +905,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-062 — Define hierarchy rules and topic API
 
-- [ ] **CAP-062 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-062 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Implement tree fetch, owner-scoped create, rename, move, and delete rules; define root vs child unique names, maximum depth and cycle detection.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-062 — Define hierarchy rules and topic API` |
-| Last verified completed task | `CAP-061` |
-| Last verification executed | `Chromium captured a real public NIST article, and local Inngest, hosted Supabase, and OpenAI produced validated notes visible without reload. Dispatch to visible notes took 15.8 seconds. Measured generation cost was about USD 0.001456.` |
-| Last successful Git commit | `4de9187` |
+| Current task | `CAP-063 — Implement topic normalization and matching` |
+| Last verified completed task | `CAP-062` |
+| Last verification executed | `Two signed-in development accounts verified complete owner-only trees, sibling uniqueness, four-level depth, rollback on cycles and invalid moves, and leaf deletion that preserves articles. All 113 local tests passed.` |
+| Last successful Git commit | `ac0af8f` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement the owner-scoped topic tree API and verify its hierarchy constraints.` |
+| Next action | `Normalize topic labels and match existing siblings and aliases consistently.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 0/11 | Not started |
+| P7 | CAP-062–072 | 1/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2607,3 +2607,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Configured loopback development workers and added an optional account-scoped local schedule. Increased the model request timeout while bounding total retry time.
 - **Verification:** The connected development database confirmed the reported article was Ready with one stored note and a successful dispatched job. Local Inngest registered the minute schedule. Hosted SQL verified account isolation and deferred work handling. All 113 local tests, web TypeScript, formatting, and diff checks passed.
 - **Next action:** CAP-062 — Define hierarchy rules and topic API.
+
+### [2026-11-23T14:36:56+08:00] CAP-062 — Define hierarchy rules and topic API — STARTED
+
+- **Plan:** Add owner-scoped tree retrieval and topic mutations. Verify sibling uniqueness, maximum depth, cycle rejection, and cross-account isolation.
+
+### [2026-11-23T14:41:23+08:00] CAP-062 — Define hierarchy rules and topic API — COMPLETE
+
+- **Changes:** Added authenticated tree reads and create, rename, move, and leaf-delete operations. Root and child names are unique within their parent. The database enforces a four-level depth limit on whole subtrees and rejects cycles. Deleting a leaf unlinks its articles and keeps the articles in the library.
+- **Verification:** Applied the migration to capture-dev. The two-account HTTP fixture retrieved both complete trees and verified owner isolation, duplicate names, depth overflow, invalid cross-account moves, self and descendant cycles, opposing concurrent moves, and article retention after leaf deletion. All 113 local tests, shared and web TypeScript, ESLint, formatting, and diff checks passed.
+- **Next action:** CAP-063 — Implement topic normalization and matching.

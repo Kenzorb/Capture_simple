@@ -774,6 +774,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      capture_match_topic_path: {
+        Args: { p_labels: string[]; p_owner_id: string };
+        Returns: string[];
+      };
       capture_mutate_topic: {
         Args: { p_fields: Json; p_operation: string; p_topic_id?: string };
         Returns: Json;

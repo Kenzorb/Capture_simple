@@ -915,7 +915,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-063 — Implement topic normalization and matching
 
-- [ ] **CAP-063 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-063 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Normalize labels/aliases, prioritize exact or existing matching topics, keep matching deterministic where possible.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P7 — Topic organization and dynamic knowledge tree` |
-| Current task | `CAP-063 — Implement topic normalization and matching` |
-| Last verified completed task | `CAP-062` |
-| Last verification executed | `Two signed-in development accounts verified complete owner-only trees, sibling uniqueness, four-level depth, rollback on cycles and invalid moves, and leaf deletion that preserves articles. All 113 local tests passed.` |
-| Last successful Git commit | `ac0af8f` |
+| Current task | `CAP-064 — Resolve AI-suggested topic paths` |
+| Last verified completed task | `CAP-063` |
+| Last verification executed | `Hosted SQL verified two related article paths reuse the same branch, exact names outrank aliases, and matching stays in the intended account and parent.` |
+| Last successful Git commit | `5147b86` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Normalize topic labels and match existing siblings and aliases consistently.` |
+| Next action | `Resolve proposed paths transactionally and verify that foreign candidate IDs are rejected and fallback topics stay owner-scoped.` |
 
 ### 11.1 Phase progress overview
 
@@ -1590,7 +1590,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P4 | CAP-034–039 | 6/6 | Complete |
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
-| P7 | CAP-062–072 | 1/11 | In progress |
+| P7 | CAP-062–072 | 2/11 | In progress |
 | P8 | CAP-073–083 | 0/11 | Not started |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
@@ -2617,3 +2617,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes:** Added authenticated tree reads and create, rename, move, and leaf-delete operations. Root and child names are unique within their parent. The database enforces a four-level depth limit on whole subtrees and rejects cycles. Deleting a leaf unlinks its articles and keeps the articles in the library.
 - **Verification:** Applied the migration to capture-dev. The two-account HTTP fixture retrieved both complete trees and verified owner isolation, duplicate names, depth overflow, invalid cross-account moves, self and descendant cycles, opposing concurrent moves, and article retention after leaf deletion. All 113 local tests, shared and web TypeScript, ESLint, formatting, and diff checks passed.
 - **Next action:** CAP-063 — Implement topic normalization and matching.
+
+### [2026-11-23T14:42:19+08:00] CAP-063 — Implement topic normalization and matching — STARTED
+
+- **Plan:** Match owner-scoped siblings by exact labels, normalized labels, and explicit aliases. Verify related paths reuse the same existing branch.
+
+### [2026-11-23T14:43:54+08:00] CAP-063 — Implement topic normalization and matching — COMPLETE
+
+- **Changes:** Added sibling matching that prefers exact names, then normalized labels, then known aliases. It stays within the owner's current parent and returns the existing prefix when a path stops matching. Normalization preserves distinguishing characters such as the plus signs in C++.
+- **Verification:** Applied the migration to capture-dev. Rollback-only SQL verified two related article suggestions resolved to the same branch through Unicode, case, spacing, and alias variations. It also verified exact-name precedence, parent and account isolation, and service-only access. Web TypeScript, formatting, and diff checks passed.
+- **Next action:** CAP-064 — Resolve AI-suggested topic paths.

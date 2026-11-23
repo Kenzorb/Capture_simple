@@ -138,6 +138,8 @@ Processing allowances start at 00:00 UTC on the first day of each calendar month
 
 An upgrade increases the current month's allowance and retains usage. A downgrade retains completed analyses and pending reservations and blocks new reservations once the Free allowance is reached. Jobs that finish after the reset settle against the period that reserved them.
 
+Deleting a queued capture releases its reserved allowance. Deleting a processed capture retains the allowance already used. Its usage event retains only quota metadata after the capture and its job are deleted.
+
 ## Errors
 
 Use the HTTP status and machine-readable code. The error may echo a valid request ID.

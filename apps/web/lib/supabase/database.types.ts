@@ -643,7 +643,7 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
-          job_id: string;
+          job_id: string | null;
           state: Database["public"]["Enums"]["usage_reservation_state"];
           units: number;
           updated_at: string;
@@ -653,7 +653,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           id?: string;
-          job_id: string;
+          job_id?: string | null;
           state?: Database["public"]["Enums"]["usage_reservation_state"];
           units?: number;
           updated_at?: string;
@@ -663,7 +663,7 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
-          job_id?: string;
+          job_id?: string | null;
           state?: Database["public"]["Enums"]["usage_reservation_state"];
           units?: number;
           updated_at?: string;
@@ -693,6 +693,7 @@ export type Database = {
           id: string;
           period_end: string;
           period_start: string;
+          prior_deleted_usage: number;
           reserved: number;
           used: number;
           user_id: string;
@@ -702,6 +703,7 @@ export type Database = {
           id?: string;
           period_end: string;
           period_start: string;
+          prior_deleted_usage?: number;
           reserved?: number;
           used?: number;
           user_id: string;
@@ -711,6 +713,7 @@ export type Database = {
           id?: string;
           period_end?: string;
           period_start?: string;
+          prior_deleted_usage?: number;
           reserved?: number;
           used?: number;
           user_id?: string;
@@ -882,6 +885,16 @@ export type Database = {
           p_text: string;
         };
         Returns: boolean;
+      };
+      capture_usage_audit: {
+        Args: { p_owner_id: string };
+        Returns: {
+          period_id: string;
+          used: number;
+          reserved: number;
+          ledger_used: number;
+          ledger_reserved: number;
+        }[];
       };
       capture_topic_tree: {
         Args: never;

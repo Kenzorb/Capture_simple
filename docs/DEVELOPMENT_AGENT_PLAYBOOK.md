@@ -1071,7 +1071,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-078 — Harden and audit atomic reserve/use/release
 
-- [ ] **CAP-078 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-078 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Extend the initial queue quota logic with concurrency-safe `used + reserved < limit` enforcement, reconciliation, paid limits, and reset behavior; success commits one used unit, terminal failure releases; retries reuse the same reservation.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P8 — Search, quotas, export, onboarding and usability` |
-| Current task | `CAP-078 — Harden and audit atomic reserve/use/release` |
-| Last verified completed task | `CAP-077` |
-| Last verification executed | `Hosted SQL verified leap and non-leap month boundaries across timezones, annual Pro monthly allowances, term expiry and renewal, and prior usage retention. Capture deduplication and worker regressions passed.` |
-| Last successful Git commit | `80a8748` |
+| Current task | `CAP-079 — Implement quota-limited save behavior` |
+| Last verified completed task | `CAP-078` |
+| Last verification executed | `Six parallel requests at the final slot admitted one Free and one Pro capture in their respective tests. Hosted SQL and usage reconciliation verified recovery, settlement, and deletion.` |
+| Last successful Git commit | `00e1bb0` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Verify parallel quota admission and reconcile reservations and charges with the usage ledger.` |
+| Next action | `Show quota-limited saves and next reset, and verify queued work remains server-gated.` |
 
 ### 11.1 Phase progress overview
 
@@ -1591,7 +1591,7 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P5 | CAP-040–048 | 9/9 | Complete |
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
-| P8 | CAP-073–083 | 5/11 | In progress |
+| P8 | CAP-073–083 | 6/11 | In progress |
 | P9 | CAP-084–092 | 0/9 | Not started |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
@@ -2769,3 +2769,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Changes** — Initial capture and manual retry use the same lazily created UTC calendar-month period. Free receives 20 analyses and an active or trialing Pro term receives 300 per month, including during annual billing. Plan changes preserve existing usage and reservations, and late completions settle against the original period.
 - **Verification** — Applied the hosted migration. Rollback SQL verified leap and non-leap February, 30- and 31-day months, Los Angeles and Singapore timezone settings, separate monthly periods within an annual Pro term, scheduled cancellation, term expiry, and renewal. Processing schema, recovery, publication, and live capture deduplication checks passed. Documentation formatting and diff checks passed.
 - **Next action** — CAP-078 — Harden and audit atomic reserve/use/release.
+
+### [2026-11-23T18:26:27+08:00] CAP-078 — Harden and audit atomic reserve/use/release — STARTED
+
+- **Plan** — Keep usage history when a capture is deleted and verify the ledger against quota counters. Exercise parallel admission, retry redelivery, settlement, and deletion at the Free and Pro limits.
+
+### [2026-11-23T18:29:50+08:00] CAP-078 — Harden and audit atomic reserve/use/release — COMPLETE
+
+- **Changes** — Usage events retain anonymous job-free quota metadata when their capture is deleted. Deleting a queued capture releases its reservation, and deleting a processed capture retains its debit. The service-only audit compares period counters with event totals and the baseline retained from legacy deleted captures.
+- **Verification** — Hosted HTTP tests raced six captures for the last slot on each plan. One queued per plan and the others saved at quota. Terminal failure released the slot, replay settled it once, and deleting queued and processed jobs left reconciled counters. Hosted processing transitions, recovery and period SQL, web TypeScript, lint, formatting, and 113 Vitest tests passed. Three opt-in tests were skipped in the Vitest run.
+- **Next action** — CAP-079 — Implement quota-limited save behavior.

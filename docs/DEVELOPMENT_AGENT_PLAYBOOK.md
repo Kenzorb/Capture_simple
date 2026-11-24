@@ -1273,7 +1273,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-097 — Performance-test realistic library sizes
 
-- [ ] **CAP-097 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-097 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Seed 100/1,000+ articles per test account, nested topics and longer articles; profile pagination, tree and search queries.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-097 — Performance-test realistic library sizes` |
-| Last verified completed task | `CAP-096` |
-| Last verification executed | `Chrome and Edge passed desktop and narrow-width accessibility flows. The 16 auth browser cases passed and the focus and layout screenshots were reviewed.` |
-| Last successful Git commit | `fdfb1a9` |
+| Current task | `CAP-098 — Implement privacy lifecycle` |
+| Last verified completed task | `CAP-097` |
+| Last verification executed | `100- and 1,250-capture fixtures passed pagination, search, and tree latency and response size budgets. The slowest measured p95 was 1,098 ms.` |
+| Last successful Git commit | `75edb3e` |
 | Active blockers | `CAP-092 is deferred with owner approval. Production readiness and launch approval are required for live billing. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Measure pagination, search, and topic browsing on disposable 100- and 1,000-plus-article libraries.` |
+| Next action | `Implement and verify account deletion, source retention controls, scoped export, and privacy lifecycle handling.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 4/9 | In progress |
+| P10 | CAP-093–101 | 5/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **94/112** | **In progress** |
+| **Total** | **CAP-001–112** | **95/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2981,3 +2981,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Browser verification** — Sixteen guest flow checks passed in Chrome desktop and Edge mobile emulation. The disposable signed-in test passed in both browsers at 1440 px and 320 px. It verified the skip link, Account disclosure and Escape focus return, labeled inputs, actionable validation feedback, nested keyboard navigation, focused route headings, and access to a capture's personal note. Lint and formatting passed.
 - **Manual visual pass** — Reviewed the captured desktop and narrow layouts. The focused nested branch had a visible outline, the active navigation item and nesting were distinct, and the search, Account control, row counts, and capture title fit the narrow layout. Mobile checks used browser emulation.
 - **Next action** — CAP-097 — Performance-test realistic library sizes.
+
+### [2026-11-24T12:43:10+08:00] CAP-097 — Performance-test realistic library sizes — STARTED
+
+- **Plan** — Benchmark authenticated first and second library and search pages plus the topic tree on development libraries of 100 and 1,250 articles. Use a warm HTTP regression budget of 2,500 ms at p95 and 64 KiB per response in this setup.
+
+### [2026-11-24T12:45:17+08:00] CAP-097 — Performance-test realistic library sizes — COMPLETE
+
+- **Verification** — Each disposable account had 32 topics in four levels and eight source text fixtures of about 60 KiB. Eight warm HTTP samples per endpoint passed the budgets. At 100 and 1,250 articles respectively, p95 times were 469 and 583 ms for the first library page, 439 and 1,098 ms for the second library page, 350 and 852 ms for the first search page, 292 and 293 ms for the second search page, and 266 and 446 ms for the tree. Maximum response size was 6,412 bytes.
+- **Query review** — The library and search paths fetch one bounded data result per page. The tree RPC aggregates counts in one query and fetches article previews only for opened branches. Cursor checks confirmed disjoint consecutive pages. Both fixture accounts were removed. These timings are from the local web app with hosted capture-dev.
+- **Next action** — CAP-098 — Implement privacy lifecycle.

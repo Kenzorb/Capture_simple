@@ -1187,7 +1187,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-089 — Implement customer billing portal
 
-- [ ] **CAP-089 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-089 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create authenticated Stripe portal session for user’s own customer; expose manage/cancel/update payment actions.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-089 — Implement customer billing portal` |
-| Last verified completed task | `CAP-088` |
-| Last verification executed | `Hosted SQL and Stripe sandbox integration verified upgrade, scheduled cancellation, downgrade, past-due recovery, and retention of monthly usage. The authenticated client could not set its plan.` |
-| Last successful Git commit | `48a4d10` |
+| Current task | `CAP-090 — Build billing UI` |
+| Last verified completed task | `CAP-089` |
+| Last verification executed | `The authenticated customer reached the hosted Stripe sandbox portal; unauthorized requests were rejected and the Stripe response matched the fixed Capture settings return URL.` |
+| Last successful Git commit | `ed89a45` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Create and verify an authenticated sandbox billing portal session for the signed-in customer's own Stripe account.` |
+| Next action | `Expose plan status, approved USD prices, Checkout, and billing portal actions in Capture Settings.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 5/9 | In progress |
+| P9 | CAP-084–092 | 6/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **87/112** | **In progress** |
+| **Total** | **CAP-001–112** | **88/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2902,3 +2902,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Database** — Applied only `20261124102000_capture_stripe_entitlements.sql` to the approved `capture-dev` project. Webhook transactions now derive the stored plan from verified subscription state. The quota and account views use the effective billing term.
 - **Verification** — The hosted sandbox integration verified 20 analyses for Free, 300 during a verified trial and scheduled cancellation, and 20 after cancellation. It preserved 24 used analyses and 3 reservations and rejected a direct authenticated plan change. The hosted rollback-only SQL test verified past-due, unpaid, paused, canceled, term expiry, and recovery. Both Checkout intervals still opened successfully in the sandbox.
 - **Next action** — CAP-089 — Implement customer billing portal.
+
+### [2026-11-24T10:26:31+08:00] CAP-089 — Implement customer billing portal — STARTED
+
+- **Plan** — Create a dedicated Stripe sandbox configuration, then issue authenticated portal sessions for the server-mapped customer with a fixed Capture Settings return URL.
+
+### [2026-11-24T10:29:50+08:00] CAP-089 — Implement customer billing portal — COMPLETE
+
+- **Implementation** — The sandbox portal enables payment method updates, invoice history, and cancellation at the end of the billing period. `POST /api/billing/portal` resolves the authenticated user's own customer and validates the portal origin, customer, configuration, and return URL before responding.
+- **Verification** — A disposable authenticated account reached the Stripe-hosted sandbox portal. Anonymous and cross-origin requests were denied, an account without a customer could not enter, and caller-supplied customer and redirect fields were rejected. Stripe returned the fixed Settings URL, and Capture still reported the expected Free allowance after opening the portal. Both Checkout cadences passed regression checks. Type, lint, format, and unit checks passed.
+- **Next action** — CAP-090 — Build billing UI and connect its controls to the verified endpoints.

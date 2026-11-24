@@ -81,6 +81,8 @@ Remove-Item Env:CAPTURE_TEST_AI_LIVE
 
 The environment template lists the planned configuration. Integration tasks should keep the template in sync with their actual configuration.
 
+Set `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` to a sandbox customer portal configuration that enables payment method updates, invoice history, and cancellation at the end of the billing period.
+
 ## Local credentials
 
 Use an ignored local environment file for development values. Keep provider keys, Supabase privileged keys, and signing secrets server-side. Use local database credentials and dedicated scoped development keys, and store hosted secrets in the corresponding deployment environment. Use Stripe test credentials during paid readiness. Transfer account access through provider invitations and credentials through a secret store.

@@ -865,6 +865,7 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 STRIPE_PRO_MONTHLY_PRICE_ID=
 STRIPE_PRO_ANNUAL_PRICE_ID=
+STRIPE_BILLING_PORTAL_CONFIGURATION_ID=
 
 # Job-provider and observability credentials: add provider-specific variables
 ```

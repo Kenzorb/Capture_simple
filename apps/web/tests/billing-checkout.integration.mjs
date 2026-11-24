@@ -6,7 +6,7 @@ import { URL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 test(
-  "Free users enter sandbox Checkout with server-selected prices",
+  "Authenticated users enter sandbox Checkout and their own billing portal",
   { timeout: 90_000 },
   async (t) => {
     const {
@@ -14,6 +14,7 @@ test(
       CAPTURE_TEST_SUPABASE_PUBLIC,
       CAPTURE_TEST_SUPABASE_SECRET,
       STRIPE_SECRET_KEY,
+      STRIPE_BILLING_PORTAL_CONFIGURATION_ID,
     } = process.env;
     assert(
       CAPTURE_TEST_SUPABASE_URL &&
@@ -25,6 +26,7 @@ test(
       STRIPE_SECRET_KEY?.startsWith("sk_test_"),
       "Set a Stripe sandbox key.",
     );
+    assert(STRIPE_BILLING_PORTAL_CONFIGURATION_ID?.startsWith("bpc_"));
     const endpoint = new URL(
       "/api/billing/checkout",
       process.env.CAPTURE_TEST_APP_URL ?? "http://127.0.0.1:3000",
@@ -179,5 +181,73 @@ test(
     assert.deepEqual(subscriptions.data, [
       { user_id: free.id, plan: "free", stripe_customer_id: customer },
     ]);
+
+    function openPortal(accessToken, { origin = endpoint.origin, body } = {}) {
+      return globalThis.fetch(new URL("/api/billing/portal", endpoint), {
+        method: "POST",
+        headers: {
+          Origin: origin,
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        body,
+        signal: globalThis.AbortSignal.timeout(25_000),
+      });
+    }
+
+    assert.equal((await openPortal()).status, 401);
+    assert.equal(
+      (await openPortal(token, { origin: "https://example.test" })).status,
+      403,
+    );
+    const otherLogin = await client.auth.signInWithPassword({
+      email: other.email,
+      password: other.password,
+    });
+    assert(!otherLogin.error && otherLogin.data.session);
+    const otherToken = otherLogin.data.session.access_token;
+    assert.equal((await openPortal(otherToken)).status, 409);
+    assert.equal(
+      (
+        await openPortal(otherToken, {
+          body: JSON.stringify({
+            customer,
+            return_url: "https://example.test",
+          }),
+        })
+      ).status,
+      400,
+    );
+
+    const config = await stripe(
+      `/billing_portal/configurations/${STRIPE_BILLING_PORTAL_CONFIGURATION_ID}`,
+    );
+    assert.equal(config.livemode, false);
+    assert.equal(config.features.payment_method_update.enabled, true);
+    assert.equal(config.features.invoice_history.enabled, true);
+    assert.equal(config.features.subscription_cancel.enabled, true);
+    assert.equal(config.features.subscription_cancel.mode, "at_period_end");
+    const portal = await openPortal(token);
+    assert.equal(portal.status, 200, `Portal returned HTTP ${portal.status}.`);
+    assert.equal(portal.headers.get("cache-control"), "private, no-store");
+    const hostedUrl = new URL((await portal.json()).url);
+    assert.equal(hostedUrl.origin, "https://billing.stripe.com");
+    const hostedPage = await globalThis.fetch(hostedUrl, {
+      signal: globalThis.AbortSignal.timeout(20_000),
+    });
+    assert.equal(
+      hostedPage.status,
+      200,
+      "Stripe did not serve the portal page.",
+    );
+    await hostedPage.body?.cancel();
+
+    const usage = await globalThis.fetch(new URL("/api/usage", endpoint), {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: globalThis.AbortSignal.timeout(15_000),
+    });
+    assert.equal(usage.status, 200);
+    const state = await usage.json();
+    assert.equal(state.plan, "free");
+    assert.equal(state.article_limit, 20);
   },
 );

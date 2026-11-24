@@ -26,7 +26,7 @@ export function getStripeSandboxConfig() {
 
 export async function stripePost(
   key: string,
-  path: "/customers" | "/checkout/sessions",
+  path: "/customers" | "/checkout/sessions" | "/billing_portal/sessions",
   fields: Record<string, string>,
   idempotencyKey?: string,
 ) {
@@ -41,8 +41,14 @@ export async function stripePost(
   });
   if (!response.ok)
     throw new Error(`Stripe rejected ${path}: ${response.status}`);
-  const result: { id?: string; url?: string; livemode?: boolean } =
-    await response.json();
+  const result: {
+    id?: string;
+    url?: string;
+    livemode?: boolean;
+    customer?: string;
+    configuration?: string;
+    return_url?: string;
+  } = await response.json();
   if (result.livemode !== false)
     throw new Error("Expected a Stripe sandbox object");
   return result;

@@ -1253,7 +1253,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-095 — Test concurrency and event retries
 
-- [ ] **CAP-095 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-095 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Simulate simultaneous captures, repeated jobs, stale workers, outage recovery, quota racing, Stripe webhook replay and partial writes.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-095 — Test concurrency and event retries` |
-| Last verified completed task | `CAP-094` |
-| Last verification executed | `Defensive destination, redirect, content, and provider-response checks passed. One public article completed live extraction and note validation.` |
-| Last successful Git commit | `09c8a71` |
+| Current task | `CAP-096 — Test full browser/mobile accessibility` |
+| Last verified completed task | `CAP-095` |
+| Last verification executed | `Concurrent capture and quota, worker recovery, partial-write rollback, and Stripe sandbox replay passed. The isolated Stripe rerun passed after one cancellation timeout.` |
+| Last successful Git commit | `d93f41d` |
 | Active blockers | `CAP-092 is deferred with owner approval. Production readiness and launch approval are required for live billing. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Verify concurrent capture, quota accounting, worker recovery, and repeated event delivery.` |
+| Next action | `Verify critical web flows at desktop and mobile widths with keyboard and browser accessibility checks.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 2/9 | In progress |
+| P10 | CAP-093–101 | 3/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **92/112** | **In progress** |
+| **Total** | **CAP-001–112** | **93/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2960,3 +2960,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Hardening** — Cap the decoded model response stream at 128 KiB before parsing. The regression checked that an oversized stream is canceled and the response is rejected without retry.
 - **Live and local checks** — A public RFC passed live extraction and generated a valid note with evidence references through the bounded reader. The deterministic suite passed with 124 tests and 3 opt-in skips. Web and test TypeScript, lint, formatting, and diff checks passed.
 - **Next action** — CAP-095 — Test concurrency and event retries.
+
+### [2026-11-24T12:29:20+08:00] CAP-095 — Test concurrency and event retries — STARTED
+
+- **Plan** — Run concurrent capture and quota fixtures, verify stale worker recovery, replay sandbox webhooks, and force a transaction failure after a billing event starts recording.
+
+### [2026-11-24T12:33:59+08:00] CAP-095 — Test concurrency and event retries — COMPLETE
+
+- **Capture and worker checks** — Hosted integration tests verified concurrent capture deduplication and Free and Pro quota accounting. Hosted rollback-only worker fixtures verified that stale and repeated deliveries cannot publish another note or debit quota twice. The new regression simulated a dispatch failure and confirmed that the job remains queued for retry, the old lease cannot finalize it, and the article is retained.
+- **Billing atomicity** — A forced subscription write conflict rolled back both the event record and the subscription update. A retry applied the event once and a replay changed no subscription revision.
+- **Sandbox verification** — One Stripe CLI run timed out while waiting for scheduled annual cancellation. Stripe had created the event, and the cause of the timeout was undetermined. The isolated rerun passed, with all 12 forwarded requests returning HTTP 200 and stale or repeated events preserving the correct state. The temporary signing configuration was restored. The deterministic suite passed with 124 tests and 3 opt-in skips.
+- **Next action** — CAP-096 — Test full browser/mobile accessibility.

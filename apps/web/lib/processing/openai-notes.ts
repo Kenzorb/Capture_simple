@@ -13,6 +13,7 @@ import {
 export const defaultNoteModel = "gpt-5.6-luna";
 const endpoint = "https://api.openai.com/v1/responses";
 const maxOutputTokens = 1_800;
+const maxResponseBytes = 128 * 1024;
 const maxAttempts = 3;
 const requestTimeoutMs = 30_000;
 const retryBudgetMs = 42_000;
@@ -29,6 +30,35 @@ function tokenCount(value: unknown) {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
     ? value
     : null;
+}
+
+async function readProviderJson(response: Response): Promise<unknown> {
+  const reader = response.body?.getReader();
+  if (!reader) return null;
+  const chunks: Uint8Array[] = [];
+  let bytes = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > maxResponseBytes) {
+        void reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  try {
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(
+      Buffer.concat(chunks, bytes),
+    );
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 
 function readResponse(value: unknown) {
@@ -136,10 +166,7 @@ export async function generateOpenAiNote(
         signal,
       });
       if (response.ok) {
-        const json: unknown = await response.json().catch((error: unknown) => {
-          if (error instanceof SyntaxError) return null;
-          throw error;
-        });
+        const json = await readProviderJson(response);
         const envelope = record(json);
         const incomplete = record(envelope?.incomplete_details);
         if (envelope?.status === "incomplete") {

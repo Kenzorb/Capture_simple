@@ -84,6 +84,28 @@ it("does not send a request when the credential is absent", async () => {
   expect(send).not.toHaveBeenCalled();
 });
 
+it("stops reading an oversized provider response before JSON parsing", async () => {
+  vi.stubEnv("OPENAI_API_KEY", "fixture-api-key");
+  const cancel = vi.fn();
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new Uint8Array(128 * 1024));
+      controller.enqueue(new Uint8Array(1));
+    },
+    cancel,
+  });
+  const send = vi
+    .fn<typeof fetch>()
+    .mockResolvedValue(
+      new Response(body, { headers: { "Content-Type": "application/json" } }),
+    );
+  expect(await generateOpenAiNote([chunk], send)).toEqual({
+    status: "invalid_response",
+  });
+  expect(cancel).toHaveBeenCalledOnce();
+  expect(send).toHaveBeenCalledOnce();
+});
+
 it.each([
   [429, "provider_rate_limited"],
   [504, "provider_timeout"],

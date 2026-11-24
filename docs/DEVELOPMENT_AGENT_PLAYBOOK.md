@@ -1243,7 +1243,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-094 — Threat-test extraction and untrusted content
 
-- [ ] **CAP-094 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-094 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Attack URL-only fetching, redirects, DNS/IP validation, script injection, HTML sanitization, prompt injection and file-size boundaries.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-094 — Threat-test extraction and untrusted content` |
-| Last verified completed task | `CAP-093` |
-| Last verification executed | `Hosted Free and Pro session checks, account isolation, provider authentication, and all 20 application table RLS checks passed.` |
-| Last successful Git commit | `920f2e5` |
+| Current task | `CAP-095 — Test concurrency and event retries` |
+| Last verified completed task | `CAP-094` |
+| Last verification executed | `Defensive destination, redirect, content, and provider-response checks passed. One public article completed live extraction and note validation.` |
+| Last successful Git commit | `09c8a71` |
 | Active blockers | `CAP-092 is deferred with owner approval. Production readiness and launch approval are required for live billing. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Review extraction and untrusted content safeguards and verify their defensive tests.` |
+| Next action | `Verify concurrent capture, quota accounting, worker recovery, and repeated event delivery.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 1/9 | In progress |
+| P10 | CAP-093–101 | 2/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **91/112** | **In progress** |
+| **Total** | **CAP-001–112** | **92/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2949,3 +2949,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Session and provider verification** — A unit test exercised the shared bearer expiration check with verified-claim fixtures. The Inngest adapter rejected an unsigned callback in production mode even with the local development flag present. Stripe sandbox lifecycle regression forwarded 12 authenticated callbacks successfully.
 - **Database verification** — A read-only catalog check found row-level security enabled on all 20 application tables, no anonymous Capture routine execution, no unexpected direct authenticated writes, and no authenticated access to privileged billing identifiers. No database changes were needed. The deterministic suite passed with 122 tests and 3 skipped, and web type, lint, format, and diff checks passed.
 - **Next action** — CAP-094 — Threat-test extraction and untrusted content.
+
+### [2026-11-24T12:25:03+08:00] CAP-094 — Threat-test extraction and untrusted content — STARTED
+
+- **Plan** — Verify network and parser safeguards with controlled fixtures. Review untrusted source text at the model boundary and note rendering in the dashboard.
+
+### [2026-11-24T12:27:12+08:00] CAP-094 — Threat-test extraction and untrusted content — COMPLETE
+
+- **Verification** — Controlled fixtures passed for disallowed destinations, DNS validation across redirects, private-address rejection, timeouts, content types, streamed byte limits, and removal of inactive HTML. Prompt tests verified the separation of untrusted article text from system instructions, the absence of tools, and rejection of unsupported output fields. The rendering regression confirmed that note markup stays plain text.
+- **Hardening** — Cap the decoded model response stream at 128 KiB before parsing. The regression checked that an oversized stream is canceled and the response is rejected without retry.
+- **Live and local checks** — A public RFC passed live extraction and generated a valid note with evidence references through the bounded reader. The deterministic suite passed with 124 tests and 3 opt-in skips. Web and test TypeScript, lint, formatting, and diff checks passed.
+- **Next action** — CAP-095 — Test concurrency and event retries.

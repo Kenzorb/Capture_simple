@@ -1207,7 +1207,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-091 — Test full billing lifecycle
 
-- [ ] **CAP-091 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-091 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Use Stripe test mode/CLI fixtures for subscribe, monthly reset, annual plan, cancel, past_due, downgrade, duplicate webhooks and stale events.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-091 — Test full billing lifecycle` |
-| Last verified completed task | `CAP-090` |
-| Last verification executed | `Signed-in Chromium verified USD 11.99 monthly, USD 107.88 annually, Free and Pro limits, scheduled cancellation, Checkout error recovery, and sandbox Checkout and portal navigation.` |
-| Last successful Git commit | `a0083da` |
-| Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-092 — Gate live billing behind owner approval` |
+| Last verified completed task | `CAP-091` |
+| Last verification executed | `Stripe test clocks and CLI deliveries verified monthly renewal, failed payment, annual cancellation, UTC quota separation, replay safety, and saved knowledge retention after downgrade.` |
+| Last successful Git commit | `54f0299` |
+| Active blockers | `Live billing requires production readiness verification and explicit owner approval under CAP-092. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
-| Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Exercise subscription renewal, usage resets, payment failure, cancellation, and downgrade through the Stripe sandbox lifecycle.` |
+| Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
+| Next action | `Review live merchant, tax, support, and production Stripe readiness. Keep live checkout disabled until verified and approved.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 7/9 | In progress |
+| P9 | CAP-084–092 | 8/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **89/112** | **In progress** |
+| **Total** | **CAP-001–112** | **90/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2922,3 +2922,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Implementation** — Settings reads the configured Stripe sandbox prices on the server and uses Capture's effective entitlement for plan and quota. Billing actions use only the selected cadence or an empty portal request.
 - **Verification** — A disposable signed-in Chromium session showed USD 11.99 monthly and USD 107.88 annually for Free, a 20-analysis Free limit, and a 300-analysis Pro limit with scheduled cancellation. The test verified Checkout error recovery, the Checkout return message, and navigation from both controls to their expected Stripe origins. It intercepted the browser's external pages after navigation and separately checked the real Stripe Checkout sessions and hosted portal response. Unit tests, type checking, lint, and formatting passed.
 - **Next action** — CAP-091 — Test full billing lifecycle.
+
+### [2026-11-24T10:52:11+08:00] CAP-091 — Test full billing lifecycle — STARTED
+
+- **Plan** — Forward real sandbox events through the Stripe CLI. Advance disposable monthly and annual subscriptions with Stripe test clocks and verify Capture usage, replay behavior, and library access.
+
+### [2026-11-24T10:58:38+08:00] CAP-091 — Test full billing lifecycle — COMPLETE
+
+- **Verification** — Stripe CLI forwarded 12 genuine sandbox webhook deliveries and each returned HTTP 200. Monthly and annual fixtures reached Pro. The monthly fixture renewed with a paid invoice, then a deliberately declined renewal produced `past_due` and restored the Free allowance. The annual fixture retained Pro during scheduled cancellation and downgraded at the simulated billing term end.
+- **Capture data** — The annual account's prior UTC month's usage did not affect the current allowance. The monthly account kept its current usage and could still read its saved article, personal note, and topic after downgrading. Replaying a processed event kept a single event record, and a distinct stale event did not restore Pro.
+- **Regression and cleanup** — Billing Settings, Checkout, the portal, both quota ledger paths, lint, formatting, and the deterministic suite passed. The listener stopped, disposable accounts and clocks were cleaned up, and the temporary local signing configuration was restored.
+- **Next action** — CAP-092 — Gate live billing behind owner approval.

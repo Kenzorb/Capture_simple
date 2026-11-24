@@ -3,6 +3,10 @@ import { RetryAfterError } from "inngest";
 import { generateOpenAiNote } from "../processing/openai-notes";
 import { prepareSource } from "../processing/prepare-source";
 import { segmentSource } from "../processing/segment-source";
+import {
+  modelCostEstimate,
+  reportCaptureTelemetry,
+} from "../processing/telemetry";
 import { createPrivilegedSupabaseClient } from "../supabase/admin";
 import { inngest } from "./client";
 
@@ -29,13 +33,23 @@ export const processCaptureJob = inngest.createFunction(
       return { status: "ignored" };
     const jobId = target.data.id;
     const execution = { p_job_id: jobId, p_execution_id: runId };
+    async function infrastructureFailure(code: string) {
+      await reportCaptureTelemetry({
+        event: "capture_system_failure",
+        jobId,
+        code,
+        attempt,
+        generation,
+      });
+      return new Error(code);
+    }
 
     const started = await step.run("start-capture-job", async () => {
       const { data, error } = await createPrivilegedSupabaseClient().rpc(
         "capture_start_delivery",
         { ...execution, p_generation: generation },
       );
-      if (error) throw new Error("Could not start capture processing.");
+      if (error) throw await infrastructureFailure("job_start_failed");
       return data;
     });
     if (!started) return { status: "ignored" };
@@ -49,18 +63,34 @@ export const processCaptureJob = inngest.createFunction(
           p_status: status,
           p_error_code: code,
         });
-        if (error) throw new Error("Could not finalize capture processing.");
+        if (error) throw await infrastructureFailure("job_finalize_failed");
+        if (data)
+          await reportCaptureTelemetry({
+            event: "capture_job_finished",
+            jobId,
+            code,
+            attempt,
+            generation,
+          });
         return { status: data ? status : "ignored" };
       }
       const job = await supabase
         .from("processing_jobs")
-        .select("article_id,user_id")
+        .select("article_id,user_id,created_at")
         .eq("id", jobId)
         .eq("execution_id", runId)
         .eq("status", "processing")
         .maybeSingle();
-      if (job.error) throw new Error("Could not read the capture job.");
+      if (job.error) throw await infrastructureFailure("job_read_failed");
       if (!job.data) return { status: "ignored" };
+      if (attempt === 0)
+        await reportCaptureTelemetry({
+          event: "capture_job_started",
+          jobId,
+          generation,
+          attempt,
+          queueLagMs: Math.max(0, Date.now() - Date.parse(job.data.created_at)),
+        });
       const { article_id: id, user_id: owner } = job.data;
       const [article, content] = await Promise.all([
         supabase
@@ -77,7 +107,7 @@ export const processCaptureJob = inngest.createFunction(
           .maybeSingle(),
       ]);
       if (article.error || content.error)
-        throw new Error("Could not read the capture source.");
+        throw await infrastructureFailure("job_source_read_failed");
       if (!article.data) return { status: "ignored" };
 
       const source = await prepareSource({
@@ -87,8 +117,16 @@ export const processCaptureJob = inngest.createFunction(
       if (source.status === "unsupported")
         return finish("unsupported", "source_unsupported");
       if (source.status === "unavailable") {
-        if (attempt < sourceRetries)
+        if (attempt < sourceRetries) {
+          await reportCaptureTelemetry({
+            event: "capture_source_retry",
+            jobId,
+            code: source.code,
+            attempt,
+            generation,
+          });
           throw new RetryAfterError(source.code, `${2 ** (attempt + 1)}s`);
+        }
         return finish("failed", source.code);
       }
       const { text, hash, chunks } = segmentSource(source.text);
@@ -102,7 +140,8 @@ export const processCaptureJob = inngest.createFunction(
           content.data?.extraction_method === "http" ? "http" : source.method,
         p_chunks: chunks,
       });
-      if (stored.error) throw new Error("Could not persist capture evidence.");
+      if (stored.error)
+        throw await infrastructureFailure("job_evidence_write_failed");
       if (!stored.data) return { status: "ignored" };
       const result = await generateOpenAiNote(chunks);
       if (result.status !== "ready")
@@ -110,6 +149,18 @@ export const processCaptureJob = inngest.createFunction(
           "failed",
           result.status === "unavailable" ? result.code : result.status,
         );
+      const { inputTokens, outputTokens } = result.usage;
+      await reportCaptureTelemetry({
+        event: "capture_model_usage",
+        jobId,
+        inputTokens,
+        outputTokens,
+        estimatedUsd: modelCostEstimate(
+          result.note.model,
+          inputTokens,
+          outputTokens,
+        ),
+      });
 
       const references = new Set(chunks.map(({ chunk_id }) => chunk_id));
       if (
@@ -125,7 +176,15 @@ export const processCaptureJob = inngest.createFunction(
         p_note: result.note,
       });
       if (published.error)
-        throw new Error("Could not publish the generated note.");
+        throw await infrastructureFailure("job_note_write_failed");
+      if (published.data)
+        await reportCaptureTelemetry({
+          event: "capture_job_finished",
+          jobId,
+          code: "ready",
+          attempt,
+          generation,
+        });
       return { status: published.data ? "ready" : "ignored" };
     });
   },

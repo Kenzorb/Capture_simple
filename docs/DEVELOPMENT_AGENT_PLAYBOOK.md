@@ -1293,7 +1293,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-099 — Add observability and recovery alerts
 
-- [ ] **CAP-099 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-099 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Log safe job IDs/errors, failures, queue lag, retries and model costs; configure alerts for systemic failures with no source-body logging.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-099 — Add observability and recovery alerts` |
-| Last verified completed task | `CAP-098` |
-| Last verification executed | `Hosted disposable accounts passed export, account deletion, scoped source-text removal, and preservation of evidence. Read-only authorization checks passed.` |
-| Last successful Git commit | `f9c8ca9` |
+| Current task | `CAP-100 — Document backup/recovery and migrations` |
+| Last verified completed task | `CAP-099` |
+| Last verification executed | `Sentry recorded a trigger from three synthetic development failures. Both the test notification and the alert email reached the sole approved recipient.` |
+| Last successful Git commit | `027e22c` |
 | Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Add safe processing telemetry and verify recovery alert delivery.` |
+| Next action | `Document migration and backup recovery, then run an isolated integrity drill with synthetic data.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 6/9 | In progress |
+| P10 | CAP-093–101 | 7/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **96/112** | **In progress** |
+| **Total** | **CAP-001–112** | **97/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -3004,3 +3004,22 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Hosted verification** — Both privacy integration cases passed. A disposable account exported its own library, proved a wrong password cannot delete the account, then deleted its account, captures, notes, and full source. Its session lost export access and the other account's data remained. A signed-in owner removed full source text twice while preserving the saved capture, personal note, and evidence excerpt. Anonymous, cross-account, and queued operations were blocked.
 - **Retention** — The setup guide records environment-scoped backup access and expiry requirements. Hosted staging and production backup expiry and restore behavior must be verified before beta.
 - **Next action** — CAP-099 — Add observability and recovery alerts.
+
+### [2026-11-24T12:55:58+08:00] CAP-099 — Add observability and recovery alerts — STARTED
+
+- **Implementation** — Added structured logs for queue age, retries, deferred dispatch, outcomes, token counts and estimated Luna cost. Systemic processing failures can send grouped events to Sentry. Telemetry uses an allowlist of fields and excludes source text, URLs, notes, user identifiers and provider responses. Added recovery and alert setup instructions.
+- **Verified so far** — Type checks, lint, formatting, and 126 deterministic tests passed. The mocked Sentry delivery checked event grouping and field filtering. The live monitoring test was skipped because no `SENTRY_DSN` is configured. Verify hosted receipt and the alert route before checking CAP-099.
+
+### [2026-11-24T13:31:20+08:00] CAP-099 — Hosted ingestion verified
+
+- **Verification** — With the owner-provided local DSN, the opt-in test sent one `synthetic_monitor_failure` event in the `development` environment. Sentry's hosted ingestion endpoint returned success. Dashboard confirmation and the alert destination remain pending.
+
+### [2026-11-24T13:47:20+08:00] CAP-099 — Sentry issue visibility confirmed
+
+- **Owner verification** — The synthetic issue appeared in the Sentry dashboard. The alert recipient and delivery test remain pending.
+
+### [2026-11-24T15:06:04+08:00] CAP-099 — Add observability and recovery alerts — COMPLETE
+
+- **Verification** — TypeScript, ESLint, Prettier, and 126 deterministic tests passed with four opt-in tests skipped. Ran the hosted opt-in test separately three times. Sentry accepted all three events, and the owner confirmed one recorded alert trigger for `synthetic_monitor_failure` in rule history at 07:02 UTC. The test notification and the subsequent alert email both reached the sole approved member.
+- **Configuration** — The development rule filters Capture events by the environment tag, fires after three occurrences in 15 minutes, and throttles notifications for each issue to one per hour.
+- **Next action** — CAP-100 — Document backup/recovery and migrations.

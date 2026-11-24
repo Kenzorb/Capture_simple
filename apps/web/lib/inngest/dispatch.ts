@@ -1,4 +1,5 @@
 import { articleParamsSchema } from "@capture/shared";
+import { reportCaptureTelemetry } from "../processing/telemetry";
 import { createPrivilegedSupabaseClient } from "../supabase/admin";
 import { inngest, inngestDev, localQueueOwner } from "./client";
 
@@ -33,13 +34,21 @@ export const dispatchCaptureJobs = inngest.createFunction(
       if (!owned) return { dispatched: 0 };
     }
     const scope = { p_job_id: jobId };
+    async function infrastructureFailure(code: string) {
+      await reportCaptureTelemetry({
+        event: "capture_system_failure",
+        jobId,
+        code,
+      });
+      return new Error(code);
+    }
 
     await step.run("reconcile-abandoned-jobs", async () => {
       const { data, error } = await createPrivilegedSupabaseClient().rpc(
         "capture_reconcile_jobs",
         scope,
       );
-      if (error) throw new Error("Could not reconcile capture jobs.");
+      if (error) throw await infrastructureFailure("dispatch_reconcile_failed");
       return data;
     });
 
@@ -48,7 +57,7 @@ export const dispatchCaptureJobs = inngest.createFunction(
         "capture_claim_dispatch",
         scope,
       );
-      if (error) throw new Error("Could not claim pending capture jobs.");
+      if (error) throw await infrastructureFailure("dispatch_claim_failed");
       return data;
     });
     const lease = rows[0]?.lease_id;
@@ -76,7 +85,14 @@ export const dispatchCaptureJobs = inngest.createFunction(
         "capture_finish_dispatch",
         { p_lease_id: lease, p_dispatched: accepted },
       );
-      if (error) throw new Error("Could not finalize capture job dispatch.");
+      if (error) throw await infrastructureFailure("dispatch_finalize_failed");
+      if (!accepted && data > 0)
+        await reportCaptureTelemetry({
+          event: "capture_dispatch_deferred",
+          jobId,
+          code: "dispatch_provider_unavailable",
+          count: data,
+        });
       return data;
     });
     return {

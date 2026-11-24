@@ -1167,7 +1167,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-087 — Implement raw-body verified Stripe webhook
 
-- [ ] **CAP-087 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-087 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Verify signature, dedupe event IDs, handle out-of-order deliveries through current Stripe state when necessary; safely persist billing state.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-087 — Implement raw-body verified Stripe webhook` |
-| Last verified completed task | `CAP-086` |
-| Last verification executed | `A disposable Free account opened both Stripe sandbox Checkout sessions with the expected USD prices. Invalid origin, client price, other-user ID, and custom redirect were rejected.` |
-| Last successful Git commit | `dc0e5ed` |
+| Current task | `CAP-088 — Implement server-side entitlements` |
+| Last verified completed task | `CAP-087` |
+| Last verification executed | `The sandbox webhook integration passed against capture-dev. Forged, altered, expired, and live-mode fixtures were rejected. Concurrent replays recorded once; a stale delivery kept the current Stripe cancellation.` |
+| Last successful Git commit | `a35c0ae` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Implement verified and deduplicated Stripe webhooks before enabling subscription state updates.` |
+| Next action | `Derive Pro entitlement and quota from verified subscription status and dates.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 3/9 | In progress |
+| P9 | CAP-084–092 | 4/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **85/112** | **In progress** |
+| **Total** | **CAP-001–112** | **86/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2871,3 +2871,19 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Implementation** — `POST /api/billing/checkout` accepts a monthly or annual interval, resolves the Price ID on the server, creates or reuses the signed-in user's Stripe customer, and uses fixed Capture settings redirects.
 - **Verification** — An integration test with two disposable Supabase accounts verified that a Free user received open, unpaid Stripe sandbox Checkout sessions for US$11.99 monthly and US$107.88 annually under the same Stripe customer. It confirmed that anonymous, cross-origin, price override, other-user, and redirect override requests were rejected. Test sessions were expired and the disposable customer and accounts were cleaned up. Type checks, changed-file lint and format checks, and the deterministic suite passed (118 tests passed and 3 skipped).
 - **Next action** — CAP-087 — Implement raw-body verified Stripe webhook.
+
+### [2026-11-23T23:48:24+08:00] CAP-087 — Implement raw-body verified Stripe webhook — STARTED
+
+- **Plan** — Verify raw sandbox deliveries, reconcile against current Stripe subscriptions for the mapped customer, and persist billing state and event IDs in a single database transaction.
+
+### [2026-11-23T23:55:37+08:00] CAP-087 — Local verification completed
+
+- **Verification** — Confirmed exact-body signature checking, timestamp enforcement, customer and price filtering across Stripe pages, and deduplication in an isolated PostgreSQL instance. The database test also verified that a stale revision cannot overwrite newer state and an authenticated browser role cannot execute the write RPC.
+- **Hosted verification pending** — The `capture-dev` dry run listed only the CAP-087 migration. The Supabase CLI stopped the apply command pending explicit confirmation. Run the hosted sandbox integration after the migration is applied.
+
+### [2026-11-24T10:13:20+08:00] CAP-087 — Implement raw-body verified Stripe webhook — COMPLETE
+
+- **Database** — Applied only `20261123235000_capture_apply_stripe_event.sql` to the owner-approved `capture-dev` project. Event recording and billing updates now commit in one transaction. The billing revision prevents an older snapshot from overwriting a newer one.
+- **Verification** — The actual local webhook route, hosted development database, and Stripe sandbox passed the integration test with disposable fixtures. The endpoint rejected forged, altered, expired and live-mode deliveries, ignored a subscription belonging to another account, recorded concurrent replays once, and kept the current cancellation when an older delivery arrived. The deterministic suite passed with 120 tests and 3 skipped, and type, lint, and format checks passed.
+- **Test setup** — The integration sent locally signed fixtures and fetched real sandbox subscription state. It restored the local test signing configuration and removed the disposable records. Stripe-initiated lifecycle delivery remains part of CAP-091.
+- **Next action** — CAP-088 — Implement server-side entitlements.

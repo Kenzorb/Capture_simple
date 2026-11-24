@@ -533,6 +533,7 @@ export type Database = {
           status: string | null;
           stripe_customer_id: string | null;
           stripe_price_id: string | null;
+          stripe_revision: number;
           stripe_subscription_id: string | null;
           updated_at: string;
           user_id: string;
@@ -545,6 +546,7 @@ export type Database = {
           status?: string | null;
           stripe_customer_id?: string | null;
           stripe_price_id?: string | null;
+          stripe_revision?: number;
           stripe_subscription_id?: string | null;
           updated_at?: string;
           user_id: string;
@@ -557,6 +559,7 @@ export type Database = {
           status?: string | null;
           stripe_customer_id?: string | null;
           stripe_price_id?: string | null;
+          stripe_revision?: number;
           stripe_subscription_id?: string | null;
           updated_at?: string;
           user_id?: string;
@@ -736,6 +739,20 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      capture_apply_stripe_event: {
+        Args: {
+          p_cancel_at_period_end: boolean;
+          p_customer_id: string;
+          p_event_id: string;
+          p_event_type: string;
+          p_period_end: string | null;
+          p_price_id: string | null;
+          p_revision: number;
+          p_status: string | null;
+          p_subscription_id: string | null;
+        };
+        Returns: string;
+      };
       capture_current_usage: {
         Args: never;
         Returns: {

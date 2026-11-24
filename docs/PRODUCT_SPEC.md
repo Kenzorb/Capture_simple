@@ -848,6 +848,8 @@ If eligible, reserve one unit and associate it with a unique job ID. On success,
 
 A plan upgrade should adjust the current allowance according to a documented policy without erasing prior usage. A canceled subscription normally continues granting access through its paid entitlement period, subject to the chosen payment-state policy. Annual renewal and monthly processing resets must be treated as separate clocks.
 
+Capture grants the 300-analysis monthly allowance when a verified subscription is active or trialing and its billing period end is still in the future. Scheduling cancellation leaves that allowance in place until the term ends. Expiration and verified statuses such as past due, unpaid, paused, incomplete, or canceled return the account to the 20-analysis monthly allowance. Renewing or recovering payment can restore Pro during the same UTC month without resetting usage or reservations.
+
 ### 16.5 Configuration example
 
 ```dotenv

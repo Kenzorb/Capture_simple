@@ -20,16 +20,12 @@ export async function readOwnAccount() {
   const session = await getAuthenticatedSession();
   if (!session) return { status: "unauthorized" } as const;
 
-  const { supabase, user } = session;
-  const [profile, subscription] = await Promise.all([
+  const { user } = session;
+  const [profile, usage] = await Promise.all([
     readOwnProfile(session),
-    supabase
-      .from("subscriptions")
-      .select("plan")
-      .eq("user_id", user.id)
-      .maybeSingle(),
+    readOwnUsage(session),
   ]);
-  if (profile.error || subscription.error) {
+  if (profile.error || usage.error || !usage.data) {
     return { status: "account_unavailable" } as const;
   }
 
@@ -39,7 +35,7 @@ export async function readOwnAccount() {
       id: user.id,
       email: user.email ?? null,
       displayName: profile.data?.display_name ?? null,
-      plan: subscription.data?.plan ?? "free",
+      plan: usage.data.plan,
     },
   } as const;
 }

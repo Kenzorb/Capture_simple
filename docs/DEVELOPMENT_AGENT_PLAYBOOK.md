@@ -1177,7 +1177,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-088 — Implement server-side entitlements
 
-- [ ] **CAP-088 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-088 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Derive Pro allowance from verified subscription state and active entitlement dates; apply cancel-at-period-end, payment failure and downgrade behavior.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-088 — Implement server-side entitlements` |
-| Last verified completed task | `CAP-087` |
-| Last verification executed | `The sandbox webhook integration passed against capture-dev. Forged, altered, expired, and live-mode fixtures were rejected. Concurrent replays recorded once; a stale delivery kept the current Stripe cancellation.` |
-| Last successful Git commit | `a35c0ae` |
+| Current task | `CAP-089 — Implement customer billing portal` |
+| Last verified completed task | `CAP-088` |
+| Last verification executed | `Hosted SQL and Stripe sandbox integration verified upgrade, scheduled cancellation, downgrade, past-due recovery, and retention of monthly usage. The authenticated client could not set its plan.` |
+| Last successful Git commit | `48a4d10` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Derive Pro entitlement and quota from verified subscription status and dates.` |
+| Next action | `Create and verify an authenticated sandbox billing portal session for the signed-in customer's own Stripe account.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 4/9 | In progress |
+| P9 | CAP-084–092 | 5/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **86/112** | **In progress** |
+| **Total** | **CAP-001–112** | **87/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2887,3 +2887,18 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification** — The actual local webhook route, hosted development database, and Stripe sandbox passed the integration test with disposable fixtures. The endpoint rejected forged, altered, expired and live-mode deliveries, ignored a subscription belonging to another account, recorded concurrent replays once, and kept the current cancellation when an older delivery arrived. The deterministic suite passed with 120 tests and 3 skipped, and type, lint, and format checks passed.
 - **Test setup** — The integration sent locally signed fixtures and fetched real sandbox subscription state. It restored the local test signing configuration and removed the disposable records. Stripe-initiated lifecycle delivery remains part of CAP-091.
 - **Next action** — CAP-088 — Implement server-side entitlements.
+
+### [2026-11-24T10:16:17+08:00] CAP-088 — Implement server-side entitlements — STARTED
+
+- **Plan** — Update stored plan from verified Stripe state inside the webhook transaction. Use the effective term for account and quota reads and preserve monthly usage and reservations when access changes.
+
+### [2026-11-24T10:19:52+08:00] CAP-088 — Local verification completed
+
+- **Verification** — The entitlement and existing monthly-usage SQL suites passed in isolated PostgreSQL. They verified Free after customer creation, Pro during a current term, Free at term expiry or payment failure, reinstatement on recovery, and unchanged usage and reservations.
+- **Hosted verification pending** — The dry run identified only `20261124102000_capture_stripe_entitlements.sql`. Apply it to `capture-dev` after approval, then run the authenticated sandbox integration.
+
+### [2026-11-24T10:25:32+08:00] CAP-088 — Implement server-side entitlements — COMPLETE
+
+- **Database** — Applied only `20261124102000_capture_stripe_entitlements.sql` to the approved `capture-dev` project. Webhook transactions now derive the stored plan from verified subscription state. The quota and account views use the effective billing term.
+- **Verification** — The hosted sandbox integration verified 20 analyses for Free, 300 during a verified trial and scheduled cancellation, and 20 after cancellation. It preserved 24 used analyses and 3 reservations and rejected a direct authenticated plan change. The hosted rollback-only SQL test verified past-due, unpaid, paused, canceled, term expiry, and recovery. Both Checkout intervals still opened successfully in the sandbox.
+- **Next action** — CAP-089 — Implement customer billing portal.

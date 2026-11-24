@@ -7,6 +7,12 @@ import { createPrivilegedSupabaseClient } from "../../../../lib/supabase/admin";
 import { getRequestSession } from "../../../../lib/supabase/request-session";
 import { articleError, articleResponseHeaders } from "../../articles/response";
 
+const checkoutAllowedStatuses = new Set([
+  null,
+  "canceled",
+  "incomplete_expired",
+]);
+
 export async function POST(request: Request) {
   const session = await getRequestSession(request);
   if (!session)
@@ -48,12 +54,13 @@ export async function POST(request: Request) {
     const readBilling = () =>
       db
         .from("subscriptions")
-        .select("stripe_customer_id,plan")
+        .select("stripe_customer_id,status")
         .eq("user_id", userId)
         .maybeSingle();
     const billing = await readBilling();
     if (billing.error) return checkoutUnavailable();
-    if (billing.data?.plan === "pro") return alreadySubscribed();
+    if (!checkoutAllowedStatuses.has(billing.data?.status ?? null))
+      return alreadySubscribed();
 
     let customerId = billing.data?.stripe_customer_id;
     if (!customerId) {
@@ -81,7 +88,8 @@ export async function POST(request: Request) {
       const confirmed = await readBilling();
       if (confirmed.error || !confirmed.data?.stripe_customer_id)
         return checkoutUnavailable();
-      if (confirmed.data.plan === "pro") return alreadySubscribed();
+      if (!checkoutAllowedStatuses.has(confirmed.data.status))
+        return alreadySubscribed();
       customerId = confirmed.data.stripe_customer_id;
     }
 
@@ -123,5 +131,9 @@ function checkoutUnavailable() {
 }
 
 function alreadySubscribed() {
-  return articleError(409, "conflict", "This account already has Capture Pro.");
+  return articleError(
+    409,
+    "conflict",
+    "This account already has a subscription to manage.",
+  );
 }

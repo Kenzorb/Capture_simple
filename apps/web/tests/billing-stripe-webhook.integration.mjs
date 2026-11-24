@@ -11,12 +11,17 @@ test(
   async (t) => {
     const {
       CAPTURE_TEST_SUPABASE_URL,
+      CAPTURE_TEST_SUPABASE_PUBLIC,
       CAPTURE_TEST_SUPABASE_SECRET,
       STRIPE_SECRET_KEY,
       STRIPE_WEBHOOK_SECRET,
       STRIPE_PRO_MONTHLY_PRICE_ID,
     } = process.env;
-    assert(CAPTURE_TEST_SUPABASE_URL && CAPTURE_TEST_SUPABASE_SECRET);
+    assert(
+      CAPTURE_TEST_SUPABASE_URL &&
+        CAPTURE_TEST_SUPABASE_PUBLIC &&
+        CAPTURE_TEST_SUPABASE_SECRET,
+    );
     assert(STRIPE_SECRET_KEY?.startsWith("sk_test_"));
     assert(
       STRIPE_WEBHOOK_SECRET?.startsWith("whsec_") &&
@@ -66,8 +71,12 @@ test(
       }
     });
 
-    const account = await db.auth.admin.createUser({
+    const credentials = {
       email: `capture-webhook-${randomUUID()}@example.test`,
+      password: `${randomUUID()}Aa7!`,
+    };
+    const account = await db.auth.admin.createUser({
+      ...credentials,
       email_confirm: true,
     });
     assert(!account.error && account.data.user);
@@ -81,6 +90,33 @@ test(
       .from("subscriptions")
       .insert({ user_id: owner, stripe_customer_id: customer });
     assert(!mapped.error);
+    const user = createClient(
+      CAPTURE_TEST_SUPABASE_URL,
+      CAPTURE_TEST_SUPABASE_PUBLIC,
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+      },
+    );
+    const login = await user.auth.signInWithPassword(credentials);
+    assert(
+      !login.error && login.data.session,
+      "Could not sign in to the disposable account.",
+    );
+    const escalation = await user
+      .from("subscriptions")
+      .update({ plan: "pro" })
+      .eq("user_id", owner);
+    assert.equal(escalation.error?.code, "42501");
+
+    async function usage(plan, articleLimit, used = 0, reserved = 0) {
+      const result = await user.rpc("capture_current_usage").single();
+      assert(!result.error);
+      assert.equal(result.data.plan, plan);
+      assert.equal(result.data.article_limit, articleLimit);
+      assert.equal(result.data.used, used);
+      assert.equal(result.data.reserved, reserved);
+    }
+    await usage("free", 20);
 
     function event(type, data, created = Math.trunc(Date.now() / 1000)) {
       const id = `evt_${randomUUID().replaceAll("-", "")}`;
@@ -160,9 +196,38 @@ test(
       stripe_revision: 2,
       stripe_subscription_id: ownSubscription.id,
       status: "trialing",
-      plan: "free",
+      plan: "pro",
       cancel_at_period_end: false,
     });
+    await usage("pro", 300);
+    const now = new Date();
+    const period = await db.from("usage_periods").insert({
+      user_id: owner,
+      period_start: new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+      ).toISOString(),
+      period_end: new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1),
+      ).toISOString(),
+      used: 24,
+      reserved: 3,
+      article_limit: 300,
+    });
+    assert(!period.error, "Could not seed disposable usage.");
+
+    const scheduled = await stripe(
+      `/subscriptions/${ownSubscription.id}`,
+      "POST",
+      {
+        cancel_at_period_end: "true",
+      },
+    );
+    assert.equal(
+      await deliver(event("customer.subscription.updated", scheduled)),
+      200,
+    );
+    assert.equal((await billing()).cancel_at_period_end, true);
+    await usage("pro", 300, 24, 3);
 
     const cancelled = await stripe(
       `/subscriptions/${ownSubscription.id}`,
@@ -185,13 +250,14 @@ test(
     assert.equal(final.status, "canceled");
     assert.equal(final.plan, "free");
     assert.equal(final.stripe_subscription_id, ownSubscription.id);
-    assert.equal(final.stripe_revision, 4);
+    assert.equal(final.stripe_revision, 5);
+    await usage("free", 20, 24, 3);
 
     const recorded = await db
       .from("billing_events")
       .select("stripe_event_id")
       .in("stripe_event_id", ids);
     assert(!recorded.error);
-    assert.equal(recorded.data.length, 4);
+    assert.equal(recorded.data.length, 5);
   },
 );

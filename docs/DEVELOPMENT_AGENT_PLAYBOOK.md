@@ -1263,7 +1263,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-096 — Test full browser/mobile accessibility
 
-- [ ] **CAP-096 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-096 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Run Playwright E2E in supported browsers, check responsive UI, focus traps, keyboard tree operation, labels, and actionable errors.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-096 — Test full browser/mobile accessibility` |
-| Last verified completed task | `CAP-095` |
-| Last verification executed | `Concurrent capture and quota, worker recovery, partial-write rollback, and Stripe sandbox replay passed. The isolated Stripe rerun passed after one cancellation timeout.` |
-| Last successful Git commit | `d93f41d` |
+| Current task | `CAP-097 — Performance-test realistic library sizes` |
+| Last verified completed task | `CAP-096` |
+| Last verification executed | `Chrome and Edge passed desktop and narrow-width accessibility flows. The 16 auth browser cases passed and the focus and layout screenshots were reviewed.` |
+| Last successful Git commit | `fdfb1a9` |
 | Active blockers | `CAP-092 is deferred with owner approval. Production readiness and launch approval are required for live billing. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Verify critical web flows at desktop and mobile widths with keyboard and browser accessibility checks.` |
+| Next action | `Measure pagination, search, and topic browsing on disposable 100- and 1,000-plus-article libraries.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 3/9 | In progress |
+| P10 | CAP-093–101 | 4/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **93/112** | **In progress** |
+| **Total** | **CAP-001–112** | **94/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2971,3 +2971,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Billing atomicity** — A forced subscription write conflict rolled back both the event record and the subscription update. A retry applied the event once and a replay changed no subscription revision.
 - **Sandbox verification** — One Stripe CLI run timed out while waiting for scheduled annual cancellation. Stripe had created the event, and the cause of the timeout was undetermined. The isolated rerun passed, with all 12 forwarded requests returning HTTP 200 and stale or repeated events preserving the correct state. The temporary signing configuration was restored. The deterministic suite passed with 124 tests and 3 opt-in skips.
 - **Next action** — CAP-096 — Test full browser/mobile accessibility.
+
+### [2026-11-24T12:35:44+08:00] CAP-096 — Test full browser/mobile accessibility — STARTED
+
+- **Plan** — Exercise signed-in navigation and form feedback in Chrome and Edge, and review desktop and narrow viewport captures of the focused Knowledge Tree.
+
+### [2026-11-24T12:42:55+08:00] CAP-096 — Test full browser/mobile accessibility — COMPLETE
+
+- **Browser verification** — Sixteen guest flow checks passed in Chrome desktop and Edge mobile emulation. The disposable signed-in test passed in both browsers at 1440 px and 320 px. It verified the skip link, Account disclosure and Escape focus return, labeled inputs, actionable validation feedback, nested keyboard navigation, focused route headings, and access to a capture's personal note. Lint and formatting passed.
+- **Manual visual pass** — Reviewed the captured desktop and narrow layouts. The focused nested branch had a visible outline, the active navigation item and nesting were distinct, and the search, Account control, row counts, and capture title fit the narrow layout. Mobile checks used browser emulation.
+- **Next action** — CAP-097 — Performance-test realistic library sizes.

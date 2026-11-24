@@ -1349,7 +1349,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-104 — Build release candidate extension
 
-- [ ] **CAP-104 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-104 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create signed/versioned unpacked/test extension package and verify production/staging origins, Manifest V3 constraints and permission prompts.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
-| Current task | `CAP-104 — Build release candidate extension` |
-| Last verified completed task | `CAP-103` |
-| Last verification executed | `CAP-103 verified a public RFC through Knowledge Tree and a separate disposable extension session through hosted PKCE consent, account lookup, and capture. Staging CORS passed.` |
-| Last successful Git commit | `dab2bbe` |
+| Current task | `CAP-105 — Run staging smoke-test matrix` |
+| Last verified completed task | `CAP-104` |
+| Last verification executed | `CAP-104 verified Capture 0.1.0 MV3 in disposable Chromium. The installed popup validated a real staging OAuth session, and all nine ZIP files matched the tested build.` |
+| Last successful Git commit | `6f0aff0` |
 | Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Package and verify the versioned staging Chrome extension.` |
+| Next action | `Run the staged two-user smoke matrix with the versioned Chrome package.` |
 
 ### 11.1 Phase progress overview
 
@@ -1594,8 +1594,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
 | P10 | CAP-093–101 | 9/9 | Complete |
-| P11 | CAP-102–112 | 2/11 | In progress |
-| **Total** | **CAP-001–112** | **101/112** | **In progress** |
+| P11 | CAP-102–112 | 3/11 | In progress |
+| **Total** | **CAP-001–112** | **102/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -3141,3 +3141,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Deployment** — Registered one public Chrome OAuth client and verified the same client in the staging allowlist table. Configured both public extension identifiers in Vercel and confirmed deployment `dpl_2si4jArcNGGKVETtcz4XMtT8fh68` was Ready at the staging alias. The Supabase config diff showed no changes to the approved consent path and registration settings.
 - **Verification** — The real public RFC reached Ready in 84 seconds through HTTP extraction and appeared under its primary topic in the Knowledge Tree. The hosted extension protocol check with a disposable user passed PKCE consent, the exact callback and state, scoped bearer account lookup, and a capture save. Other origins were denied and the extension token could not access the general topic endpoint. A separate Chromium smoke loaded the staged MV3 worker and guest popup with the expected ID and allowed hosts. The fixtures were cleaned up.
 - **Next action** — CAP-104 — Build release candidate extension.
+
+### [2026-11-24T22:29:47+08:00] CAP-104 — Build release candidate extension — STARTED
+
+- **Prior commit** — CAP-103 was committed as `6f0aff0`.
+- **Scope** — Package the tested stage-specific MV3 output for unpacked Chrome installation and verify its hosted staging connection.
+
+### [2026-11-24T22:30:59+08:00] CAP-104 — Build release candidate extension — COMPLETE
+
+- **Package** — Built Capture 0.1.0 as an unpacked MV3 staging package with WXT 0.21.5. The manifest identity derives from the registered staging public key. Its host permissions and connect policy target only the staging web and Auth origins. Staging test ZIP `dist/capture-staging-0.1.0.zip` has SHA-256 `6d11f406f42fee9494e442059f86127314f14941e9458c105f393695a268ed9a`. All nine portable ZIP entries match the tested build byte for byte.
+- **Browser verification** — Chromium loaded the installed service worker and guest popup under the expected ID. A genuine staging session from the hosted PKCE consent flow was seeded into the disposable Chrome profile for the installed-popup check. The extension verified the staging account and opened the correct staging library URL. The paired hosted API test accepted an extension capture and denied general web topic access to the extension bearer. The disposable profile and account were cleaned up.
+- **Release scope** — The artifact is for unpacked staging testing. Production host verification and store packaging are tracked in the subsequent production and publication tasks.
+- **Next action** — CAP-105 — Run the two-user staging smoke matrix.

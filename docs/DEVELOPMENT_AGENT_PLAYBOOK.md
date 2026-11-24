@@ -1313,7 +1313,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-101 — Run automated and manual release regression
 
-- [ ] **CAP-101 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-101 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Run lint, types, unit, integration, E2E, builds, RLS tests, extension tests, cost/performance checks; record exact commands/outcomes.
 
@@ -1473,10 +1473,10 @@ Run these at phase gates and again in staging/production as applicable. Every ca
 - [ ] Every mandatory MVP phase gate passed; no critical/security blocker remains.
 - [ ] All mandatory automated suites and manual critical-path checks have evidence.
 - [ ] A real webpage was captured from the real extension into the deployed web app.
-- [ ] Cross-user isolation and input/SSRF/prompt injection boundaries were exercised.
-- [ ] Async processing works after temporary provider failures; quota is concurrency-safe.
-- [ ] Free-plan limits and link-only capture behavior are proven.
-- [ ] Stripe test lifecycle passes **before** enabling paid features.
+- [x] Cross-user isolation and input/SSRF/prompt injection boundaries were exercised. See [development release evidence](RELEASE_QA.md).
+- [x] Async processing works after temporary provider failures; quota is concurrency-safe. See [development release evidence](RELEASE_QA.md).
+- [x] Free-plan limits and link-only capture behavior are proven. See [development release evidence](RELEASE_QA.md).
+- [x] Stripe test lifecycle passes **before** enabling paid features. See [development release evidence](RELEASE_QA.md).
 - [ ] Privacy terms, data/export/delete pathways and support contact are prepared.
 - [ ] Production secrets, backups, alerts, budget ceilings and rollback instructions are set.
 - [ ] User/owner explicitly approved any live billing, production resources, or store publication.
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-101 — Run automated and manual release regression` |
-| Last verified completed task | `CAP-100` |
-| Last verification executed | `The local backup dry run restored 38 migrations and matched 22 table fingerprints. Migration rollback, owner isolation, worker recovery and deletion replay passed.` |
-| Last successful Git commit | `64d93af` |
-| Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
+| Current phase | `P11 — Deploy, pilot, and close implementation` |
+| Current task | `CAP-102 — Provision and verify staging infrastructure` |
+| Last verified completed task | `CAP-101` |
+| Last verification executed | `Development release regression passed in the optimized local build with hosted capture-dev and Stripe sandbox. Evidence is recorded in docs/RELEASE_QA.md.` |
+| Last successful Git commit | `dc591eb` |
+| Active blockers | `CAP-102 needs an approved staging hosting project and isolated provider environments. CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Run the release regression matrix and record actual results and deployment blockers.` |
+| Next action | `Confirm owner-approved staging hosting and budget, then provision isolated staging resources and verify the deploy and worker callback.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 8/9 | In progress |
-| P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **98/112** | **In progress** |
+| P10 | CAP-093–101 | 9/9 | Complete |
+| P11 | CAP-102–112 | 0/11 | Awaiting staging setup |
+| **Total** | **CAP-001–112** | **99/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1604,7 +1604,7 @@ Record answers here as decisions are made; record private keys only in secret st
 | Topic | Default / open question | Status |
 |---|---|---|
 | Supabase project | Which dev/staging/prod project? | Hosted capture-dev verified; staging and production unconfirmed |
-| GitHub repository | Repo name, owner and CI access? | Unconfirmed |
+| GitHub repository | Repo name, owner and CI access? | Local origin identifies Kenzorb/Capture_simple. Staging integration and hosted CI access remain unconfirmed. |
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
 | Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049 |
 | Payment plan | Live billing readiness and launch approval | Live billing deferred by owner under CAP-092. Sandbox remains enabled for development. |
@@ -3033,3 +3033,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification** — `node supabase/tests/backup-recovery.mjs node_modules/capture-webhook-verification/node_modules/@electric-sql/pglite` applied all 38 migrations with PGlite 0.6.0, restored an in-memory snapshot to a fresh instance, and matched counts and SHA-256 fingerprints for 22 tables. The forced migration error rolled back, the existing RLS and abandoned-worker checks passed, and repeated post-snapshot account deletion produced the exact expected database state.
 - **Deployment gate** — Run the separate hosted staging drill, verify provider backup expiry and Auth configuration, and record observed restore time before beta. The synthetic run did not touch the hosted database.
 - **Next action** — CAP-101 — Run automated and manual release regression.
+
+### [2026-11-24T15:10:13+08:00] CAP-101 — Run automated and manual release regression — STARTED
+
+- **Scope** — Run the production build, browser and extension checks, hosted development and Stripe sandbox integrations, RLS dry run, and cost and library performance regressions.
+
+### [2026-11-24T15:19:00+08:00] CAP-101 — Run automated and manual release regression — COMPLETE
+
+- **Verification** — Formatting, lint, type checking, 126 deterministic tests, web and extension builds, and 16 browser cases passed. Hosted authorization, capture, privacy, topics, quota, accessibility, performance, checkout, signed webhook fixtures, and provider billing lifecycle passed across the final runs. Fresh Chromium loaded the built MV3 worker and guest popup; the prior full extension save and recovery evidence is linked in the regression record.
+- **Triage** — The lock held by the existing development server, the missing Playwright-pinned browser, and an initial Checkout origin mismatch were corrected in the test setup. The reruns passed on an isolated optimized build with a matching origin and installed browsers.
+- **Evidence and gate** — [Exact commands, development scenarios, results, and staging follow-up](RELEASE_QA.md). P10 passed. Hosted staging rollout, restore, and extension verification remain pending, along with the approved signup and live billing deferrals.
+- **Commits** — CAP-099 was committed as `64d93af`. CAP-100 was committed as `dc591eb`.
+- **Next action** — CAP-102 — Provision and verify staging infrastructure after the owner confirms the staging hosting project and budget.

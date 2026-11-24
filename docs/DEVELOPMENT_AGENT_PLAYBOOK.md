@@ -1369,7 +1369,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-106 — Prepare production release runbook
 
-- [ ] **CAP-106 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-106 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Write env setup, deploy, migration, rollback, alert triage, budget caps, Stripe live gating, support contact and extension store submission checklist.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
-| Current task | `CAP-106 — Prepare production release runbook` |
-| Last verified completed task | `CAP-105` |
-| Last verification executed | `CAP-105 passed staging Chrome capture and deduplication, two-account isolation, AI notes and topics, search, export, deletion, and the Free limit. Stripe is disabled in staging.` |
-| Last successful Git commit | `4cdb386` |
-| Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
+| Current task | `CAP-107 — Provision production after approval` |
+| Last verified completed task | `CAP-106` |
+| Last verification executed | `CAP-106 reviewed the production runbook against the deployment and recovery procedures. Six links and 12 documented environment names were checked, and formatting passed.` |
+| Last successful Git commit | `0f6c8ed` |
+| Active blockers | `CAP-107 awaits explicit owner approval of the production target and budget. Production support and backup details are pending. CAP-092 and CAP-023 remain deferred.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Write and review the production release runbook, with owner inputs and rollout gates explicit.` |
+| Next action | `Obtain explicit production provisioning approval, a production hostname and approved budgets before making provider changes.` |
 
 ### 11.1 Phase progress overview
 
@@ -1594,8 +1594,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
 | P10 | CAP-093–101 | 9/9 | Complete |
-| P11 | CAP-102–112 | 4/11 | In progress |
-| **Total** | **CAP-001–112** | **103/112** | **In progress** |
+| P11 | CAP-102–112 | 5/11 | In progress |
+| **Total** | **CAP-001–112** | **104/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -3164,3 +3164,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Outcomes** — Both users signed in. The worker saved once and acknowledged the duplicate with the same article ID. AI notes, the assigned topic, search, and JSON export were visible to the owner. The other account could neither read nor delete the capture, and its search and export were empty. Confirmed owner deletion removed the article and retained the single used analysis. A fixture at the Free limit saved a link with no processing job. Both test accounts and the browser profile were cleaned up.
 - **Triage** — The first matrix run omitted extracted text and got the documented link-only unsupported status. The corrected fixture included the real article text and passed. The staging environment had no Stripe variables, so the conditional staged billing case was skipped. CAP-101 has sandbox lifecycle evidence.
 - **Next action** — CAP-106 — Prepare the production release runbook.
+
+### [2026-11-24T22:36:10+08:00] CAP-106 — Prepare production release runbook — STARTED
+
+- **Prior commit** — CAP-105 was committed as `0f6c8ed`.
+- **Scope** — Consolidate environment setup, release and rollback, monitoring, spend controls, support and store publication into the production operator checklist.
+
+### [2026-11-24T22:37:20+08:00] CAP-106 — Prepare production release runbook — COMPLETE
+
+- **Deliverable** — [Production release runbook](RUNBOOK.md) links the verified staging baseline, detailed setup, backup drill, alert guide, and pricing model. The runbook identifies required production environment values, rollback and beta gates, and owner decisions for provider spend, backups, support, billing and store submission.
+- **Verification** — Reviewed the instructions against CAP-102–105 and the database recovery procedure. A local check resolved all six Markdown links and confirmed all 12 named environment variables exist in `.env.example`. Prettier and the Git diff check passed.
+- **Next action** — CAP-107 requires explicit owner approval for production provisioning, including the hostname, target accounts, and budget. No production provider settings changed.

@@ -81,14 +81,18 @@ test("records queue and model cost without sending routine job telemetry", async
 });
 
 test.skipIf(process.env.CAPTURE_TEST_MONITOR_LIVE !== "1")(
-  "Sentry accepts a synthetic development failure",
+  "Sentry accepts a synthetic failure",
   async () => {
-    vi.stubEnv("CAPTURE_MONITOR_ENVIRONMENT", "development");
+    const environment =
+      process.env.CAPTURE_MONITOR_ENVIRONMENT === "staging"
+        ? "staging"
+        : "development";
+    vi.stubEnv("CAPTURE_MONITOR_ENVIRONMENT", environment);
     const eventId = await reportCaptureTelemetry({
       event: "capture_monitor_test",
       code: "synthetic_monitor_failure",
     });
     expect(eventId).toMatch(/^[a-f0-9]{32}$/);
-    console.info("Capture synthetic Sentry event ID", eventId);
+    console.info("Capture synthetic Sentry event ID", environment, eventId);
   },
 );

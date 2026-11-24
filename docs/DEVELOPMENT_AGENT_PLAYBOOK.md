@@ -1329,7 +1329,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-102 — Provision and verify staging infrastructure
 
-- [ ] **CAP-102 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-102 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create staging Supabase, Next.js hosting, jobs, monitoring, HTTPS origins and test credentials, with separate secrets and budgets.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
-| Current task | `CAP-102 — Provision and verify staging infrastructure` |
-| Last verified completed task | `CAP-101` |
-| Last verification executed | `Development release regression passed in the optimized local build with hosted capture-dev and Stripe sandbox. Evidence is recorded in docs/RELEASE_QA.md.` |
-| Last successful Git commit | `dc591eb` |
-| Active blockers | `CAP-102 needs an approved staging hosting project and isolated provider environments. CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
+| Current task | `CAP-103 — Deploy and test staged web and workers` |
+| Last verified completed task | `CAP-102` |
+| Last verification executed | `CAP-102 verified staging HTTPS, isolated Supabase account access, signed Inngest callbacks, synthetic capture to Ready, and staging-tagged Sentry ingestion.` |
+| Last successful Git commit | `0d5adb1` |
+| Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Confirm owner-approved staging hosting and budget, then provision isolated staging resources and verify the deploy and worker callback.` |
+| Next action | `Run a real public article through staging from save to Knowledge Tree and verify the deployed auth, extension, and worker boundaries.` |
 
 ### 11.1 Phase progress overview
 
@@ -1594,8 +1594,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
 | P10 | CAP-093–101 | 9/9 | Complete |
-| P11 | CAP-102–112 | 0/11 | Awaiting staging setup |
-| **Total** | **CAP-001–112** | **99/112** | **In progress** |
+| P11 | CAP-102–112 | 1/11 | In progress |
+| **Total** | **CAP-001–112** | **100/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1603,10 +1603,10 @@ Record answers here as decisions are made; record private keys only in secret st
 
 | Topic | Default / open question | Status |
 |---|---|---|
-| Supabase project | Which dev/staging/prod project? | Hosted capture-dev verified; staging and production unconfirmed |
+| Supabase project | Which dev/staging/prod project? | Hosted capture-dev verified. Owner-provided capture_staging is separate and migrated. Production is unconfirmed. |
 | GitHub repository | Repo name, owner and CI access? | Local origin identifies Kenzorb/Capture_simple. Staging integration and hosted CI access remain unconfirmed. |
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
-| Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049 |
+| Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049. Capture Staging exists in Inngest Cloud and awaits app sync. |
 | Payment plan | Live billing readiness and launch approval | Live billing deferred by owner under CAP-092. Sandbox remains enabled for development. |
 | Pricing/currency | USD $11.99 monthly / $107.88 annually | Sandbox decision recorded in CAP-084 |
 | Production launch | Deployment/account approvals | Required when reached |
@@ -3045,3 +3045,78 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Evidence and gate** — [Exact commands, development scenarios, results, and staging follow-up](RELEASE_QA.md). P10 passed. Hosted staging rollout, restore, and extension verification remain pending, along with the approved signup and live billing deferrals.
 - **Commits** — CAP-099 was committed as `64d93af`. CAP-100 was committed as `dc591eb`.
 - **Next action** — CAP-102 — Provision and verify staging infrastructure after the owner confirms the staging hosting project and budget.
+
+### [2026-11-24T15:33:16+08:00] CAP-102 — Provision and verify staging infrastructure — STARTED
+
+- **Jobs** — Created and verified the isolated `Capture Staging` environment in the existing Inngest Cloud workspace. No app was synced during this step.
+
+### [2026-11-24T15:54:57+08:00] CAP-102 — Public deployment smoke — PARTIAL
+
+- **Hosting** — The owner supplied `https://capture-simple.vercel.app/` as the new Vercel deployment.
+- **Verification** — Read-only HTTPS GETs returned 200 for `/` and `/sign-in`, 307 to `/sign-in` for the signed-out dashboard, and 401 for `/api/me` and the unsigned `/api/inngest` request. The unsigned response confirms the route is present and denies the request. It does not verify that staging keys are installed or that signed jobs succeed.
+- **Pending** — Confirm the separate staging Supabase project and monitoring, configure the staging deployment secrets, sync the app to Capture Staging, and verify a signed callback and a disposable capture before checking CAP-102.
+- **Commit** — CAP-101 was committed as `0d5adb1`. CAP-102 remains in progress.
+
+### [2026-11-24T21:08:00+08:00] CAP-102 — Staging database initialized — PARTIAL
+
+- **Target** — The owner supplied `abacoacgebwycjuwmlsm` for `capture_staging`. HTTPS gateway responses identified that reference, distinct from the current `capture-dev` reference.
+- **Migration verification** — `npx supabase@3.2.0 db push --remote=abacoacgebwycjuwmlsm --dry-run --skip-vault` listed precisely the 38 checked-in migrations. Applied that set to the explicitly named staging target with `--skip-vault`, then repeated the dry run and confirmed zero pending migrations. No seed or Vault values were pushed.
+- **Authorization** — `npx supabase@3.2.0 db query --remote=abacoacgebwycjuwmlsm --read-only --file=supabase/tests/authorization_catalog.sql` returned zero violations. A rollback-only worker fixture was requested without mutation consent and did not run. Worker behavior still requires a signed callback test on the staging deployment.
+- **Access** — The Vercel CLI rejected project inspection because it lacks a valid authentication token. Environment secret installation and redeployment are pending.
+
+### [2026-11-24T21:09:57+08:00] CAP-102 — Staging Auth and worker database checks — PARTIAL
+
+- **Worker verification** — `npx supabase@3.2.0 db query --remote=abacoacgebwycjuwmlsm --yes --file=supabase/tests/worker_recovery.sql` succeeded. The rollback-only worker fixture checked stale execution rejection, idempotent replacement, note publication and quota accounting.
+- **Auth verification** — A minimal temporary config declared only the HTTPS Auth site URL and confirmation and recovery callback allowlist for the Vercel deployment. `config diff` identified two declared changes. `config push` reported only those two staging Auth updates, and the follow-up diff showed zero declared changes.
+- **Next action** — Restore authenticated project access in Vercel, then configure scoped Supabase and Inngest keys, redeploy, and verify the hosted callback and synthetic capture.
+
+### [2026-11-24T21:17:46+08:00] CAP-102 — Staging deployment configuration — PARTIAL
+
+- **Project** — The owner signed in to Vercel CLI. Project inspection confirmed `capture-simple` with root `apps/web`. Deployment inspection confirmed that Vercel's Production target for this staging project serves the approved staging URL.
+- **Variables** — Configured the staging app origin, staging Supabase URL and publishable key, staging service role key as a sensitive server-only value, and the staging monitoring environment tag. The service token's project reference and role were checked before transfer. A follow-up `vercel env ls` confirmed all five variables in the target without displaying secret values.
+- **Pending** — The target already had a hidden Inngest signing key of unverified origin and lacked an event key. Redeployment and app sync await the two Capture Staging keys. The separate staging model and monitoring configuration are also pending.
+
+### [2026-11-24T21:35:52+08:00] CAP-102 — Redeployed and verified staging account isolation — PARTIAL
+
+- **Deployment** — The owner saved both Capture Staging Inngest keys. `vercel env ls` confirmed both names in the Vercel target serving staging. `vercel redeploy dpl_AP3276GFubAsSqoRw9gBCdqjqDD1 --target production` produced ready deployment `dpl_DeV1i5eXve1rTKzhYD5wEW8Xgwu3` and assigned the staging alias.
+- **Verification** — An HTTPS smoke test with two disposable accounts from staging confirmed that guest access to the account API returns 401, both staging sessions resolve to their expected account, the article owner can read their fixture, and the second account receives 404. Both accounts were cleaned up.
+- **Pending** — Sync the worker to Capture Staging and verify a signed run. Staging OpenAI and Sentry delivery remain pending.
+
+### [2026-11-24T21:43:05+08:00] CAP-102 — Inngest sync troubleshooting — BLOCKED
+
+- **Evidence** — The user reported an unauthorized response from the Capture Staging manual sync. Filtered runtime logs for staging deployment `dpl_DeV1i5eXve1rTKzhYD5wEW8Xgwu3` showed two `PUT /api/inngest` requests returning HTTP 401 with the SDK reporting `Invalid signature`. The requests reached the deployed route. Log output excluded key values and request bodies.
+- **Next action** — Copy the active signing key from Capture Staging into the sensitive `INNGEST_SIGNING_KEY` variable in the Vercel target serving staging. Redeploy before retrying the sync. Verify the next signed callback before checking CAP-102.
+
+### [2026-11-24T21:48:24+08:00] CAP-102 — Inngest sync and signed dispatcher verified — PARTIAL
+
+- **Recovery** — The owner replaced the signing key. Redeployed the same Vercel project and confirmed that it was Ready and aliased to `https://capture-simple.vercel.app`.
+- **Verification** — Retried the sync in Capture Staging. The app reported success and registered exactly `dispatch-capture-jobs` and `process-capture-job` at the expected HTTPS endpoint. On the staging Runs page, a scheduled `dispatch-capture-jobs` run reached Completed.
+- **Configuration check** — The Vercel environment list included `OPENAI_API_KEY` and lacked `SENTRY_DSN`. Proceeding with a disposable capture to verify the complete hosted worker pipeline.
+
+### [2026-11-24T21:55:51+08:00] CAP-102 — Hosted capture processing — BLOCKED
+
+- **Verified** — Two disposable staging captures saved and started as queued. The second test observed the outbox transition from pending with zero attempts to dispatched after one attempt. Both article jobs stayed queued with no recorded processing error during their test windows. Both disposable accounts were cleaned up. Filtered callback logs confirmed the successful signed sync and scheduler traffic, with no processing-start or dispatch-failure markers found in the sampled output.
+- **Unverified** — Event delivery to the Capture Staging environment and invocation of the article-processing function. A valid event key belonging to another environment could explain the successful dispatch without a matching stage run. Vercel only exposes the sensitive variable name, so the environment association must be checked in Inngest.
+- **Next action** — Verify or replace the event key with a Capture Staging key that accepts `capture/job.requested`, redeploy, and rerun the disposable capture through Ready. Staging Sentry delivery is still pending.
+
+### [2026-11-24T22:02:05+08:00] CAP-102 — Hosted capture processing verified — PARTIAL
+
+- **Deployment** — The owner replaced the staging event key. Rebuilt the existing Vercel deployment and verified it was ready at `https://capture-simple.vercel.app`.
+- **Verification** — The disposable staging fixture saved through the hosted capture API, was dispatched on the first attempt, progressed from Queued to Processing to Ready in 74 seconds, and had exactly one published note, one used analysis, and zero outstanding reservations. The fixture account was cleaned up.
+- **Pending** — The Vercel target has `CAPTURE_MONITOR_ENVIRONMENT=staging` and no `SENTRY_DSN`. Native browser control stopped before staging Sentry setup because it could not verify the active browser URL. Configure the staging DSN and verify monitoring delivery before closing CAP-102.
+
+### [2026-11-24T22:07:56+08:00] CAP-102 — Staging monitoring configured — PARTIAL
+
+- **Configuration** — The owner saved `SENTRY_DSN`. `vercel env ls` showed all nine staging web, database, worker, model, and monitoring variable names in the deployment target. The DSN is marked sensitive. Redeployment `dpl_9bciVXR9Rd6vdNgv3yKKXBdLfAts` reached Ready and kept the staging alias.
+- **Verification** — The new deployment returned 200 for sign-in and 401 for unsigned account and Inngest requests. `node node_modules/vitest/vitest.mjs run apps/web/tests/processing-telemetry.test.tsx` passed both deterministic cases, including the staging environment tag. The opt-in live case was skipped because the staging DSN can only be read by the deployed application.
+- **Next action** — Verify live Sentry delivery with a synthetic staging event before closing the task. No additional Vercel variables are needed for the staging web and worker scope.
+
+### [2026-11-24T22:13:02+08:00] CAP-102 — Staging-tagged Sentry delivery — PARTIAL
+
+- **Verification** — The Sentry organization displayed the existing `javascript-nextjs` project. Extended the opt-in telemetry test to honor an explicit staging environment while retaining development as the default. Confirmed the locally configured DSN matched that observed project, then ran all three telemetry tests with `CAPTURE_TEST_MONITOR_LIVE=1` and `CAPTURE_MONITOR_ENVIRONMENT=staging`. All passed. Sentry accepted synthetic event `0ff4da7898744cd3bece37c1af44aa31` with the staging tag. Prettier and diff checks passed.
+- **Pending** — Vercel masks the deployed DSN. Confirm its project matches the ingest destination tested above. Configuration and synthetic ingest were verified separately.
+
+### [2026-11-24T22:17:42+08:00] CAP-102 — Provision and verify staging infrastructure — COMPLETE
+
+- **Verification** — Two disposable users established the staging account boundary. The signed scheduler completed after app sync, and a synthetic article reached Ready with one note and one quota debit. The new deployment with monitoring configured passed public access checks. All three telemetry tests passed, including live ingestion with the staging tag. The owner's Client Keys page was independently identified as the same `javascript-nextjs` Sentry project that accepted the test event. Sentry events are distinguished by environment within the existing project. Ingestion used the test runner with the staging tag.
+- **Next action** — CAP-103 — Verify a real public article through the hosted worker and Knowledge Tree and exercise staging auth and extension configuration.

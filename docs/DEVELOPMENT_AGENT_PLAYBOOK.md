@@ -1233,7 +1233,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-093 — Audit authorization end to end
 
-- [ ] **CAP-093 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-093 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Exercise anonymous, expired, signed-out, standard Free and Pro sessions against every API; verify RLS on every new table.
 
@@ -1567,15 +1567,15 @@ _None at document creation._
 | Field | Current value |
 |---|---|
 | Overall status | `IN PROGRESS` |
-| Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-092 — Gate live billing behind owner approval` |
-| Last verified completed task | `CAP-091` |
-| Last verification executed | `Stripe test clocks and CLI deliveries verified monthly renewal, failed payment, annual cancellation, UTC quota separation, replay safety, and saved knowledge retention after downgrade.` |
-| Last successful Git commit | `54f0299` |
-| Active blockers | `Live billing requires production readiness verification and explicit owner approval under CAP-092. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current phase | `P10 — Reliability, security, performance, and beta QA` |
+| Current task | `CAP-094 — Threat-test extraction and untrusted content` |
+| Last verified completed task | `CAP-093` |
+| Last verification executed | `Hosted Free and Pro session checks, account isolation, provider authentication, and all 20 application table RLS checks passed.` |
+| Last successful Git commit | `920f2e5` |
+| Active blockers | `CAP-092 is deferred with owner approval. Production readiness and launch approval are required for live billing. Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Review live merchant, tax, support, and production Stripe readiness. Keep live checkout disabled until verified and approved.` |
+| Next action | `Review extraction and untrusted content safeguards and verify their defensive tests.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 8/9 | In progress |
-| P10 | CAP-093–101 | 0/9 | Not started |
+| P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
+| P10 | CAP-093–101 | 1/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **90/112** | **In progress** |
+| **Total** | **CAP-001–112** | **91/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -1607,7 +1607,7 @@ Record answers here as decisions are made; record private keys only in secret st
 | GitHub repository | Repo name, owner and CI access? | Unconfirmed |
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
 | Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049 |
-| Payment plan | Free-only beta or paid beta? | Unconfirmed |
+| Payment plan | Live billing readiness and launch approval | Live billing deferred by owner under CAP-092. Sandbox remains enabled for development. |
 | Pricing/currency | USD $11.99 monthly / $107.88 annually | Sandbox decision recorded in CAP-084 |
 | Production launch | Deployment/account approvals | Required when reached |
 | Chrome Web Store | Publisher account/permissions | Required when reached |
@@ -2933,3 +2933,19 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Capture data** — The annual account's prior UTC month's usage did not affect the current allowance. The monthly account kept its current usage and could still read its saved article, personal note, and topic after downgrading. Replaying a processed event kept a single event record, and a distinct stale event did not restore Pro.
 - **Regression and cleanup** — Billing Settings, Checkout, the portal, both quota ledger paths, lint, formatting, and the deterministic suite passed. The listener stopped, disposable accounts and clocks were cleaned up, and the temporary local signing configuration was restored.
 - **Next action** — CAP-092 — Gate live billing behind owner approval.
+
+### [2026-11-24T12:15:21+08:00] CAP-092 — Gate live billing behind owner approval — DEFERRED
+
+- **Owner decision** — The owner explicitly approved deferring live billing and starting CAP-093. CAP-092 remains unchecked. Revisit merchant, tax, support, and production Stripe readiness before requesting launch approval. Live checkout remains disabled.
+- **P9 gate** — Eight tasks verified and one owner-approved deferral. Start P10 in checklist order.
+
+### [2026-11-24T12:15:21+08:00] CAP-093 — Audit authorization end to end — STARTED
+
+- **Plan** — Check signed-in Free and Pro access, unauthenticated and expired sessions, cross-account ownership, provider authentication, and database row-level security using disposable fixtures.
+
+### [2026-11-24T12:22:15+08:00] CAP-093 — Audit authorization end to end — COMPLETE
+
+- **HTTP verification** — The local web app and hosted development database passed the 15-method anonymous and signed-out matrix. Signed-in Free and Pro cookie sessions could read and modify their own captures and topics. Neither session could read, change, or delete the other's tested resources or see the other user's data in listing, search, or export. Existing article-access and topic integration suites passed.
+- **Session and provider verification** — A unit test exercised the shared bearer expiration check with verified-claim fixtures. The Inngest adapter rejected an unsigned callback in production mode even with the local development flag present. Stripe sandbox lifecycle regression forwarded 12 authenticated callbacks successfully.
+- **Database verification** — A read-only catalog check found row-level security enabled on all 20 application tables, no anonymous Capture routine execution, no unexpected direct authenticated writes, and no authenticated access to privileged billing identifiers. No database changes were needed. The deterministic suite passed with 122 tests and 3 skipped, and web type, lint, format, and diff checks passed.
+- **Next action** — CAP-094 — Threat-test extraction and untrusted content.

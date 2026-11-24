@@ -1339,7 +1339,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-103 — Deploy and test staged web and workers
 
-- [ ] **CAP-103 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-103 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Apply migrations, build/deploy, ensure auth redirect URLs, CORS/extension API host and jobs provider webhook endpoints align.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
-| Current task | `CAP-103 — Deploy and test staged web and workers` |
-| Last verified completed task | `CAP-102` |
-| Last verification executed | `CAP-102 verified staging HTTPS, isolated Supabase account access, signed Inngest callbacks, synthetic capture to Ready, and staging-tagged Sentry ingestion.` |
-| Last successful Git commit | `0d5adb1` |
+| Current task | `CAP-104 — Build release candidate extension` |
+| Last verified completed task | `CAP-103` |
+| Last verification executed | `CAP-103 verified a public RFC through Knowledge Tree and a separate disposable extension session through hosted PKCE consent, account lookup, and capture. Staging CORS passed.` |
+| Last successful Git commit | `dab2bbe` |
 | Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Run a real public article through staging from save to Knowledge Tree and verify the deployed auth, extension, and worker boundaries.` |
+| Next action | `Package and verify the versioned staging Chrome extension.` |
 
 ### 11.1 Phase progress overview
 
@@ -1594,8 +1594,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
 | P10 | CAP-093–101 | 9/9 | Complete |
-| P11 | CAP-102–112 | 1/11 | In progress |
-| **Total** | **CAP-001–112** | **100/112** | **In progress** |
+| P11 | CAP-102–112 | 2/11 | In progress |
+| **Total** | **CAP-001–112** | **101/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -3120,3 +3120,24 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 
 - **Verification** — Two disposable users established the staging account boundary. The signed scheduler completed after app sync, and a synthetic article reached Ready with one note and one quota debit. The new deployment with monitoring configured passed public access checks. All three telemetry tests passed, including live ingestion with the staging tag. The owner's Client Keys page was independently identified as the same `javascript-nextjs` Sentry project that accepted the test event. Sentry events are distinguished by environment within the existing project. Ingestion used the test runner with the staging tag.
 - **Next action** — CAP-103 — Verify a real public article through the hosted worker and Knowledge Tree and exercise staging auth and extension configuration.
+
+### [2026-11-24T22:18:30+08:00] CAP-103 — Deploy and test staged web and workers — STARTED
+
+- **Scope** — Verify hosted capture-to-tree with a real public article, then align the staging extension OAuth client, callback and API origin.
+- **Prior commit** — CAP-102 was committed as `dab2bbe`.
+
+### [2026-11-24T22:21:21+08:00] CAP-103 — Real article verified, staging OAuth awaiting approval — BLOCKED
+
+- **Hosted verification** — A disposable staging account saved RFC 9309 by URL with no supplied article text. Inngest dispatched it on its first attempt. The worker recorded HTTP extraction and reached Ready in 84 seconds. The article API returned the published note and assigned topic. The Knowledge Tree API returned that primary topic with one article. One analysis was used, no reservation remained, and the account was cleaned up.
+- **Extension audit** — The Vercel target lacks both stage-specific extension IDs. A targeted, read-only Supabase diff found only the declared OAuth server, consent path, and dynamic-registration settings. Automatic approval review rejected the proposed push because enabling the OAuth server is a persistent access change requiring exact owner authorization. No OAuth settings or clients changed.
+- **Next action** — Obtain authorization to enable staging-only OAuth with consent at `/oauth/consent`, dynamic registration disabled, and one registered public Chrome extension client restricted to its exact staging redirect. Then configure Vercel and verify hosted extension and CORS behavior.
+
+### [2026-11-24T22:24:33+08:00] CAP-103 — Staging OAuth explicitly approved — RESUMED
+
+- **Scope** — The owner authorized only staging OAuth with `/oauth/consent`, dynamic registration disabled, and one public Chrome client with the exact staging callback. Applied only those Auth settings to the staging project.
+
+### [2026-11-24T22:28:27+08:00] CAP-103 — Deploy and test staged web and workers — COMPLETE
+
+- **Deployment** — Registered one public Chrome OAuth client and verified the same client in the staging allowlist table. Configured both public extension identifiers in Vercel and confirmed deployment `dpl_2si4jArcNGGKVETtcz4XMtT8fh68` was Ready at the staging alias. The Supabase config diff showed no changes to the approved consent path and registration settings.
+- **Verification** — The real public RFC reached Ready in 84 seconds through HTTP extraction and appeared under its primary topic in the Knowledge Tree. The hosted extension protocol check with a disposable user passed PKCE consent, the exact callback and state, scoped bearer account lookup, and a capture save. Other origins were denied and the extension token could not access the general topic endpoint. A separate Chromium smoke loaded the staged MV3 worker and guest popup with the expected ID and allowed hosts. The fixtures were cleaned up.
+- **Next action** — CAP-104 — Build release candidate extension.

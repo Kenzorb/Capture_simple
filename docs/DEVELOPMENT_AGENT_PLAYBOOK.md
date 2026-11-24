@@ -1303,7 +1303,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-100 — Document backup/recovery and migrations
 
-- [ ] **CAP-100 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-100 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Create safe migration procedure, rollback/roll-forward strategy, recovery behavior and backup restore drill plan.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-100 — Document backup/recovery and migrations` |
-| Last verified completed task | `CAP-099` |
-| Last verification executed | `Sentry recorded a trigger from three synthetic development failures. Both the test notification and the alert email reached the sole approved recipient.` |
-| Last successful Git commit | `027e22c` |
+| Current task | `CAP-101 — Run automated and manual release regression` |
+| Last verified completed task | `CAP-100` |
+| Last verification executed | `The local backup dry run restored 38 migrations and matched 22 table fingerprints. Migration rollback, owner isolation, worker recovery and deletion replay passed.` |
+| Last successful Git commit | `64d93af` |
 | Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Document migration and backup recovery, then run an isolated integrity drill with synthetic data.` |
+| Next action | `Run the release regression matrix and record actual results and deployment blockers.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 7/9 | In progress |
+| P10 | CAP-093–101 | 8/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **97/112** | **In progress** |
+| **Total** | **CAP-001–112** | **98/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -3023,3 +3023,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification** — TypeScript, ESLint, Prettier, and 126 deterministic tests passed with four opt-in tests skipped. Ran the hosted opt-in test separately three times. Sentry accepted all three events, and the owner confirmed one recorded alert trigger for `synthetic_monitor_failure` in rule history at 07:02 UTC. The test notification and the subsequent alert email both reached the sole approved member.
 - **Configuration** — The development rule filters Capture events by the environment tag, fires after three occurrences in 15 minutes, and throttles notifications for each issue to one per hour.
 - **Next action** — CAP-100 — Document backup/recovery and migrations.
+
+### [2026-11-24T15:06:52+08:00] CAP-100 — Document backup/recovery and migrations — STARTED
+
+- **Scope** — Document backup selection, migration verification, app rollback, corrective migrations, incident restore isolation, and deletion reconciliation. Exercise the schema and data checks in a synthetic local drill.
+
+### [2026-11-24T15:08:40+08:00] CAP-100 — Document backup/recovery and migrations — COMPLETE
+
+- **Verification** — `node supabase/tests/backup-recovery.mjs node_modules/capture-webhook-verification/node_modules/@electric-sql/pglite` applied all 38 migrations with PGlite 0.6.0, restored an in-memory snapshot to a fresh instance, and matched counts and SHA-256 fingerprints for 22 tables. The forced migration error rolled back, the existing RLS and abandoned-worker checks passed, and repeated post-snapshot account deletion produced the exact expected database state.
+- **Deployment gate** — Run the separate hosted staging drill, verify provider backup expiry and Auth configuration, and record observed restore time before beta. The synthetic run did not touch the hosted database.
+- **Next action** — CAP-101 — Run automated and manual release regression.

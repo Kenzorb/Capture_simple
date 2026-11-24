@@ -99,7 +99,7 @@ To verify the billing lifecycle, use the same development database credentials a
 
 Account deletion requires an authenticated account, password verification, and typed confirmation. Export JSON or Markdown from Settings before deletion if you need a copy. If the account still has a subscription to manage, end it through Stripe first. Delete a capture to remove its saved link, source, notes, and associations. On an idle capture, remove stored full source text separately to keep the link and notes. Completed analysis retains its evidence excerpts. Starting analysis again can retrieve a new copy of the source.
 
-Keep backups private and scoped to each deployment environment. Record the backup location, access roles, expiry, and restore procedure before onboarding beta users. State the verified backup expiry in customer-facing retention information. A restored backup can contain data deleted after its snapshot, so check deletion reconciliation before returning a restored environment to service. Use only synthetic data in test backups and exclude captured URLs, excerpts, and notes from analytics.
+Keep backups private and scoped to each deployment environment. Record the backup location, access roles, expiry, and restore procedure before onboarding beta users. State the verified backup expiry in customer-facing retention information. A restored backup can contain data deleted after its snapshot, so check deletion reconciliation before returning a restored environment to service. Use only synthetic data in test backups and exclude captured URLs, excerpts, and notes from analytics. Follow the [database recovery runbook](RECOVERY.md) for migrations and restore drills.
 
 ### Worker monitoring and recovery
 

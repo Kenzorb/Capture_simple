@@ -16,6 +16,14 @@ export function readOwnUsage({ supabase }: Session) {
   return supabase.rpc("capture_current_usage").maybeSingle();
 }
 
+export function readOwnBillingStatus({ supabase, user }: Session) {
+  return supabase
+    .from("subscriptions")
+    .select("status,period_end,cancel_at_period_end")
+    .eq("user_id", user.id)
+    .maybeSingle();
+}
+
 export async function readOwnAccount() {
   const session = await getAuthenticatedSession();
   if (!session) return { status: "unauthorized" } as const;

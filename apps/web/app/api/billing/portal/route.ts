@@ -1,4 +1,5 @@
 import {
+  getStripePortalConfigurationId,
   getStripeSandboxConfig,
   stripePost,
 } from "../../../../lib/billing/stripe";
@@ -12,9 +13,8 @@ export async function POST(request: Request) {
     return articleError(401, "unauthenticated", "Sign in to manage billing.");
 
   const config = getStripeSandboxConfig();
-  const configuration = process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
-  if (!config || !configuration || !/^bpc_[A-Za-z0-9]+$/.test(configuration))
-    return portalUnavailable();
+  const configuration = getStripePortalConfigurationId();
+  if (!config || !configuration) return portalUnavailable();
 
   const origin = request.headers.get("origin");
   if (origin !== null && origin !== config.origin)

@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { readOwnProfile, readOwnUsage } from "../../../../lib/supabase/account";
+import { canStartCheckout } from "../../../../lib/billing/plans";
+import {
+  getStripePortalConfigurationId,
+  getStripeSandboxConfig,
+  readSandboxPrices,
+} from "../../../../lib/billing/stripe";
+import {
+  readOwnBillingStatus,
+  readOwnProfile,
+  readOwnUsage,
+} from "../../../../lib/supabase/account";
 import { getAuthenticatedSession } from "../../../../lib/supabase/server";
 import { SubmitButton } from "../../../(auth)/submit-button";
 import { DashboardHeading } from "../../dashboard-focus";
 import { saveDisplayName } from "./actions";
+import { BillingActions } from "./billing-actions";
 
 export const metadata: Metadata = { title: "Settings" };
 const card = "mt-6 rounded-xl border border-[#dde5dd] bg-white p-4 sm:p-5";
@@ -20,29 +31,55 @@ const profileMessages = new Map([
   ["invalid", "Enter a display name of up to 80 characters."],
   ["failed", "Could not save your profile. Try again."],
 ]);
+const billingStatuses = new Map([
+  ["active", "Active"],
+  ["trialing", "Trial"],
+  ["past_due", "Payment past due"],
+  ["unpaid", "Payment unpaid"],
+  ["paused", "Paused"],
+  ["incomplete", "Payment pending"],
+  ["incomplete_expired", "Payment expired"],
+  ["canceled", "Canceled"],
+]);
 
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ profile?: string | string[] }>;
+  searchParams: Promise<{
+    profile?: string | string[];
+    checkout?: string | string[];
+  }>;
 }) {
   const session = await getAuthenticatedSession();
   if (!session) redirect("/sign-in");
-  const [{ data: usage }, { data: profile }, params] = await Promise.all([
-    readOwnUsage(session),
-    readOwnProfile(session),
-    searchParams,
-  ]);
+  const [{ data: usage }, { data: profile }, billing, params] =
+    await Promise.all([
+      readOwnUsage(session),
+      readOwnProfile(session),
+      readOwnBillingStatus(session),
+      searchParams,
+    ]);
   const status = typeof params.profile === "string" ? params.profile : "";
   const feedback = profileMessages.get(status);
   const stats = usage
     ? [
-        ["Plan", usage.plan === "pro" ? "Pro" : "Free"],
         ["Used", usage.used],
         ["Reserved", usage.reserved],
         ["Monthly limit", usage.article_limit],
       ]
     : [];
+  const subscription = billing.data;
+  const stripe = getStripeSandboxConfig();
+  const canUpgrade =
+    usage?.plan === "free" &&
+    !billing.error &&
+    canStartCheckout(subscription?.status ?? null);
+  const prices = canUpgrade && stripe ? await readSandboxPrices(stripe) : null;
+  const showPortal = Boolean(
+    stripe && subscription?.status && getStripePortalConfigurationId(),
+  );
+  const currentTermEnd =
+    usage?.plan === "pro" ? subscription?.period_end : null;
 
   return (
     <div className="max-w-3xl">
@@ -58,7 +95,7 @@ export default async function SettingsPage({
         </h2>
         {usage ? (
           <>
-            <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {stats.map(([name, value]) => (
                 <div key={name} className="rounded-lg bg-[#f7f9f5] p-3">
                   <dt className="text-sm text-[#506458]">{name}</dt>
@@ -82,6 +119,65 @@ export default async function SettingsPage({
         ) : (
           <p role="alert" className="mt-2 text-sm text-red-800">
             Could not load usage. Refresh to try again.
+          </p>
+        )}
+      </section>
+      <section id="billing" aria-labelledby="billing-heading" className={card}>
+        <h2 id="billing-heading" className="text-lg font-semibold">
+          Billing
+        </h2>
+        {usage && (
+          <p className="mt-2 text-sm">
+            Current plan{" "}
+            <strong>{usage.plan === "pro" ? "Pro" : "Free"}</strong>
+          </p>
+        )}
+        {billing.error || !usage ? (
+          <p role="alert" className="mt-2 text-sm text-red-800">
+            Could not load billing. Refresh to try again.
+          </p>
+        ) : subscription?.status ? (
+          <p className="mt-2 text-sm text-[#506458]">
+            {billingStatuses.get(subscription.status) ??
+              "Subscription status unavailable"}
+            {currentTermEnd && subscription.cancel_at_period_end && (
+              <>
+                {" "}
+                until{" "}
+                <time dateTime={currentTermEnd}>
+                  {date.format(new Date(currentTermEnd))}
+                </time>
+                . Cancellation scheduled.
+              </>
+            )}
+          </p>
+        ) : null}
+        {params.checkout === "success" && usage?.plan !== "pro" && (
+          <p role="status" className="mt-2 text-sm text-[#506458]">
+            Your plan updates after Stripe confirms the subscription.
+          </p>
+        )}
+        {params.checkout === "cancelled" && (
+          <p role="status" className="mt-2 text-sm text-[#506458]">
+            Checkout canceled. You can start again here.
+          </p>
+        )}
+        {(prices || showPortal) && (
+          <p className="mt-3 text-sm text-[#506458]">
+            {prices && "Pro includes 300 analyses per month. "}Stripe sandbox.
+          </p>
+        )}
+        {canUpgrade && !prices && (
+          <p className="mt-2 text-sm text-[#506458]">
+            Paid billing is currently unavailable.
+          </p>
+        )}
+        {prices || showPortal ? (
+          <BillingActions prices={prices} showPortal={showPortal} />
+        ) : null}
+        {stripe && subscription?.status && !showPortal && (
+          <p className="mt-2 text-sm text-[#506458]">
+            The billing portal is currently unavailable.
           </p>
         )}
       </section>

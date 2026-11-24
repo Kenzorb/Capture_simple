@@ -1197,7 +1197,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-090 — Build billing UI
 
-- [ ] **CAP-090 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-090 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Show Free/Pro, limits, proposed prices, checkout/manage links, billing status and error states; do not advertise planned features as live.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P9 — Stripe monetization and entitlement integrity` |
-| Current task | `CAP-090 — Build billing UI` |
-| Last verified completed task | `CAP-089` |
-| Last verification executed | `The authenticated customer reached the hosted Stripe sandbox portal; unauthorized requests were rejected and the Stripe response matched the fixed Capture settings return URL.` |
-| Last successful Git commit | `ed89a45` |
+| Current task | `CAP-091 — Test full billing lifecycle` |
+| Last verified completed task | `CAP-090` |
+| Last verification executed | `Signed-in Chromium verified USD 11.99 monthly, USD 107.88 annually, Free and Pro limits, scheduled cancellation, Checkout error recovery, and sandbox Checkout and portal navigation.` |
+| Last successful Git commit | `a0083da` |
 | Active blockers | `Fresh signup acceptance remains deferred under CAP-023.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — Stripe test lifecycle + explicit approval required` |
-| Next action | `Expose plan status, approved USD prices, Checkout, and billing portal actions in Capture Settings.` |
+| Next action | `Exercise subscription renewal, usage resets, payment failure, cancellation, and downgrade through the Stripe sandbox lifecycle.` |
 
 ### 11.1 Phase progress overview
 
@@ -1592,10 +1592,10 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P6 | CAP-049–061 | 13/13 | Complete |
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
-| P9 | CAP-084–092 | 6/9 | In progress |
+| P9 | CAP-084–092 | 7/9 | In progress |
 | P10 | CAP-093–101 | 0/9 | Not started |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **88/112** | **In progress** |
+| **Total** | **CAP-001–112** | **89/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2912,3 +2912,13 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Implementation** — The sandbox portal enables payment method updates, invoice history, and cancellation at the end of the billing period. `POST /api/billing/portal` resolves the authenticated user's own customer and validates the portal origin, customer, configuration, and return URL before responding.
 - **Verification** — A disposable authenticated account reached the Stripe-hosted sandbox portal. Anonymous and cross-origin requests were denied, an account without a customer could not enter, and caller-supplied customer and redirect fields were rejected. Stripe returned the fixed Settings URL, and Capture still reported the expected Free allowance after opening the portal. Both Checkout cadences passed regression checks. Type, lint, format, and unit checks passed.
 - **Next action** — CAP-090 — Build billing UI and connect its controls to the verified endpoints.
+
+### [2026-11-24T10:32:02+08:00] CAP-090 — Build billing UI — STARTED
+
+- **Plan** — Show effective plan, quota, verified subscription status, and configured Stripe prices in Settings. Connect Checkout and the customer portal and show errors and return states in the same view.
+
+### [2026-11-24T10:38:08+08:00] CAP-090 — Build billing UI — COMPLETE
+
+- **Implementation** — Settings reads the configured Stripe sandbox prices on the server and uses Capture's effective entitlement for plan and quota. Billing actions use only the selected cadence or an empty portal request.
+- **Verification** — A disposable signed-in Chromium session showed USD 11.99 monthly and USD 107.88 annually for Free, a 20-analysis Free limit, and a 300-analysis Pro limit with scheduled cancellation. The test verified Checkout error recovery, the Checkout return message, and navigation from both controls to their expected Stripe origins. It intercepted the browser's external pages after navigation and separately checked the real Stripe Checkout sessions and hosted portal response. Unit tests, type checking, lint, and formatting passed.
+- **Next action** — CAP-091 — Test full billing lifecycle.

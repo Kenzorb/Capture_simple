@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 import test from "node:test";
-import { URL } from "node:url";
+import { URL, URLSearchParams } from "node:url";
+import { chromium, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
 test(
-  "Authenticated users enter sandbox Checkout and their own billing portal",
+  "Billing Settings matches Stripe sandbox prices and entitlements",
   { timeout: 90_000 },
   async (t) => {
     const {
@@ -47,14 +48,17 @@ test(
     );
     const owners = [];
     const sessions = [];
+    const eventId = `evt_${randomUUID().replaceAll("-", "")}`;
     let customer;
+    let browser;
 
-    async function stripe(path, method = "GET") {
+    async function stripe(path, method = "GET", fields) {
       const response = await globalThis.fetch(
         `https://api.stripe.com/v1${path}`,
         {
           method,
           headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}` },
+          body: fields && new URLSearchParams(fields),
           signal: globalThis.AbortSignal.timeout(15_000),
         },
       );
@@ -72,6 +76,14 @@ test(
           assert(!error, "Could not clean disposable account.");
         }),
         ...(customer ? [stripe(`/customers/${customer}`, "DELETE")] : []),
+        ...(browser ? [browser.close()] : []),
+        (async () => {
+          const { error } = await admin
+            .from("billing_events")
+            .delete()
+            .eq("stripe_event_id", eventId);
+          assert(!error, "Could not clean the billing fixture.");
+        })(),
       ]);
       for (const result of [...results, ...cleanup])
         assert.equal(result.status, "fulfilled");
@@ -249,5 +261,105 @@ test(
     const state = await usage.json();
     assert.equal(state.plan, "free");
     assert.equal(state.article_limit, 20);
+
+    browser = await chromium.launch({
+      executablePath: process.env.CAPTURE_TEST_CHROMIUM_EXECUTABLE,
+    });
+    const page = await browser.newPage();
+    const settings = new URL("/dashboard/settings", endpoint);
+    await page.goto(new URL("/sign-in", endpoint).href);
+    await page.getByLabel("Email").fill(free.email);
+    await page.getByLabel("Password", { exact: true }).fill(free.password);
+    await Promise.all([
+      page.waitForURL(new URL("/dashboard", endpoint).href),
+      page.getByRole("button", { name: "Sign in", exact: true }).click(),
+    ]);
+    await page.goto(settings.href + "?checkout=cancelled");
+    const billing = page.getByRole("region", { name: "Billing" });
+    const analysis = page.getByRole("region", { name: "Analysis usage" });
+    await expect(billing).toContainText("Current plan Free");
+    await expect(billing).toContainText(/USD\s+11\.99/);
+    await expect(billing).toContainText(/USD\s+107\.88/);
+    await expect(billing.getByRole("status")).toContainText(
+      "Checkout canceled",
+    );
+    await expect(analysis.getByText("20", { exact: true })).toBeVisible();
+    await expect(
+      billing.getByRole("button", { name: "Choose annual" }),
+    ).toBeVisible();
+
+    await page.route(
+      "**/api/billing/checkout",
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: { message: "Could not start Checkout. Try again." } },
+        }),
+      { times: 1 },
+    );
+    await billing.getByRole("button", { name: "Choose monthly" }).click();
+    await expect(billing.getByRole("alert")).toHaveText(
+      "Could not start Checkout. Try again.",
+    );
+
+    const checkoutResponse = page.waitForResponse(
+      (res) => res.url() === endpoint.href && res.request().method() === "POST",
+    );
+    // The actual Stripe destination and amount are checked above without printing session URLs.
+    await page.route("https://checkout.stripe.com/**", (route) => {
+      const id = new URL(route.request().url()).pathname.split("/").at(-1);
+      if (id?.startsWith("cs_test_")) sessions.push(id);
+      return route.fulfill({ body: "Sandbox Checkout destination" });
+    });
+    await billing.getByRole("button", { name: "Choose monthly" }).click();
+    const browserCheckout = await checkoutResponse;
+    assert.equal(browserCheckout.status(), 200);
+    await page.waitForURL(
+      (url) => url.origin === "https://checkout.stripe.com",
+    );
+    assert.equal(sessions.length, 3);
+
+    const trial = await stripe("/subscriptions", "POST", {
+      customer,
+      "items[0][price]": process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
+      "metadata[capture_user_id]": free.id,
+      trial_period_days: "7",
+      cancel_at_period_end: "true",
+    });
+    assert.equal(trial.livemode, false);
+    const item = trial.items.data[0];
+    const verified = await admin.rpc("capture_apply_stripe_event", {
+      p_event_id: eventId,
+      p_event_type: "customer.subscription.created",
+      p_customer_id: customer,
+      p_revision: 0,
+      p_subscription_id: trial.id,
+      p_price_id: item.price.id,
+      p_status: trial.status,
+      p_period_end: new Date(
+        (item.current_period_end ?? trial.current_period_end) * 1000,
+      ).toISOString(),
+      p_cancel_at_period_end: trial.cancel_at_period_end,
+    });
+    assert(!verified.error && verified.data === "applied");
+    await page.goto(settings.href);
+    await expect(billing).toContainText("Current plan Pro");
+    await expect(billing).toContainText("Cancellation scheduled");
+    await expect(analysis.getByText("300", { exact: true })).toBeVisible();
+    await expect(
+      billing.getByRole("button", { name: "Choose monthly" }),
+    ).toHaveCount(0);
+
+    await page.route("https://billing.stripe.com/**", (route) =>
+      route.fulfill({ body: "Sandbox portal destination" }),
+    );
+    const portalResponse = page.waitForResponse(
+      (res) =>
+        new URL(res.url()).pathname === "/api/billing/portal" &&
+        res.request().method() === "POST",
+    );
+    await billing.getByRole("button", { name: "Manage billing" }).click();
+    assert.equal((await portalResponse).status(), 200);
+    await page.waitForURL((url) => url.origin === "https://billing.stripe.com");
   },
 );

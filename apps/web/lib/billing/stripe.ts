@@ -24,6 +24,60 @@ export function getStripeSandboxConfig() {
   return { key, prices: { monthly, annual }, origin: appUrl.origin };
 }
 
+export function getStripePortalConfigurationId() {
+  const configuration = process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
+  return configuration && /^bpc_[A-Za-z0-9]+$/.test(configuration)
+    ? configuration
+    : null;
+}
+
+export async function readSandboxPrices(
+  config: NonNullable<ReturnType<typeof getStripeSandboxConfig>>,
+) {
+  const signal = AbortSignal.timeout(5_000);
+  try {
+    const [monthly, annual] = await Promise.all([
+      readSandboxPrice(config.key, config.prices.monthly, "month", signal),
+      readSandboxPrice(config.key, config.prices.annual, "year", signal),
+    ]);
+    return monthly && annual ? { monthly, annual } : null;
+  } catch {
+    return null;
+  }
+}
+
+async function readSandboxPrice(
+  key: string,
+  id: string,
+  interval: "month" | "year",
+  signal: AbortSignal,
+) {
+  const response = await fetch(
+    `https://api.stripe.com/v1/prices/${encodeURIComponent(id)}`,
+    {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: "no-store",
+      signal,
+    },
+  );
+  if (!response.ok) return null;
+  const price = await response.json();
+  if (
+    price.id !== id ||
+    price.livemode !== false ||
+    price.active !== true ||
+    price.currency !== "usd" ||
+    price.billing_scheme !== "per_unit" ||
+    typeof price.unit_amount !== "number" ||
+    !Number.isSafeInteger(price.unit_amount) ||
+    price.unit_amount <= 0 ||
+    price.recurring?.interval !== interval ||
+    price.recurring.interval_count !== 1
+  )
+    return null;
+  return price.unit_amount;
+}
+
 export async function stripePost(
   key: string,
   path: "/customers" | "/checkout/sessions" | "/billing_portal/sessions",

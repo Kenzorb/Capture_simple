@@ -1,3 +1,4 @@
+import { canStartCheckout } from "../../../../lib/billing/plans";
 import {
   getStripeSandboxConfig,
   stripePost,
@@ -6,12 +7,6 @@ import { readCaptureJson } from "../../../../lib/capture-request";
 import { createPrivilegedSupabaseClient } from "../../../../lib/supabase/admin";
 import { getRequestSession } from "../../../../lib/supabase/request-session";
 import { articleError, articleResponseHeaders } from "../../articles/response";
-
-const checkoutAllowedStatuses = new Set([
-  null,
-  "canceled",
-  "incomplete_expired",
-]);
 
 export async function POST(request: Request) {
   const session = await getRequestSession(request);
@@ -59,7 +54,7 @@ export async function POST(request: Request) {
         .maybeSingle();
     const billing = await readBilling();
     if (billing.error) return checkoutUnavailable();
-    if (!checkoutAllowedStatuses.has(billing.data?.status ?? null))
+    if (!canStartCheckout(billing.data?.status ?? null))
       return alreadySubscribed();
 
     let customerId = billing.data?.stripe_customer_id;
@@ -88,8 +83,7 @@ export async function POST(request: Request) {
       const confirmed = await readBilling();
       if (confirmed.error || !confirmed.data?.stripe_customer_id)
         return checkoutUnavailable();
-      if (!checkoutAllowedStatuses.has(confirmed.data.status))
-        return alreadySubscribed();
+      if (!canStartCheckout(confirmed.data.status)) return alreadySubscribed();
       customerId = confirmed.data.stripe_customer_id;
     }
 

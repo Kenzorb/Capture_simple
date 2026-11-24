@@ -61,6 +61,11 @@ export function AuthForm({
           .
         </p>
       )}
+      {notice === "account-deleted" && !isSignUp && (
+        <p role="status" className="mt-4 text-emerald-950/80">
+          Your Capture account was deleted.
+        </p>
+      )}
 
       <form action={isSignUp ? signUp : signIn} className="mt-8 space-y-4">
         {authorizationId && (

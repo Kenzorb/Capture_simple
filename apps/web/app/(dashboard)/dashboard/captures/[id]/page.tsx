@@ -20,6 +20,7 @@ import {
 import {
   deleteCapture,
   moveCaptureToTopic,
+  removeCaptureSourceText,
   retryCapture,
   setCaptureArchived,
 } from "./actions";
@@ -41,6 +42,18 @@ const feedback = new Map<string, { text: string; error?: boolean }>([
   ["archived", { text: "Capture archived." }],
   ["restored", { text: "Capture restored to active captures." }],
   ["retried", { text: "Analysis queued." }],
+  ["source-removed", { text: "Stored full source text removed." }],
+  [
+    "source-busy",
+    {
+      text: "Wait for analysis to finish before removing source text.",
+      error: true,
+    },
+  ],
+  [
+    "confirm-source",
+    { text: "Confirm source text removal first.", error: true },
+  ],
   [
     "retry_limit",
     { text: "This capture has reached its analysis retry limit.", error: true },
@@ -291,6 +304,35 @@ export default async function CaptureDetailPage({
                 label={archived ? "Restore capture" : "Archive capture"}
               />
             </form>
+            {article.status !== "queued" && article.status !== "processing" && (
+              <details className="mt-4">
+                <summary className="w-fit cursor-pointer rounded font-semibold focus-visible:outline-2">
+                  Remove stored source text
+                </summary>
+                <p className="mt-2 text-sm text-[#506458]">
+                  Keep the saved link and notes, including the evidence excerpts
+                  for completed analysis. A future analysis may fetch the source
+                  text again.
+                </p>
+                <form
+                  action={removeCaptureSourceText.bind(null, article.id)}
+                  className="mt-3"
+                >
+                  <label className="flex items-start gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="confirm_source_removal"
+                      required
+                      className="mt-1"
+                    />
+                    Remove the stored full source text.
+                  </label>
+                  <div className="mt-3">
+                    <SubmitButton label="Remove source text" />
+                  </div>
+                </form>
+              </details>
+            )}
             <details className="mt-4">
               <summary className="w-fit cursor-pointer font-semibold text-red-800">
                 Delete capture

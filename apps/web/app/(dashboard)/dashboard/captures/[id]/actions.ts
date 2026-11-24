@@ -132,6 +132,24 @@ export async function retryCapture(id: string) {
   );
 }
 
+export async function removeCaptureSourceText(id: string, form: FormData) {
+  const { session, capturePath } = await captureTarget(id);
+  if (form.get("confirm_source_removal") !== "on")
+    redirect(`${capturePath}?change=confirm-source`);
+  const { data, error } = await session.supabase.rpc(
+    "capture_remove_source_text",
+    {
+      p_article_id: id,
+    },
+  );
+  if (error?.code === "42501") redirect("/sign-in");
+  if (error) redirect(`${capturePath}?change=failed`);
+  if (data === "busy") redirect(`${capturePath}?change=source-busy`);
+  if (data !== "removed") redirect(capturePath);
+  revalidatePath(capturePath);
+  redirect(`${capturePath}?change=source-removed`);
+}
+
 export async function submitCaptureText(
   id: string,
   _previous: string | null,

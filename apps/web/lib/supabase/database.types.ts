@@ -824,6 +824,10 @@ export type Database = {
         Args: { p_article_id: string; p_text: string };
         Returns: string | null;
       };
+      capture_remove_source_text: {
+        Args: { p_article_id: string };
+        Returns: string;
+      };
       capture_retry_article: {
         Args: { p_article_id: string };
         Returns: string | null;

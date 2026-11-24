@@ -1283,7 +1283,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-098 — Implement privacy lifecycle
 
-- [ ] **CAP-098 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-098 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** Account deletion, content deletion, source retention controls, analytics exclusion of source text/URLs, scoped backups/retention and export.
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P10 — Reliability, security, performance, and beta QA` |
-| Current task | `CAP-098 — Implement privacy lifecycle` |
-| Last verified completed task | `CAP-097` |
-| Last verification executed | `100- and 1,250-capture fixtures passed pagination, search, and tree latency and response size budgets. The slowest measured p95 was 1,098 ms.` |
-| Last successful Git commit | `75edb3e` |
-| Active blockers | `CAP-092 is deferred with owner approval. Production readiness and launch approval are required for live billing. Fresh signup acceptance remains deferred under CAP-023.` |
+| Current task | `CAP-099 — Add observability and recovery alerts` |
+| Last verified completed task | `CAP-098` |
+| Last verification executed | `Hosted disposable accounts passed export, account deletion, scoped source-text removal, and preservation of evidence. Read-only authorization checks passed.` |
+| Last successful Git commit | `f9c8ca9` |
+| Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Implement and verify account deletion, source retention controls, scoped export, and privacy lifecycle handling.` |
+| Next action | `Add safe processing telemetry and verify recovery alert delivery.` |
 
 ### 11.1 Phase progress overview
 
@@ -1593,9 +1593,9 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P7 | CAP-062–072 | 11/11 | Complete |
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
-| P10 | CAP-093–101 | 5/9 | In progress |
+| P10 | CAP-093–101 | 6/9 | In progress |
 | P11 | CAP-102–112 | 0/11 | Not started |
-| **Total** | **CAP-001–112** | **95/112** | **In progress** |
+| **Total** | **CAP-001–112** | **96/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -2991,3 +2991,16 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Verification** — Each disposable account had 32 topics in four levels and eight source text fixtures of about 60 KiB. Eight warm HTTP samples per endpoint passed the budgets. At 100 and 1,250 articles respectively, p95 times were 469 and 583 ms for the first library page, 439 and 1,098 ms for the second library page, 350 and 852 ms for the first search page, 292 and 293 ms for the second search page, and 266 and 446 ms for the tree. Maximum response size was 6,412 bytes.
 - **Query review** — The library and search paths fetch one bounded data result per page. The tree RPC aggregates counts in one query and fetches article previews only for opened branches. Cursor checks confirmed disjoint consecutive pages. Both fixture accounts were removed. These timings are from the local web app with hosted capture-dev.
 - **Next action** — CAP-098 — Implement privacy lifecycle.
+
+### [2026-11-24T12:46:16+08:00] CAP-098 — Implement privacy lifecycle — STARTED
+
+- **Implementation** — Added account deletion from Settings with password verification and typed confirmation. Added a per-capture control to remove stored full source text when analysis is idle. Completed notes, evidence excerpts, and the saved link remain available. Documented export and environment-scoped backup handling.
+- **Verified so far** — Chromium with hosted development data verified owner-only export, rejection of a wrong password, account deletion, deletion of the account's captures, notes, and stored source, preservation of another account's records, and denial of export after deletion. Type checking, changed-file lint, and 124 deterministic tests passed.
+- **Verification pending** — Isolated PostgreSQL passed ownership, in-progress protection, idempotency, and excerpt preservation. The hosted dry run showed only `20261124125000_capture_remove_source_text.sql`. Approval to apply it is pending. CAP-098 remains unchecked until the hosted privacy suite passes.
+
+### [2026-11-24T12:55:11+08:00] CAP-098 — Implement privacy lifecycle — COMPLETE
+
+- **Database** — Applied only the approved source-text removal migration to `capture-dev`. The rollback-only local checks and read-only hosted authorization audit passed.
+- **Hosted verification** — Both privacy integration cases passed. A disposable account exported its own library, proved a wrong password cannot delete the account, then deleted its account, captures, notes, and full source. Its session lost export access and the other account's data remained. A signed-in owner removed full source text twice while preserving the saved capture, personal note, and evidence excerpt. Anonymous, cross-account, and queued operations were blocked.
+- **Retention** — The setup guide records environment-scoped backup access and expiry requirements. Hosted staging and production backup expiry and restore behavior must be verified before beta.
+- **Next action** — CAP-099 — Add observability and recovery alerts.

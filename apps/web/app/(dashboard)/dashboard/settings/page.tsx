@@ -15,7 +15,7 @@ import {
 import { getAuthenticatedSession } from "../../../../lib/supabase/server";
 import { SubmitButton } from "../../../(auth)/submit-button";
 import { DashboardHeading } from "../../dashboard-focus";
-import { saveDisplayName } from "./actions";
+import { deleteOwnAccount, saveDisplayName } from "./actions";
 import { BillingActions } from "./billing-actions";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -41,6 +41,18 @@ const billingStatuses = new Map([
   ["incomplete_expired", "Payment expired"],
   ["canceled", "Canceled"],
 ]);
+const deletionMessages = new Map([
+  [
+    "confirmation",
+    "Enter DELETE and your password to confirm account deletion.",
+  ],
+  ["password", "Your password could not be verified. Try again."],
+  [
+    "billing",
+    "End your subscription in Manage billing before deleting your account.",
+  ],
+  ["unavailable", "Could not delete your account. Try again."],
+]);
 
 export default async function SettingsPage({
   searchParams,
@@ -48,6 +60,7 @@ export default async function SettingsPage({
   searchParams: Promise<{
     profile?: string | string[];
     checkout?: string | string[];
+    deletion?: string | string[];
   }>;
 }) {
   const session = await getAuthenticatedSession();
@@ -61,6 +74,10 @@ export default async function SettingsPage({
     ]);
   const status = typeof params.profile === "string" ? params.profile : "";
   const feedback = profileMessages.get(status);
+  const deletionFeedback =
+    typeof params.deletion === "string"
+      ? deletionMessages.get(params.deletion)
+      : undefined;
   const stats = usage
     ? [
         ["Used", usage.used],
@@ -225,7 +242,7 @@ export default async function SettingsPage({
           </p>
         )}
       </section>
-      <section aria-labelledby="privacy-heading" className={card}>
+      <section id="privacy" aria-labelledby="privacy-heading" className={card}>
         <h2 id="privacy-heading" className="text-lg font-semibold">
           Privacy and data
         </h2>
@@ -251,6 +268,46 @@ export default async function SettingsPage({
             </a>
           </li>
         </ul>
+        {deletionFeedback && (
+          <p role="alert" className="mt-3 text-sm text-red-800">
+            {deletionFeedback}
+          </p>
+        )}
+        <details className="mt-4">
+          <summary className="w-fit cursor-pointer rounded font-semibold text-red-800 focus-visible:outline-2">
+            Delete account
+          </summary>
+          <p className="mt-2 text-sm text-[#506458]">
+            Download your library first if you want to keep a copy. Deletion
+            permanently removes your account and library from Capture.
+          </p>
+          <form
+            action={deleteOwnAccount}
+            className="mt-3 grid max-w-sm justify-items-start gap-2 text-sm"
+          >
+            <label htmlFor="account-delete-password">Current password</label>
+            <input
+              id="account-delete-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              className="w-full rounded-lg border border-[#b8c8bd] px-3 py-2"
+              required
+            />
+            <label htmlFor="account-delete-confirmation">
+              Type DELETE to confirm
+            </label>
+            <input
+              id="account-delete-confirmation"
+              name="confirmation"
+              autoComplete="off"
+              maxLength={6}
+              className="w-full rounded-lg border border-[#b8c8bd] px-3 py-2"
+              required
+            />
+            <SubmitButton label="Delete account permanently" />
+          </form>
+        </details>
       </section>
     </div>
   );

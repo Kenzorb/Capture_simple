@@ -1359,7 +1359,7 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 #### CAP-105 — Run staging smoke-test matrix
 
-- [ ] **CAP-105 complete** (implemented, verified, logged, and persisted).
+- [x] **CAP-105 complete** (implemented, verified, logged, and persisted).
 
 **Implement:** With two users: sign in, extension capture, duplicate, AI notes, hierarchy, search, export, deletion, quota limit and billing in test mode (if enabled).
 
@@ -1568,14 +1568,14 @@ _None at document creation._
 |---|---|
 | Overall status | `IN PROGRESS` |
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
-| Current task | `CAP-105 — Run staging smoke-test matrix` |
-| Last verified completed task | `CAP-104` |
-| Last verification executed | `CAP-104 verified Capture 0.1.0 MV3 in disposable Chromium. The installed popup validated a real staging OAuth session, and all nine ZIP files matched the tested build.` |
-| Last successful Git commit | `6f0aff0` |
+| Current task | `CAP-106 — Prepare production release runbook` |
+| Last verified completed task | `CAP-105` |
+| Last verification executed | `CAP-105 passed staging Chrome capture and deduplication, two-account isolation, AI notes and topics, search, export, deletion, and the Free limit. Stripe is disabled in staging.` |
+| Last successful Git commit | `4cdb386` |
 | Active blockers | `CAP-092 and CAP-023 remain deferred. Deployment-specific backup expiry must be verified before beta.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Run the staged two-user smoke matrix with the versioned Chrome package.` |
+| Next action | `Write and review the production release runbook, with owner inputs and rollout gates explicit.` |
 
 ### 11.1 Phase progress overview
 
@@ -1594,8 +1594,8 @@ Counts below refer to tasks in the immutable numbered checklist. **Agents must u
 | P8 | CAP-073–083 | 11/11 | Complete |
 | P9 | CAP-084–092 | 8/9 | Gate passed with CAP-092 deferred |
 | P10 | CAP-093–101 | 9/9 | Complete |
-| P11 | CAP-102–112 | 3/11 | In progress |
-| **Total** | **CAP-001–112** | **102/112** | **In progress** |
+| P11 | CAP-102–112 | 4/11 | In progress |
+| **Total** | **CAP-001–112** | **103/112** | **In progress** |
 
 ### 11.2 Decisions and blockers requiring owner input
 
@@ -3153,3 +3153,14 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Browser verification** — Chromium loaded the installed service worker and guest popup under the expected ID. A genuine staging session from the hosted PKCE consent flow was seeded into the disposable Chrome profile for the installed-popup check. The extension verified the staging account and opened the correct staging library URL. The paired hosted API test accepted an extension capture and denied general web topic access to the extension bearer. The disposable profile and account were cleaned up.
 - **Release scope** — The artifact is for unpacked staging testing. Production host verification and store packaging are tracked in the subsequent production and publication tasks.
 - **Next action** — CAP-105 — Run the two-user staging smoke matrix.
+
+### [2026-11-24T22:32:20+08:00] CAP-105 — Run staging smoke-test matrix — STARTED
+
+- **Scope** — Exercise the staged MV3 worker with two disposable Free accounts and one public article. The prior CAP-104 commit was `4cdb386`.
+
+### [2026-11-24T22:35:30+08:00] CAP-105 — Run staging smoke-test matrix — COMPLETE
+
+- **Setup** — Hosted staging at `https://capture-simple.vercel.app`, Capture 0.1.0 in disposable Chromium, two confirmed fixture accounts, and RFC 9309. The local operator harness ran as `node node_modules/capture-vercel-staging/staging-matrix.cjs`. It completed real staging OAuth consent, seeded the fresh session in the disposable profile, and invoked the installed worker from the extension popup document with a draft built from the public source.
+- **Outcomes** — Both users signed in. The worker saved once and acknowledged the duplicate with the same article ID. AI notes, the assigned topic, search, and JSON export were visible to the owner. The other account could neither read nor delete the capture, and its search and export were empty. Confirmed owner deletion removed the article and retained the single used analysis. A fixture at the Free limit saved a link with no processing job. Both test accounts and the browser profile were cleaned up.
+- **Triage** — The first matrix run omitted extracted text and got the documented link-only unsupported status. The corrected fixture included the real article text and passed. The staging environment had no Stripe variables, so the conditional staged billing case was skipped. CAP-101 has sandbox lifecycle evidence.
+- **Next action** — CAP-106 — Prepare the production release runbook.

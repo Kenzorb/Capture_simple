@@ -1570,12 +1570,12 @@ _None at document creation._
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
 | Current task | `CAP-107 — Provision production after approval` |
 | Last verified completed task | `CAP-106` |
-| Last verification executed | `CAP-106 reviewed the production runbook against the deployment and recovery procedures. Six links and 12 documented environment names were checked, and formatting passed.` |
-| Last successful Git commit | `0f6c8ed` |
-| Active blockers | `CAP-107 awaits explicit owner approval of the production target and budget. Production support and backup details are pending. CAP-092 and CAP-023 remain deferred.` |
+| Last verification executed | `CAP-107 applied 38 production Supabase migrations. The follow-up dry run found zero pending migrations, the read-only authorization audit found zero violations, and Vercel production configuration names were verified.` |
+| Last successful Git commit | `d6e06e1` |
+| Active blockers | `Production Supabase is migrated and connected to a separate Vercel project. Production worker, AI and monitoring keys, provider budgets, and backup verification remain pending. CAP-092 and CAP-023 remain deferred.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Obtain explicit production provisioning approval, a production hostname and approved budgets before making provider changes.` |
+| Next action | `Confirm production provider spend and configure production-scoped worker, model, and monitoring keys. Verify backups and the generated Vercel origin before opening production.` |
 
 ### 11.1 Phase progress overview
 
@@ -1603,7 +1603,7 @@ Record answers here as decisions are made; record private keys only in secret st
 
 | Topic | Default / open question | Status |
 |---|---|---|
-| Supabase project | Which dev/staging/prod project? | Hosted capture-dev verified. Owner-provided capture_staging is separate and migrated. Production is unconfirmed. |
+| Supabase project | Which dev/staging/prod project? | Development is paused. Staging remains active. The owner provided the separate active capture-production project, and its schema and authorization checks passed. |
 | GitHub repository | Repo name, owner and CI access? | Local origin identifies Kenzorb/Capture_simple. Staging integration and hosted CI access remain unconfirmed. |
 | AI provider/model | OpenAI structured output, capped budgets | Default proposed; verify |
 | Background jobs | Inngest, one durable provider | Selected and verified locally in CAP-049. Capture Staging exists in Inngest Cloud and awaits app sync. |
@@ -3175,3 +3175,16 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Deliverable** — [Production release runbook](RUNBOOK.md) links the verified staging baseline, detailed setup, backup drill, alert guide, and pricing model. The runbook identifies required production environment values, rollback and beta gates, and owner decisions for provider spend, backups, support, billing and store submission.
 - **Verification** — Reviewed the instructions against CAP-102–105 and the database recovery procedure. A local check resolved all six Markdown links and confirmed all 12 named environment variables exist in `.env.example`. Prettier and the Git diff check passed.
 - **Next action** — CAP-107 requires explicit owner approval for production provisioning, including the hostname, target accounts, and budget. No production provider settings changed.
+
+### [2026-11-25T09:13:13+08:00] CAP-107 — Production provisioning preflight — STARTED
+
+- **Owner direction** — The owner reported the staging extension works and authorized proceeding to the production gate. The production hostname and spend ceiling have not been specified.
+- **Verification** — The approved CLI login listed both `capture-dev` and `capture-staging` as active and healthy. Supabase documents two active Free projects per owner. The production runbook was committed as `d6e06e1`.
+- **Pending** — Confirm the target hostname and maximum monthly infrastructure spend before creating an isolated production deployment. No paid resources or production settings changed.
+
+### [2026-11-25T10:11:35+08:00] CAP-107 — Production Supabase and Vercel provisioned — PARTIAL
+
+- **Owner decisions** — Use a Vercel-generated production hostname and keep Supabase on Free initially. The owner created production Supabase project `xzkvzgejkrxzosxqppnk`. The project list confirmed production and staging are healthy and development is paused.
+- **Database verification** — The explicit production dry run listed exactly the 38 staged migrations. Applied them without seed or Vault changes, then verified zero pending migrations and an empty read-only authorization audit. The development link and staging deployment were untouched.
+- **Hosting verification** — Created a separate empty Vercel `capture-production` project in the existing account. Verified the Next.js preset and `apps/web` root. Saved the production Supabase URL and publishable key, marked the production service role as sensitive, and configured the production monitoring environment tag. Verified the four variable names and that Stripe credentials are absent. No deployment or paid plan change occurred.
+- **Pending** — Configure production-only Inngest, OpenAI, and Sentry keys, confirm remaining provider spend and backup procedures, and verify the production HTTPS origin during rollout. The generated URL is still unverified. CAP-107 remains unchecked.

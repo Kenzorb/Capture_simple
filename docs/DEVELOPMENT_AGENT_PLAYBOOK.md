@@ -1383,6 +1383,8 @@ Apply request schemas, authentication/authorization, ownership checks, paginatio
 
 **Implement:** With explicit owner approval, configure production Supabase, hosting, jobs, monitoring, secrets, backups, DNS and migration procedure.
 
+**Worker dependency:** CAP-A001 replaces scheduled polling. Verify the hosted event trigger and capture recovery in staging before production.
+
 **Verify / acceptance:** Production architecture works and follows documented budgets and isolation.
 
 **Record:** Append a start and outcome entry for `CAP-107` in §12; update §11; check this box and commit only on verified success.
@@ -1545,7 +1547,7 @@ Do **not** renumber existing `CAP-001` through `CAP-112` items. Instead add `CAP
 
 **Amendments (append new entries below):**
 
-_None at document creation._
+- [x] **CAP-A001 — Dispatch captures on demand with manual recovery.** Depends on the transactional outbox and worker recovery already verified in CAP-059. Acceptance requires an event-only dispatcher, post-commit wakes for app queue writes, an owner-scoped retry for eligible stalled jobs, and successful regression, type, build, and database recovery checks. Hosted validation is part of CAP-107.
 
 ### 10.2 Post-MVP backlog (not a launch gate)
 
@@ -1569,13 +1571,13 @@ _None at document creation._
 | Overall status | `IN PROGRESS` |
 | Current phase | `P11 — Deploy, pilot, and close implementation` |
 | Current task | `CAP-107 — Provision production after approval` |
-| Last verified completed task | `CAP-106` |
-| Last verification executed | `CAP-107 applied 38 production Supabase migrations. The follow-up dry run found zero pending migrations, the read-only authorization audit found zero violations, and Vercel production configuration names were verified.` |
-| Last successful Git commit | `d6e06e1` |
-| Active blockers | `Production Supabase is migrated and connected to a separate Vercel project. Production worker, AI and monitoring keys, provider budgets, and backup verification remain pending. CAP-092 and CAP-023 remain deferred.` |
+| Last verified completed task | `CAP-A001 (last numbered task CAP-106)` |
+| Last verification executed | `CAP-A001 passed 131 tests, workspace typecheck, changed-file lint, the web build, and the database recovery drill. Four optional tests were skipped. Hosted verification remains pending.` |
+| Last successful Git commit | `d7f52bb (checkpoint before CAP-A001)` |
+| Active blockers | `Production provider variable names are present. CAP-107 awaits staging validation of event-driven dispatch, the Vercel Hobby usage decision, and hosted backup verification. CAP-092 and CAP-023 remain deferred.` |
 | MVP launch gate | `NOT READY` |
 | Paid launch gate | `NOT READY — production readiness and explicit owner approval required` |
-| Next action | `Confirm production provider spend and configure production-scoped worker, model, and monitoring keys. Verify backups and the generated Vercel origin before opening production.` |
+| Next action | `Verify normal and recovered captures on staging after syncing the event trigger. Confirm the production hosting mode and backup procedure before opening production.` |
 
 ### 11.1 Phase progress overview
 
@@ -3188,3 +3190,15 @@ _No tasks have been started or completed as of playbook creation. New entries MU
 - **Database verification** — The explicit production dry run listed exactly the 38 staged migrations. Applied them without seed or Vault changes, then verified zero pending migrations and an empty read-only authorization audit. The development link and staging deployment were untouched.
 - **Hosting verification** — Created a separate empty Vercel `capture-production` project in the existing account. Verified the Next.js preset and `apps/web` root. Saved the production Supabase URL and publishable key, marked the production service role as sensitive, and configured the production monitoring environment tag. Verified the four variable names and that Stripe credentials are absent. No deployment or paid plan change occurred.
 - **Pending** — Configure production-only Inngest, OpenAI, and Sentry keys, confirm remaining provider spend and backup procedures, and verify the production HTTPS origin during rollout. The generated URL is still unverified. CAP-107 remains unchecked.
+
+### [2026-11-25T10:29:11+08:00] CAP-107 — Production credentials and Free plan review — PARTIAL
+
+- **Configuration** — The owner saved the production keys and confirmed the providers are on Free plans. Vercel listed the production Inngest, OpenAI, and Sentry variable names, as well as the Supabase variables. No Stripe variables were listed. Secret values were not read.
+- **Verification** — `pnpm --filter web build` passed on Node 22.15.0. The local PGlite recovery drill passed 38 migrations, 22 table fingerprints, transactional rollback, owner isolation, worker reconciliation, and deletion replay. No hosted production restore was performed.
+- **Free plan gate** — At one dispatcher run and two steps per minute, one empty environment is estimated to use 129,600 executions in 30 days. Inngest Free includes 50,000 monthly executions. Vercel Hobby permits personal, non-commercial use. Confirm the intended launch mode and validate a schedule that fits the plan before starting the production worker. A Free Supabase database also needs an operator-managed backup procedure. No deployment, worker sync, plan upgrade, or billing change was made.
+
+### [2026-11-25T10:55:19+08:00] CAP-A001 — Event-driven dispatch and manual recovery — VERIFIED
+
+- **Decision** — The owner chose job events and manual recovery to eliminate idle dispatcher executions. New queued saves, explicit retries, and pasted-text analysis send a wake after the committed response. The detail page can re-wake a stalled job under the existing lease and generation checks.
+- **Verification** — The test suite passed 131 tests with four optional skips. Workspace typecheck, changed-file ESLint, and the production web build passed. The PGlite restore drill passed all 38 migrations and matched 22 table fingerprints, including the existing worker recovery and owner-isolation checks.
+- **Handoff** — CAP-107 remains open. Deploy and sync the staging app, verify that the registered dispatcher is event-only, and smoke-test a new capture and a manually recovered capture. Staging and production have yet to receive this change.

@@ -2,6 +2,7 @@ import { articleParamsSchema, structuredNoteSchema } from "@capture/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { readActiveCaptureDispatch } from "../../../../../lib/inngest/wake";
 import {
   listOwnRelatedArticles,
   readOwnArticle,
@@ -21,11 +22,12 @@ import {
   deleteCapture,
   moveCaptureToTopic,
   removeCaptureSourceText,
+  resumeCapture,
   retryCapture,
   setCaptureArchived,
 } from "./actions";
 import { AnalysisNotes } from "./analysis-notes";
-import { CapturePolling } from "./capture-polling";
+import { CapturePolling, StalledCaptureRecovery } from "./capture-polling";
 import { CaptureTextForm } from "./capture-text-form";
 import { PersonalNoteField } from "./personal-note-field";
 
@@ -42,6 +44,8 @@ const feedback = new Map<string, { text: string; error?: boolean }>([
   ["archived", { text: "Capture archived." }],
   ["restored", { text: "Capture restored to active captures." }],
   ["retried", { text: "Analysis queued." }],
+  ["resuming", { text: "Analysis restart requested." }],
+  ["analysis-active", { text: "Analysis is still in progress." }],
   ["source-removed", { text: "Stored full source text removed." }],
   [
     "source-busy",
@@ -85,12 +89,17 @@ export default async function CaptureDetailPage({
   const { data: article, error } = parsed.success
     ? await readOwnArticle(session, parsed.data.id)
     : { data: null, error: null };
-  const [tree, related] = article
+  const [tree, related, dispatch] = article
     ? await Promise.all([
         readOwnTopicTree(session),
         listOwnRelatedArticles(session, article.id),
+        article.status === "queued" || article.status === "processing"
+          ? readActiveCaptureDispatch(session.user.id, article.id).catch(
+              () => null,
+            )
+          : null,
       ])
-    : [null, null];
+    : [null, null, null];
   const primaryTopic = article?.article_topics.find(
     (topic) => topic.is_primary,
   )?.topics;
@@ -231,6 +240,12 @@ export default async function CaptureDetailPage({
           <section className="mt-6 border-t border-[#dde5dd] pt-5">
             <h2 className="text-lg font-semibold">AI notes</h2>
             <AnalysisNotes note={aiNote} status={article.status} />
+            {dispatch && (
+              <StalledCaptureRecovery
+                eligibleAt={dispatch.eligibleAt}
+                action={resumeCapture.bind(null, article.id)}
+              />
+            )}
             {(article.status === "failed" ||
               article.status === "unsupported") && (
               <CaptureTextForm articleId={article.id} />

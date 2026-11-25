@@ -4,9 +4,37 @@ import { processingStatusSchema, type ProcessingStatus } from "@capture/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { SubmitButton } from "../../../../(auth)/submit-button";
 
 const pollInterval = 2_500;
 const savedPollLimit = 2 * 60_000;
+
+export function StalledCaptureRecovery({
+  eligibleAt,
+  action,
+}: {
+  eligibleAt: number;
+  action: () => Promise<void>;
+}) {
+  const [visibleFor, setVisibleFor] = useState<number>();
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setVisibleFor(eligibleAt),
+      Math.max(0, eligibleAt - Date.now()),
+    );
+    return () => clearTimeout(timer);
+  }, [eligibleAt]);
+  if (visibleFor !== eligibleAt) return null;
+
+  return (
+    <form action={action} className="mt-3">
+      <p className="mb-2 text-sm text-[#506458]">
+        Analysis is taking longer than expected. You can try again.
+      </p>
+      <SubmitButton label="Retry analysis" />
+    </form>
+  );
+}
 
 export function CapturePolling({
   articleId,

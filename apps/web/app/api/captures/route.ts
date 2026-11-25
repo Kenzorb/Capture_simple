@@ -48,9 +48,12 @@ export async function POST(request: Request) {
 }
 
 async function saveCapture(request: Request) {
-  const session =
-    (await getExtensionBearer(request)) ??
-    (isExtensionOrigin(request) ? null : await getRequestSession(request));
+  const extension = await getExtensionBearer(request);
+  const session = extension
+    ? { supabase: extension.supabase, user: { id: extension.claims.sub } }
+    : isExtensionOrigin(request)
+      ? null
+      : await getRequestSession(request);
   if (!session)
     return captureError(401, "unauthenticated", "Sign in to save a capture.");
 

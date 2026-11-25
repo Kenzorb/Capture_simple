@@ -5,12 +5,13 @@ import {
   canonicalizeManualUrl,
   type CaptureRequest,
 } from "@capture/shared";
+import { wakeCaptureAfterResponse } from "../inngest/wake";
 import type { getAuthenticatedSession } from "./server";
 
 type Session = Pick<
   NonNullable<Awaited<ReturnType<typeof getAuthenticatedSession>>>,
   "supabase"
->;
+> & { user: { id: string } };
 
 export function getCaptureTarget({ url, source }: CaptureRequest) {
   return source === "manual_url"
@@ -18,12 +19,12 @@ export function getCaptureTarget({ url, source }: CaptureRequest) {
     : canonicalizeCaptureUrl(url);
 }
 
-export function saveOwnCapture(
-  { supabase }: Session,
+export async function saveOwnCapture(
+  { supabase, user }: Session,
   capture: CaptureRequest,
   target: NonNullable<ReturnType<typeof getCaptureTarget>>,
 ) {
-  return supabase
+  const result = await supabase
     .rpc("capture_save_article", {
       p_request_id: capture.request_id,
       p_url: target.url,
@@ -35,4 +36,11 @@ export function saveOwnCapture(
       p_personal_note: capture.personal_note,
     })
     .single();
+  if (
+    !result.error &&
+    !result.data.duplicate &&
+    result.data.processing_status === "queued"
+  )
+    wakeCaptureAfterResponse(user.id, result.data.article_id);
+  return result;
 }

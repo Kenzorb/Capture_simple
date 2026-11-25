@@ -10,6 +10,10 @@ import {
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
+  readActiveCaptureDispatch,
+  wakeCaptureAfterResponse,
+} from "../../../../../lib/inngest/wake";
+import {
   deleteOwnArticle,
   editOwnArticle,
   retryOwnArticle,
@@ -125,11 +129,26 @@ export async function retryCapture(id: string) {
   const { data, error } = await retryOwnArticle(session, id);
   if (data === "retry_limit" || data === "quota_limited")
     redirect(`${capturePath}?change=${data}`);
+  if (!error && data === "queued")
+    wakeCaptureAfterResponse(session.user.id, id);
   finishMutation(
     { data: data === "queued", error },
     capturePath,
     `${capturePath}?change=retried`,
   );
+}
+
+export async function resumeCapture(id: string) {
+  const { session, capturePath } = await captureTarget(id);
+  const dispatch = await readActiveCaptureDispatch(session.user.id, id).catch(
+    () => redirect(`${capturePath}?change=failed`),
+  );
+  if (dispatch && Date.now() < dispatch.eligibleAt)
+    redirect(`${capturePath}?change=analysis-active`);
+  if (!dispatch) redirect(capturePath);
+  wakeCaptureAfterResponse(session.user.id, id);
+  revalidatePath(capturePath);
+  redirect(`${capturePath}?change=resuming`);
 }
 
 export async function removeCaptureSourceText(id: string, form: FormData) {
@@ -178,6 +197,7 @@ export async function submitCaptureText(
     return "This capture has reached its analysis retry limit.";
   if (error || data !== "queued")
     return "Could not queue this capture. Your text is still here.";
+  wakeCaptureAfterResponse(session.user.id, id);
   revalidatePath(capturePath);
   revalidatePath("/dashboard");
   revalidatePath(libraryPath);
